@@ -1,9 +1,30 @@
-import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, RefreshControl } from 'react-native';
+import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function PerfilScreen() {
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    // Simula carregamento de dados (substitua com sua lógica real)
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setRefreshing(false);
+  };
+
   return (
-    <ScrollView className="flex-1 bg-[#0B1F1F]">
+    <ScrollView 
+      className="flex-1 bg-[#0B1F1F]"
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="white"
+          colors={['white']}
+          progressBackgroundColor="white"
+        />
+      }
+    >
       {/* Header com Foto de Perfil */}
       <View style={{ paddingHorizontal: 24, paddingTop: 24, paddingBottom: 16 }}>
         <View style={{ alignItems: 'center', marginBottom: 24 }}>
@@ -25,7 +46,7 @@ export default function PerfilScreen() {
             Samuel Silva
           </Text>
           <Text style={{ color: '#00C896', fontSize: 16, fontWeight: '600', marginBottom: 8 }}>
-            Treinador Pessoal
+            Personal Trainer
           </Text>
           <Text style={{ color: '#9CA3AF', fontSize: 14, textAlign: 'center' }}>
             CREF: 123456-G/SP

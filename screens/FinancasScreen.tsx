@@ -1,9 +1,30 @@
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, RefreshControl } from 'react-native';
+import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function FinancasScreen() {
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    // Simula carregamento de dados (substitua com sua lógica real)
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setRefreshing(false);
+  };
+
   return (
-    <ScrollView className="flex-1 bg-[#0B1F1F]">
+    <ScrollView 
+      className="flex-1 bg-[#0B1F1F]"
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="white"
+          colors={['white']}
+          progressBackgroundColor="white"
+        />
+      }
+    >
       <View className="px-6 py-6">
         <Text className="text-xl font-bold text-white mb-4">Finanças</Text>
         

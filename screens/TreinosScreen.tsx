@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Image, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
@@ -13,6 +13,7 @@ type Treino = {
 
 export default function TreinosScreen() {
     const router = useRouter();
+    const [refreshing, setRefreshing] = useState(false);
     const [activeCategory, setActiveCategory] = useState<'workouts' | 'fitness' | 'plans' | 'training'>('workouts');
     const [treinos, setTreinos] = useState<Treino[]>([
         {
@@ -44,6 +45,13 @@ export default function TreinosScreen() {
             imagem: require('../assets/images/desenvolvimento.jpeg'),
         },
     ]);
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        // Simula carregamento de dados (substitua com sua lógica real)
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        setRefreshing(false);
+    };
 
     const getDificuldadeColor = (dificuldade: string) => {
         switch (dificuldade) {
@@ -126,7 +134,18 @@ export default function TreinosScreen() {
             </View>
 
             {/* Treinos Grid */}
-            <ScrollView className="flex-1 px-4">
+            <ScrollView 
+                className="flex-1 px-4"
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor="white"
+                        colors={['white']}
+                        progressBackgroundColor="white"
+                    />
+                }
+            >
                 <View className="flex-row flex-wrap justify-between pb-6">
                     {treinos.map((treino) => (
                         <TouchableOpacity 

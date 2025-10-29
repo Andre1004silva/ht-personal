@@ -14,7 +14,7 @@ export default function DashScreen() {
   const showGreetingToast = () => {
     setShowGreeting(true);
     fadeAnim.setValue(0);
-    
+
     // Fade in
     Animated.timing(fadeAnim, {
       toValue: 1,
@@ -40,13 +40,13 @@ export default function DashScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    
+
     // Simula carregamento de dados (substitua com sua lógica real)
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     // Mostra o toast novamente após recarregar
     showGreetingToast();
-    
+
     setRefreshing(false);
   };
 
@@ -65,24 +65,24 @@ export default function DashScreen() {
   };
 
   return (
-    <ScrollView 
+    <ScrollView
       className="flex-1 bg-[#0B1F1F]"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor="#C4F82A"
-          colors={['#C4F82A']}
-          progressBackgroundColor="#1A3333"
+          tintColor="white"
+          colors={['white']}
+          progressBackgroundColor="white"
         />
       }
     >
       {/* Greeting Toast */}
       {showGreeting && (
-        <Animated.View 
-          style={{ 
+        <Animated.View
+          style={{
             position: 'absolute',
-            top: 60,
+            top: 10,
             left: 24,
             right: 24,
             zIndex: 1000,
@@ -95,9 +95,11 @@ export default function DashScreen() {
             }],
           }}
         >
-          <View style={{ 
+          <View style={{
             backgroundColor: '#1A3333',
             borderRadius: 16,
+            borderColor: '#C4F82A',
+            borderWidth: 2,
             padding: 16,
             flexDirection: 'row',
             alignItems: 'center',
@@ -109,14 +111,14 @@ export default function DashScreen() {
           }}>
             <Image
               source={require('../assets/images/personal.jpeg')}
-              style={{ 
-                width: 48, 
-                height: 48, 
+              style={{
+                width: 48,
+                height: 48,
                 borderRadius: 24,
-                marginRight: 12 
+                marginRight: 12
               }}
             />
-            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>Boa tarde Samuel</Text>
+            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>Boa tarde, Samuel!</Text>
           </View>
         </Animated.View>
       )}
@@ -126,15 +128,15 @@ export default function DashScreen() {
 
       {/* Stats Card - Passos */}
       <View style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
-        <View style={{ 
-          backgroundColor: '#1A3333', 
-          borderRadius: 24, 
+        <View style={{
+          backgroundColor: '#1A3333',
+          borderRadius: 24,
           padding: 24,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.3,
           shadowRadius: 8,
-          elevation: 5
+          elevation: 8
         }}>
           <Text style={{ color: 'white', fontSize: 18, fontWeight: '600', marginBottom: 12 }}>
             Passos
@@ -149,17 +151,17 @@ export default function DashScreen() {
             <Text style={{ color: '#9CA3AF', fontSize: 16 }}>71%</Text>
           </View>
           {/* Progress Bar */}
-          <View style={{ 
-            height: 12, 
-            backgroundColor: 'rgba(156, 163, 175, 0.2)', 
-            borderRadius: 6, 
-            overflow: 'hidden' 
+          <View style={{
+            height: 12,
+            backgroundColor: 'rgba(156, 163, 175, 0.2)',
+            borderRadius: 6,
+            overflow: 'hidden'
           }}>
-            <View style={{ 
-              height: '100%', 
-              width: '71%', 
-              backgroundColor: '#C4F82A', 
-              borderRadius: 6 
+            <View style={{
+              height: '100%',
+              width: '71%',
+              backgroundColor: '#C4F82A',
+              borderRadius: 6
             }} />
           </View>
         </View>
@@ -167,9 +169,9 @@ export default function DashScreen() {
 
       {/* Daily Activity Card */}
       <View style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
-        <View style={{ 
-          backgroundColor: '#1A3333', 
-          borderRadius: 24, 
+        <View style={{
+          backgroundColor: '#1A3333',
+          borderRadius: 24,
           padding: 24,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 4 },
@@ -248,9 +250,9 @@ export default function DashScreen() {
 
       {/* Workouts Card */}
       <View style={{ paddingHorizontal: 24, paddingBottom: 24 }}>
-        <View style={{ 
-          backgroundColor: '#1A3333', 
-          borderRadius: 24, 
+        <View style={{
+          backgroundColor: '#1A3333',
+          borderRadius: 24,
           padding: 24,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 4 },
@@ -266,25 +268,25 @@ export default function DashScreen() {
           </View>
 
           {/* Workout Item 1 */}
-          <TouchableOpacity 
-            style={{ 
-              backgroundColor: 'rgba(26, 51, 51, 0.6)', 
-              borderRadius: 16, 
-              padding: 16, 
-              marginBottom: 12, 
-              flexDirection: 'row', 
-              alignItems: 'center' 
+          <TouchableOpacity
+            style={{
+              backgroundColor: 'rgba(26, 51, 51, 0.6)',
+              borderRadius: 16,
+              padding: 16,
+              marginBottom: 12,
+              flexDirection: 'row',
+              alignItems: 'center'
             }}
             activeOpacity={0.7}
           >
-            <View style={{ 
-              width: 48, 
-              height: 48, 
-              borderRadius: 24, 
-              backgroundColor: 'rgba(0, 200, 150, 0.2)', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              marginRight: 16 
+            <View style={{
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              backgroundColor: 'rgba(0, 200, 150, 0.2)',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: 16
             }}>
               <Ionicons name="walk" size={24} color="#00C896" />
             </View>
@@ -301,25 +303,25 @@ export default function DashScreen() {
           </TouchableOpacity>
 
           {/* Workout Item 2 */}
-          <TouchableOpacity 
-            style={{ 
-              backgroundColor: 'rgba(26, 51, 51, 0.6)', 
-              borderRadius: 16, 
-              padding: 16, 
-              marginBottom: 12, 
-              flexDirection: 'row', 
-              alignItems: 'center' 
+          <TouchableOpacity
+            style={{
+              backgroundColor: 'rgba(26, 51, 51, 0.6)',
+              borderRadius: 16,
+              padding: 16,
+              marginBottom: 12,
+              flexDirection: 'row',
+              alignItems: 'center'
             }}
             activeOpacity={0.7}
           >
-            <View style={{ 
-              width: 48, 
-              height: 48, 
-              borderRadius: 24, 
-              backgroundColor: 'rgba(0, 200, 150, 0.2)', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              marginRight: 16 
+            <View style={{
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              backgroundColor: 'rgba(0, 200, 150, 0.2)',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: 16
             }}>
               <Ionicons name="fitness" size={24} color="#00C896" />
             </View>
@@ -336,24 +338,24 @@ export default function DashScreen() {
           </TouchableOpacity>
 
           {/* Workout Item 3 */}
-          <TouchableOpacity 
-            style={{ 
-              backgroundColor: 'rgba(26, 51, 51, 0.6)', 
-              borderRadius: 16, 
-              padding: 16, 
-              flexDirection: 'row', 
-              alignItems: 'center' 
+          <TouchableOpacity
+            style={{
+              backgroundColor: 'rgba(26, 51, 51, 0.6)',
+              borderRadius: 16,
+              padding: 16,
+              flexDirection: 'row',
+              alignItems: 'center'
             }}
             activeOpacity={0.7}
           >
-            <View style={{ 
-              width: 48, 
-              height: 48, 
-              borderRadius: 24, 
-              backgroundColor: 'rgba(0, 200, 150, 0.2)', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              marginRight: 16 
+            <View style={{
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              backgroundColor: 'rgba(0, 200, 150, 0.2)',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: 16
             }}>
               <Ionicons name="bicycle" size={24} color="#00C896" />
             </View>

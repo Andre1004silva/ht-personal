@@ -37,7 +37,7 @@ export default function Home() {
       <Stack.Screen options={{ headerShown: false }} />
       
       {/* Header */}
-      <View className="bg-[#1A3333] pt-8 pb-4 px-6 rounded-b-[40px]">
+      <View className=" bg-[#1A3333] pt-[36px] pb-[18px] px-6 rounded-b-[40px] z-[1]">
         <View className="flex-row items-center justify-center">
           <Image 
             source={require('../assets/logo.png')} 

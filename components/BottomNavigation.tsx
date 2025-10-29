@@ -8,9 +8,9 @@ type BottomNavigationProps = {
 
 export default function BottomNavigation({ activeTab, onTabChange }: BottomNavigationProps) {
   return (
-    <View className="bg-[#1A3333] flex-row border-t border-[#00C896]/20 rounded-t-[40px] pb-4">
+    <View className="bg-[#1A3333] flex-row rounded-t-[40px] pb-[18px]">
       <TouchableOpacity 
-        className="flex-1 items-center py-3"
+        className="flex-1 items-center py-3 rounded-t-[40px]"
         onPress={() => onTabChange('dash')}
       >
         <Ionicons 

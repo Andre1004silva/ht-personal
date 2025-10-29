@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
+import { useState } from 'react';
 import { ChevronRight } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 
@@ -13,6 +14,20 @@ const alunos = [
   },
   {
     id: 2,
+    nome: 'Kasandra Lilo',
+    tipo: 'Fisioterapia',
+    experiencia: '3 meses',
+    foto: 'https://randomuser.me/api/portraits/women/2.jpg'
+  },
+  {
+    id: 6,
+    nome: 'Chris Heria',
+    tipo: 'Emagrecimento',
+    experiencia: '6 meses',
+    foto: 'https://randomuser.me/api/portraits/men/3.jpg'
+  },
+  {
+    id: 5,
     nome: 'Kasandra Lilo',
     tipo: 'Fisioterapia',
     experiencia: '3 meses',
@@ -36,13 +51,33 @@ const alunos = [
 
 export default function AlunosScreen() {
   const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    // Simula carregamento de dados (substitua com sua lógica real)
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setRefreshing(false);
+  };
 
   return (
-    <ScrollView className="flex-1 bg-[#0B1F1F] px-6 py-6" contentContainerStyle={styles.scrollContent}>
+    <ScrollView 
+      className="flex-1 bg-[#0B1F1F] px-2 z-[1]" 
+      contentContainerStyle={styles.scrollContent}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="white"
+          colors={['white']}
+          progressBackgroundColor="white"
+        />
+      }
+    >
       {alunos.map((aluno) => (
         <TouchableOpacity
           key={aluno.id}
-          className="bg-[#1A3333] px-6 py-4 flex-row items-center"
+          className="bg-[#1A3333] px-2 py-4 flex-row items-center"
           style={styles.card}
           activeOpacity={0.7}
           onPress={() => router.push(`/aluno-details?id=${aluno.id}`)}
@@ -75,6 +110,7 @@ const styles = StyleSheet.create({
     gap: 16, // Espaçamento entre os cards
   },
   card: {
+    width: '100%',
     borderRadius: 24, // Bordas arredondadas (rounded-3xl)
     borderWidth: 1,
     borderColor: 'rgba(0, 200, 150, 0.2)',

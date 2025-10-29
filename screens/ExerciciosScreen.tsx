@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
@@ -15,6 +15,7 @@ type Exercicio = {
 
 export default function ExerciciosScreen() {
   const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
   const [activeCategory, setActiveCategory] = useState<'todos' | 'peito' | 'costas' | 'pernas' | 'ombros' | 'bracos'>('todos');
   
   const exercicios: Exercicio[] = [
@@ -73,6 +74,13 @@ export default function ExerciciosScreen() {
       imagem: require('../assets/images/costas.jpeg'),
     },
   ];
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    // Simula carregamento de dados (substitua com sua lógica real)
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setRefreshing(false);
+  };
 
   const getDificuldadeColor = (dificuldade: string) => {
     switch (dificuldade) {
@@ -162,7 +170,18 @@ export default function ExerciciosScreen() {
       </View>
 
       {/* Exercícios List */}
-      <ScrollView className="flex-1 px-4">
+      <ScrollView 
+        className="flex-1 px-4"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="white"
+            colors={['white']}
+            progressBackgroundColor="white"
+          />
+        }
+      >
         <View className="pb-6">
           {filteredExercicios.map((exercicio) => (
             <TouchableOpacity
