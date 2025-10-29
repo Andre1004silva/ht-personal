@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Dimensions, Image, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions, Image, Animated, RefreshControl } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { ProgressChart } from 'react-native-chart-kit';
@@ -9,8 +9,12 @@ const screenWidth = Dimensions.get('window').width;
 export default function DashScreen() {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [showGreeting, setShowGreeting] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
+  const showGreetingToast = () => {
+    setShowGreeting(true);
+    fadeAnim.setValue(0);
+    
     // Fade in
     Animated.timing(fadeAnim, {
       toValue: 1,
@@ -19,7 +23,7 @@ export default function DashScreen() {
     }).start();
 
     // Fade out após 3 segundos
-    const timer = setTimeout(() => {
+    setTimeout(() => {
       Animated.timing(fadeAnim, {
         toValue: 0,
         duration: 500,
@@ -28,9 +32,23 @@ export default function DashScreen() {
         setShowGreeting(false);
       });
     }, 3000);
+  };
 
-    return () => clearTimeout(timer);
+  useEffect(() => {
+    showGreetingToast();
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    
+    // Simula carregamento de dados (substitua com sua lógica real)
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Mostra o toast novamente após recarregar
+    showGreetingToast();
+    
+    setRefreshing(false);
+  };
 
   // Dados para o gráfico de progresso circular
   const progressData = {
@@ -47,7 +65,18 @@ export default function DashScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-[#0B1F1F]">
+    <ScrollView 
+      className="flex-1 bg-[#0B1F1F]"
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="#C4F82A"
+          colors={['#C4F82A']}
+          progressBackgroundColor="#1A3333"
+        />
+      }
+    >
       {/* Greeting Toast */}
       {showGreeting && (
         <Animated.View 
