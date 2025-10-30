@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View, Image, StyleSheet, Dimensions } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -11,7 +12,6 @@ import Animated, {
   withSequence,
   withTiming,
   Easing,
-  runOnJS
 } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
@@ -21,28 +21,22 @@ SplashScreen.preventAutoHideAsync();
 
 export default function Layout() {
   const [appIsReady, setAppIsReady] = useState(false);
-  const scale = useSharedValue(0.3);
-  const opacity = useSharedValue(0);
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
 
   useEffect(() => {
     async function prepare() {
       try {
-        // Simula carregamento de recursos
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Logo aparece imediatamente (opacity já é 1)
         
-        // Inicia animações
+        // Animação sutil de pulso
         scale.value = withSequence(
-          withSpring(1.2, { damping: 10 }),
+          withSpring(1.05, { damping: 10 }),
           withSpring(1, { damping: 8 })
         );
-        
-        opacity.value = withTiming(1, {
-          duration: 800,
-          easing: Easing.ease
-        });
 
-        // Aguarda mais 1.5 segundos antes de esconder
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Simula carregamento de recursos
+        await new Promise(resolve => setTimeout(resolve, 2000));
       } catch (e) {
         console.warn(e);
       } finally {
@@ -63,7 +57,12 @@ export default function Layout() {
 
   if (!appIsReady) {
     return (
-      <View style={styles.splashContainer}>
+      <LinearGradient
+        colors={['#0B1120', '#1a2847', '#0B1120']}
+        style={styles.splashContainer}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
         <Animated.View style={[styles.logoContainer, animatedStyle]}>
           <Image 
             source={require('../assets/logo.png')} 
@@ -71,7 +70,7 @@ export default function Layout() {
             resizeMode="contain"
           />
         </Animated.View>
-      </View>
+      </LinearGradient>
     );
   }
 
@@ -81,7 +80,6 @@ export default function Layout() {
 const styles = StyleSheet.create({
   splashContainer: {
     flex: 1,
-    backgroundColor: '#0B3D3D',
     alignItems: 'center',
     justifyContent: 'center',
   },
