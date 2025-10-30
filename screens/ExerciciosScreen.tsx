@@ -85,11 +85,11 @@ export default function ExerciciosScreen() {
   const getDificuldadeColor = (dificuldade: string) => {
     switch (dificuldade) {
       case 'Iniciante':
-        return '#00C896';
+        return '#3B82F6';
       case 'Intermediário':
-        return '#C4F82A';
+        return '#2563EB';
       case 'Avançado':
-        return '#EF4444';
+        return '#93C5FD';
       default:
         return '#9CA3AF';
     }
@@ -100,9 +100,9 @@ export default function ExerciciosScreen() {
     : exercicios.filter(ex => ex.categoria.toLowerCase() === activeCategory);
 
   return (
-    <View className="flex-1 bg-[#0B1F1F]">
+    <View className="flex-1 bg-[#0B1120]">
       {/* Category Tabs */}
-      <View className="px-4 pt-4">
+      <View className="px-4" style={{ paddingTop: 140 }}>
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
@@ -110,42 +110,42 @@ export default function ExerciciosScreen() {
         >
         <TouchableOpacity
           onPress={() => setActiveCategory('todos')}
-          className={`px-5 py-2 rounded-full ${activeCategory === 'todos' ? 'bg-[#00C896]' : 'bg-[#1A3333]'}`}
+          className={`px-5 py-2 rounded-full ${activeCategory === 'todos' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
         >
           <Text className="font-semibold text-white">Todos</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => setActiveCategory('peito')}
-          className={`px-5 py-2 rounded-full ${activeCategory === 'peito' ? 'bg-[#00C896]' : 'bg-[#1A3333]'}`}
+          className={`px-5 py-2 rounded-full ${activeCategory === 'peito' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
         >
           <Text className="font-semibold text-white">Peito</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => setActiveCategory('costas')}
-          className={`px-5 py-2 rounded-full ${activeCategory === 'costas' ? 'bg-[#00C896]' : 'bg-[#1A3333]'}`}
+          className={`px-5 py-2 rounded-full ${activeCategory === 'costas' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
         >
           <Text className="font-semibold text-white">Costas</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => setActiveCategory('pernas')}
-          className={`px-5 py-2 rounded-full ${activeCategory === 'pernas' ? 'bg-[#00C896]' : 'bg-[#1A3333]'}`}
+          className={`px-5 py-2 rounded-full ${activeCategory === 'pernas' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
         >
           <Text className="font-semibold text-white">Pernas</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => setActiveCategory('ombros')}
-          className={`px-5 py-2 rounded-full ${activeCategory === 'ombros' ? 'bg-[#00C896]' : 'bg-[#1A3333]'}`}
+          className={`px-5 py-2 rounded-full ${activeCategory === 'ombros' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
         >
           <Text className="font-semibold text-white">Ombros</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => setActiveCategory('bracos')}
-          className={`px-5 py-2 rounded-full ${activeCategory === 'bracos' ? 'bg-[#00C896]' : 'bg-[#1A3333]'}`}
+          className={`px-5 py-2 rounded-full ${activeCategory === 'bracos' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
         >
           <Text className="font-semibold text-white">Braços</Text>
         </TouchableOpacity>
@@ -154,17 +154,17 @@ export default function ExerciciosScreen() {
 
       {/* Action Bar */}
       <View className="flex-row items-center justify-between px-4 py-4">
-        <TouchableOpacity className="flex-row items-center gap-2 bg-[#1A3333] px-4 py-2 rounded-lg">
-          <Ionicons name="filter" size={20} color="#00C896" />
+        <TouchableOpacity className="flex-row items-center gap-2 bg-[#1E3A8A] px-4 py-2 rounded-lg">
+          <Ionicons name="filter" size={20} color="#3B82F6" />
           <Text className="text-white font-medium">Filtros</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="flex-row items-center gap-2 bg-[#1A3333] px-4 py-2 rounded-lg">
-          <Ionicons name="search" size={20} color="#00C896" />
+        <TouchableOpacity className="flex-row items-center gap-2 bg-[#1E3A8A] px-4 py-2 rounded-lg">
+          <Ionicons name="search" size={20} color="#3B82F6" />
           <Text className="text-white font-medium">Buscar</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="bg-[#00C896] px-4 py-2 rounded-lg">
+        <TouchableOpacity className="bg-[#3B82F6] px-4 py-2 rounded-lg">
           <Ionicons name="add" size={24} color="white" />
         </TouchableOpacity>
       </View>
@@ -172,6 +172,7 @@ export default function ExerciciosScreen() {
       {/* Exercícios List */}
       <ScrollView 
         className="flex-1 px-4"
+        contentContainerStyle={{ paddingBottom: 100 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -186,7 +187,7 @@ export default function ExerciciosScreen() {
           {filteredExercicios.map((exercicio) => (
             <TouchableOpacity
               key={exercicio.id}
-              className="bg-[#1A3333] rounded-2xl mb-4 overflow-hidden"
+              className="bg-[#1E3A8A] rounded-2xl mb-4 overflow-hidden"
               style={styles.card}
               activeOpacity={0.7}
               onPress={() => router.push(`/exercicio-details?id=${exercicio.id}`)}
@@ -230,7 +231,7 @@ export default function ExerciciosScreen() {
 
                   <View className="flex-row gap-2">
                     <TouchableOpacity 
-                      className="flex-1 bg-[#00C896] rounded-lg py-2 items-center"
+                      className="flex-1 bg-[#3B82F6] rounded-lg py-2 items-center"
                       onPress={(e) => {
                         e.stopPropagation();
                         // Adicionar ao treino
@@ -239,13 +240,13 @@ export default function ExerciciosScreen() {
                       <Text className="text-white text-xs font-semibold">Adicionar ao Treino</Text>
                     </TouchableOpacity>
                     <TouchableOpacity 
-                      className="bg-[#0B1F1F] rounded-lg px-3 py-2 items-center justify-center"
+                      className="bg-[#0B1120] rounded-lg px-3 py-2 items-center justify-center"
                       onPress={(e) => {
                         e.stopPropagation();
                         // Ver detalhes
                       }}
                     >
-                      <Ionicons name="chevron-forward" size={16} color="#C4F82A" />
+                      <Ionicons name="chevron-forward" size={16} color="#93C5FD" />
                     </TouchableOpacity>
                   </View>
                 </View>

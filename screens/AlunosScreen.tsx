@@ -62,7 +62,7 @@ export default function AlunosScreen() {
 
   return (
     <ScrollView 
-      className="flex-1 bg-[#0B1F1F] px-2 z-[1]" 
+      className="flex-1 bg-[#0B1120] px-2 z-[1]" 
       contentContainerStyle={styles.scrollContent}
       refreshControl={
         <RefreshControl
@@ -77,7 +77,7 @@ export default function AlunosScreen() {
       {alunos.map((aluno) => (
         <TouchableOpacity
           key={aluno.id}
-          className="bg-[#1A3333] px-2 py-4 flex-row items-center"
+          className="bg-[#1E3A8A] px-2 py-4 flex-row items-center"
           style={styles.card}
           activeOpacity={0.7}
           onPress={() => router.push(`/aluno-details?id=${aluno.id}`)}
@@ -94,11 +94,11 @@ export default function AlunosScreen() {
           <View className="flex-1">
             <Text className="text-white text-lg font-bold mb-1">{aluno.nome}</Text>
             <Text className="text-gray-300 text-sm mb-1">{aluno.tipo}</Text>
-            <Text className="text-[#C4F82A] text-sm font-semibold">{aluno.experiencia}</Text>
+            <Text className="text-[#3B82F6] text-sm font-semibold">{aluno.experiencia}</Text>
           </View>
 
           {/* Ícone de seta */}
-          <ChevronRight color="#C4F82A" size={24} />
+          <ChevronRight color="#93C5FD" size={24} />
         </TouchableOpacity>
       ))}
     </ScrollView>
@@ -107,13 +107,16 @@ export default function AlunosScreen() {
 
 const styles = StyleSheet.create({
   scrollContent: {
-    gap: 16, // Espaçamento entre os cards
+    paddingTop: 140,
+    paddingBottom: 100,
+    paddingVertical: 16,
+    gap: 16,
   },
   card: {
     width: '100%',
     borderRadius: 24, // Bordas arredondadas (rounded-3xl)
     borderWidth: 1,
-    borderColor: 'rgba(0, 200, 150, 0.2)',
+    borderColor: 'rgba(59, 130, 246, 0.3)',
   },
   avatar: {
     width: 64,

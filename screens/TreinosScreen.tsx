@@ -67,12 +67,12 @@ export default function TreinosScreen() {
     };
 
     return (
-        <View className="flex-1 bg-[#0B1F1F]">
+        <View className="flex-1 bg-[#0B1120]">
             {/* Category Tabs */}
-            <View className="flex-row px-4 pt-4 gap-2">
+            <View className="flex-row px-4 gap-2" style={{ paddingTop: 140 }}>
                 <TouchableOpacity
                     onPress={() => setActiveCategory('workouts')}
-                    className={`px-5 py-2 rounded-full ${activeCategory === 'workouts' ? 'bg-[#00C896]' : 'bg-[#1A3333]'}`}
+                    className={`px-5 py-2 rounded-full ${activeCategory === 'workouts' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
                 >
                     <Text className={`font-semibold ${activeCategory === 'workouts' ? 'text-white' : 'text-white'}`}>
                         Treinos
@@ -81,7 +81,7 @@ export default function TreinosScreen() {
 
                 <TouchableOpacity
                     onPress={() => setActiveCategory('fitness')}
-                    className={`px-5 py-2 rounded-full ${activeCategory === 'fitness' ? 'bg-[#00C896]' : 'bg-[#1A3333]'}`}
+                    className={`px-5 py-2 rounded-full ${activeCategory === 'fitness' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
                 >
                     <Text className={`font-semibold ${activeCategory === 'fitness' ? 'text-white' : 'text-white'}`}>
                         Condicionamento
@@ -90,7 +90,7 @@ export default function TreinosScreen() {
 
                 <TouchableOpacity
                     onPress={() => setActiveCategory('plans')}
-                    className={`px-5 py-2 rounded-full ${activeCategory === 'plans' ? 'bg-[#00C896]' : 'bg-[#1A3333]'}`}
+                    className={`px-5 py-2 rounded-full ${activeCategory === 'plans' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
                 >
                     <Text className={`font-semibold ${activeCategory === 'plans' ? 'text-white' : 'text-white'}`}>
                         Planos
@@ -99,7 +99,7 @@ export default function TreinosScreen() {
 
                 <TouchableOpacity
                     onPress={() => setActiveCategory('training')}
-                    className={`px-5 py-2 rounded-full ${activeCategory === 'training' ? 'bg-[#00C896]' : 'bg-[#1A3333]'}`}
+                    className={`px-5 py-2 rounded-full ${activeCategory === 'training' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
                 >
                     <Text className={`font-semibold ${activeCategory === 'training' ? 'text-white' : 'text-white'}`}>
                         Treinamento
@@ -108,27 +108,27 @@ export default function TreinosScreen() {
             </View>
 
             {/* Action Bar */}
-            <View className="flex-row items-center justify-between px-4 py-4 border-b border-[#1A3333]">
-                <TouchableOpacity className="flex-row items-center gap-2 bg-[#1A3333] px-4 py-2 rounded-lg">
-                    <Ionicons name="filter" size={20} color="#00C896" />
+            <View className="flex-row items-center justify-between px-4 py-4 border-b border-[#1E3A8A]">
+                <TouchableOpacity className="flex-row items-center gap-2 bg-[#1E3A8A] px-4 py-2 rounded-lg">
+                    <Ionicons name="filter" size={20} color="#3B82F6" />
                     <Text className="text-white font-medium">Filtros</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity className="flex-row items-center gap-2 bg-[#1A3333] px-4 py-2 rounded-lg">
-                    <Ionicons name="swap-vertical" size={20} color="#00C896" />
+                <TouchableOpacity className="flex-row items-center gap-2 bg-[#1E3A8A] px-4 py-2 rounded-lg">
+                    <Ionicons name="swap-vertical" size={20} color="#3B82F6" />
                     <Text className="text-white font-medium">Ordenar</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity className="flex-row items-center gap-2 bg-[#1A3333] px-4 py-2 rounded-lg">
-                    <Ionicons name="search" size={20} color="#00C896" />
+                <TouchableOpacity className="flex-row items-center gap-2 bg-[#1E3A8A] px-4 py-2 rounded-lg">
+                    <Ionicons name="search" size={20} color="#3B82F6" />
                     <Text className="text-white font-medium">Buscar</Text>
                 </TouchableOpacity>
             </View>
 
             {/* Add New Button */}
             <View className="px-4 py-4">
-                <TouchableOpacity className="bg-[#1A3333] rounded-2xl p-4 flex-row items-center justify-center gap-2">
-                    <Ionicons name="add-circle-outline" size={24} color="#00C896" />
+                <TouchableOpacity className="bg-[#1E3A8A] rounded-2xl p-4 flex-row items-center justify-center gap-2">
+                    <Ionicons name="add-circle-outline" size={24} color="#3B82F6" />
                     <Text className="text-white font-bold text-base">Criar Novo Treino</Text>
                 </TouchableOpacity>
             </View>
@@ -136,6 +136,7 @@ export default function TreinosScreen() {
             {/* Treinos Grid */}
             <ScrollView 
                 className="flex-1 px-4"
+                contentContainerStyle={{ paddingBottom: 100 }}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -165,7 +166,7 @@ export default function TreinosScreen() {
 
                                 {/* Ícone Salvar */}
                                 <TouchableOpacity className="absolute top-3 right-3 bg-black/40 w-8 h-8 rounded-lg items-center justify-center">
-                                    <Ionicons name="bookmark" size={16} color="#00C896" />
+                                    <Ionicons name="bookmark" size={16} color="#3B82F6" />
                                 </TouchableOpacity>
 
                                 {/* Camada preta translúcida cobrindo metade inferior */}

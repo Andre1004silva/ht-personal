@@ -57,16 +57,20 @@ export default function DashScreen() {
   };
 
   const chartConfig = {
-    backgroundGradientFrom: '#1A3333',
-    backgroundGradientTo: '#1A3333',
-    color: (opacity = 1) => `rgba(196, 248, 42, ${opacity})`,
+    backgroundGradientFrom: '#121b33',
+    backgroundGradientTo: '#121b33',
+    color: (opacity = 1) => `rgba(37, 99, 235, ${opacity})`,
     strokeWidth: 2,
     barPercentage: 0.5,
   };
 
   return (
     <ScrollView
-      className="flex-1 bg-[#0B1F1F]"
+      className="flex-1 bg-[#0B1120]"
+      contentContainerStyle={{
+        paddingTop: 140,
+        paddingBottom: 100,
+      }}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -96,9 +100,9 @@ export default function DashScreen() {
           }}
         >
           <View style={{
-            backgroundColor: '#1A3333',
+            backgroundColor: '#121b33',
             borderRadius: 16,
-            borderColor: '#C4F82A',
+            borderColor: '#3B82F6',
             borderWidth: 2,
             padding: 16,
             flexDirection: 'row',
@@ -129,7 +133,7 @@ export default function DashScreen() {
       {/* Stats Card - Passos */}
       <View style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
         <View style={{
-          backgroundColor: '#1A3333',
+          backgroundColor: '#141c30',
           borderRadius: 24,
           padding: 24,
           shadowColor: '#000',
@@ -160,7 +164,7 @@ export default function DashScreen() {
             <View style={{
               height: '100%',
               width: '71%',
-              backgroundColor: '#C4F82A',
+              backgroundColor: '#3B82F6',
               borderRadius: 6
             }} />
           </View>
@@ -170,7 +174,7 @@ export default function DashScreen() {
       {/* Daily Activity Card */}
       <View style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
         <View style={{
-          backgroundColor: '#1A3333',
+          backgroundColor: '#141c30',
           borderRadius: 24,
           padding: 24,
           shadowColor: '#000',
@@ -184,7 +188,7 @@ export default function DashScreen() {
               Atividade Diária
             </Text>
             <TouchableOpacity>
-              <Text style={{ color: '#C4F82A', fontSize: 14, fontWeight: '600' }}>Ver tudo</Text>
+              <Text style={{ color: '#93C5FD', fontSize: 14, fontWeight: '600' }}>Ver tudo</Text>
             </TouchableOpacity>
           </View>
 
@@ -193,7 +197,7 @@ export default function DashScreen() {
             <View style={{ flex: 1 }}>
               <View style={{ marginBottom: 16 }}>
                 <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 4 }}>Passos</Text>
-                <Text style={{ color: '#C4F82A', fontSize: 24, fontWeight: 'bold' }}>
+                <Text style={{ color: '#3B82F6', fontSize: 24, fontWeight: 'bold' }}>
                   8.500
                   <Text style={{ color: '#9CA3AF', fontSize: 16, fontWeight: 'normal' }}>
                     / 12.000
@@ -203,7 +207,7 @@ export default function DashScreen() {
 
               <View style={{ marginBottom: 16 }}>
                 <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 4 }}>Calorias</Text>
-                <Text style={{ color: '#C4F82A', fontSize: 24, fontWeight: 'bold' }}>
+                <Text style={{ color: '#3B82F6', fontSize: 24, fontWeight: 'bold' }}>
                   520
                   <Text style={{ color: '#9CA3AF', fontSize: 16, fontWeight: 'normal' }}>
                     / 800 Cal
@@ -213,7 +217,7 @@ export default function DashScreen() {
 
               <View>
                 <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 4 }}>Água</Text>
-                <Text style={{ color: '#C4F82A', fontSize: 24, fontWeight: 'bold' }}>
+                <Text style={{ color: '#3B82F6', fontSize: 24, fontWeight: 'bold' }}>
                   2,1
                   <Text style={{ color: '#9CA3AF', fontSize: 16, fontWeight: 'normal' }}>
                     / 3,0 L
@@ -231,11 +235,11 @@ export default function DashScreen() {
                 strokeWidth={10}
                 radius={24}
                 chartConfig={{
-                  backgroundGradientFrom: '#1A3333',
-                  backgroundGradientTo: '#1A3333',
+                  backgroundGradientFrom: '#141c30',
+                  backgroundGradientTo: '#141c30',
                   color: (opacity = 1, index = 0) => {
-                    const colors = ['#C4F82A', '#00C896', '#0d9488'];
-                    return colors[index as number] || `rgba(196, 248, 42, ${opacity})`;
+                    const colors = ['#3B82F6', '#2563EB', '#93C5FD'];
+                    return colors[index as number] || `rgba(59, 130, 246, ${opacity})`;
                   },
                 }}
                 hideLegend={true}
@@ -251,7 +255,7 @@ export default function DashScreen() {
       {/* Workouts Card */}
       <View style={{ paddingHorizontal: 24, paddingBottom: 24 }}>
         <View style={{
-          backgroundColor: '#1A3333',
+          backgroundColor: '#141c30',
           borderRadius: 24,
           padding: 24,
           shadowColor: '#000',
@@ -263,14 +267,14 @@ export default function DashScreen() {
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <Text style={{ color: 'white', fontSize: 18, fontWeight: '600' }}>Treinos</Text>
             <TouchableOpacity>
-              <Text style={{ color: '#C4F82A', fontSize: 14, fontWeight: '600' }}>Ver tudo</Text>
+              <Text style={{ color: '#93C5FD', fontSize: 14, fontWeight: '600' }}>Ver tudo</Text>
             </TouchableOpacity>
           </View>
 
           {/* Workout Item 1 */}
           <TouchableOpacity
             style={{
-              backgroundColor: 'rgba(26, 51, 51, 0.6)',
+              backgroundColor: 'rgba(37, 99, 235, 0.2)',
               borderRadius: 16,
               padding: 16,
               marginBottom: 12,
@@ -283,12 +287,12 @@ export default function DashScreen() {
               width: 48,
               height: 48,
               borderRadius: 24,
-              backgroundColor: 'rgba(0, 200, 150, 0.2)',
+              backgroundColor: 'rgba(59, 130, 246, 0.3)',
               alignItems: 'center',
               justifyContent: 'center',
               marginRight: 16
             }}>
-              <Ionicons name="walk" size={24} color="#00C896" />
+              <Ionicons name="walk" size={24} color="#3B82F6" />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ color: 'white', fontWeight: '600', fontSize: 16, marginBottom: 4 }}>
@@ -298,14 +302,14 @@ export default function DashScreen() {
             </View>
             <View style={{ alignItems: 'flex-end' }}>
               <Text style={{ color: 'white', fontSize: 14 }}>Hoje</Text>
-              <Ionicons name="chevron-forward" size={20} color="#C4F82A" />
+              <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
             </View>
           </TouchableOpacity>
 
           {/* Workout Item 2 */}
           <TouchableOpacity
             style={{
-              backgroundColor: 'rgba(26, 51, 51, 0.6)',
+              backgroundColor: 'rgba(37, 99, 235, 0.2)',
               borderRadius: 16,
               padding: 16,
               marginBottom: 12,
@@ -318,12 +322,12 @@ export default function DashScreen() {
               width: 48,
               height: 48,
               borderRadius: 24,
-              backgroundColor: 'rgba(0, 200, 150, 0.2)',
+              backgroundColor: 'rgba(59, 130, 246, 0.3)',
               alignItems: 'center',
               justifyContent: 'center',
               marginRight: 16
             }}>
-              <Ionicons name="fitness" size={24} color="#00C896" />
+              <Ionicons name="fitness" size={24} color="#3B82F6" />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ color: 'white', fontWeight: '600', fontSize: 16, marginBottom: 4 }}>
@@ -333,14 +337,14 @@ export default function DashScreen() {
             </View>
             <View style={{ alignItems: 'flex-end' }}>
               <Text style={{ color: 'white', fontSize: 14 }}>Hoje</Text>
-              <Ionicons name="chevron-forward" size={20} color="#C4F82A" />
+              <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
             </View>
           </TouchableOpacity>
 
           {/* Workout Item 3 */}
           <TouchableOpacity
             style={{
-              backgroundColor: 'rgba(26, 51, 51, 0.6)',
+              backgroundColor: 'rgba(37, 99, 235, 0.2)',
               borderRadius: 16,
               padding: 16,
               flexDirection: 'row',
@@ -352,12 +356,12 @@ export default function DashScreen() {
               width: 48,
               height: 48,
               borderRadius: 24,
-              backgroundColor: 'rgba(0, 200, 150, 0.2)',
+              backgroundColor: 'rgba(59, 130, 246, 0.3)',
               alignItems: 'center',
               justifyContent: 'center',
               marginRight: 16
             }}>
-              <Ionicons name="bicycle" size={24} color="#00C896" />
+              <Ionicons name="bicycle" size={24} color="#3B82F6" />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ color: 'white', fontWeight: '600', fontSize: 16, marginBottom: 4 }}>
@@ -367,7 +371,7 @@ export default function DashScreen() {
             </View>
             <View style={{ alignItems: 'flex-end' }}>
               <Text style={{ color: 'white', fontSize: 14 }}>Ontem</Text>
-              <Ionicons name="chevron-forward" size={20} color="#C4F82A" />
+              <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
             </View>
           </TouchableOpacity>
         </View>

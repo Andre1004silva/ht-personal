@@ -64,7 +64,7 @@ export default function AlunoDetailsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-[#0B1F1F]">
+    <View className="flex-1 bg-[#0B1120]">
       <ScrollView className="flex-1">
         {/* Header com foto */}
         <View style={styles.headerContainer}>
@@ -76,7 +76,7 @@ export default function AlunoDetailsScreen() {
           
           {/* Gradient overlay */}
           <LinearGradient
-            colors={['transparent', 'rgba(11, 31, 31, 0.8)', '#0B1F1F']}
+            colors={['transparent', 'rgba(11, 17, 32, 0.8)', '#0B1120']}
             style={styles.gradient}
           />
 
@@ -93,7 +93,7 @@ export default function AlunoDetailsScreen() {
             <Text className="text-white text-3xl font-bold mb-2">
               {aluno.nome}
             </Text>
-            <Text className="text-[#00C896] text-lg font-semibold mb-3">
+            <Text className="text-[#3B82F6] text-lg font-semibold mb-3">
               {aluno.tipo}
             </Text>
             <View className="flex-row gap-3">
@@ -112,28 +112,28 @@ export default function AlunoDetailsScreen() {
         {/* Conteúdo */}
         <View className="px-5 pb-6">
           {/* Estatísticas */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View className="bg-[#1E3A8A] rounded-2xl p-5 mb-4">
             <Text className="text-white text-lg font-bold mb-4">Estatísticas</Text>
             <View className="flex-row justify-between">
               <View className="flex-1 items-center">
-                <Text className="text-[#C4F82A] text-3xl font-bold">{aluno.stats.treinos}</Text>
+                <Text className="text-[#3B82F6] text-3xl font-bold">{aluno.stats.treinos}</Text>
                 <Text className="text-gray-400 text-xs mt-1">Treinos</Text>
               </View>
               <View style={styles.divider} />
               <View className="flex-1 items-center">
-                <Text className="text-[#C4F82A] text-3xl font-bold">{aluno.stats.frequencia}%</Text>
+                <Text className="text-[#3B82F6] text-3xl font-bold">{aluno.stats.frequencia}%</Text>
                 <Text className="text-gray-400 text-xs mt-1">Frequência</Text>
               </View>
               <View style={styles.divider} />
               <View className="flex-1 items-center">
-                <Text className="text-[#00C896] text-3xl font-bold">{aluno.stats.evolucao}</Text>
+                <Text className="text-[#93C5FD] text-3xl font-bold">{aluno.stats.evolucao}</Text>
                 <Text className="text-gray-400 text-xs mt-1">Evolução</Text>
               </View>
             </View>
           </View>
 
           {/* Informações Pessoais */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View className="bg-[#1E3A8A] rounded-2xl p-5 mb-4">
             <Text className="text-white text-lg font-bold mb-3">Informações Pessoais</Text>
             
             <View className="mb-3">
@@ -164,46 +164,46 @@ export default function AlunoDetailsScreen() {
           </View>
 
           {/* Contato */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View className="bg-[#1E3A8A] rounded-2xl p-5 mb-4">
             <Text className="text-white text-lg font-bold mb-3">Contato</Text>
             
             <TouchableOpacity className="flex-row items-center mb-3">
-              <View className="bg-[#00C896]/20 w-10 h-10 rounded-full items-center justify-center mr-3">
-                <Ionicons name="call-outline" size={20} color="#00C896" />
+              <View className="bg-[#3B82F6]/20 w-10 h-10 rounded-full items-center justify-center mr-3">
+                <Ionicons name="call-outline" size={20} color="#3B82F6" />
               </View>
               <View className="flex-1">
                 <Text className="text-gray-400 text-xs">Telefone</Text>
                 <Text className="text-white text-base">{aluno.telefone}</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#C4F82A" />
+              <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
             </TouchableOpacity>
 
             <TouchableOpacity className="flex-row items-center">
-              <View className="bg-[#00C896]/20 w-10 h-10 rounded-full items-center justify-center mr-3">
-                <Ionicons name="mail-outline" size={20} color="#00C896" />
+              <View className="bg-[#3B82F6]/20 w-10 h-10 rounded-full items-center justify-center mr-3">
+                <Ionicons name="mail-outline" size={20} color="#3B82F6" />
               </View>
               <View className="flex-1">
                 <Text className="text-gray-400 text-xs">Email</Text>
                 <Text className="text-white text-base">{aluno.email}</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#C4F82A" />
+              <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
             </TouchableOpacity>
           </View>
 
           {/* Próximo Treino */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View className="bg-[#1E3A8A] rounded-2xl p-5 mb-4">
             <Text className="text-white text-lg font-bold mb-3">Próximo Treino</Text>
-            <View className="bg-[#0B1F1F] rounded-xl p-4">
+            <View className="bg-[#0B1120] rounded-xl p-4">
               <Text className="text-white text-base font-bold mb-2">
                 {aluno.proximoTreino.titulo}
               </Text>
               <View className="flex-row items-center gap-4">
                 <View className="flex-row items-center gap-1">
-                  <Ionicons name="calendar-outline" size={16} color="#C4F82A" />
+                  <Ionicons name="calendar-outline" size={16} color="#93C5FD" />
                   <Text className="text-gray-300 text-sm">{aluno.proximoTreino.data}</Text>
                 </View>
                 <View className="flex-row items-center gap-1">
-                  <Ionicons name="time-outline" size={16} color="#C4F82A" />
+                  <Ionicons name="time-outline" size={16} color="#93C5FD" />
                   <Text className="text-gray-300 text-sm">{aluno.proximoTreino.horario}</Text>
                 </View>
               </View>
@@ -211,11 +211,11 @@ export default function AlunoDetailsScreen() {
           </View>
 
           {/* Últimos Treinos */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View className="bg-[#1E3A8A] rounded-2xl p-5 mb-4">
             <View className="flex-row items-center justify-between mb-3">
               <Text className="text-white text-lg font-bold">Últimos Treinos</Text>
               <TouchableOpacity>
-                <Text className="text-[#C4F82A] text-sm font-semibold">Ver todos</Text>
+                <Text className="text-[#93C5FD] text-sm font-semibold">Ver todos</Text>
               </TouchableOpacity>
             </View>
 
@@ -226,12 +226,12 @@ export default function AlunoDetailsScreen() {
                 style={index < aluno.ultimosTreinos.length - 1 && styles.treinoItem}
               >
                 <View className={`w-10 h-10 rounded-full items-center justify-center mr-3 ${
-                  treino.concluido ? 'bg-[#C4F82A]/20' : 'bg-gray-600/20'
+                  treino.concluido ? 'bg-[#3B82F6]/20' : 'bg-gray-600/20'
                 }`}>
                   <Ionicons 
                     name={treino.concluido ? "checkmark-circle" : "close-circle"} 
                     size={24} 
-                    color={treino.concluido ? "#C4F82A" : "#9CA3AF"} 
+                    color={treino.concluido ? "#3B82F6" : "#9CA3AF"} 
                   />
                 </View>
                 <View className="flex-1">
@@ -242,13 +242,13 @@ export default function AlunoDetailsScreen() {
                     {treino.data} • {treino.duracao}
                   </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color="#C4F82A" />
+                <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
               </TouchableOpacity>
             ))}
           </View>
 
           {/* Medidas */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View className="bg-[#1E3A8A] rounded-2xl p-5 mb-4">
             <Text className="text-white text-lg font-bold mb-3">Medidas Corporais</Text>
             
             {aluno.medidas.map((medida, index) => (
@@ -261,7 +261,7 @@ export default function AlunoDetailsScreen() {
                 <View className="flex-row items-center gap-3">
                   <Text className="text-white text-base font-semibold">{medida.valor}</Text>
                   <Text className={`text-sm font-semibold ${
-                    medida.evolucao.startsWith('+') ? 'text-[#C4F82A]' : 'text-[#00C896]'
+                    medida.evolucao.startsWith('+') ? 'text-[#3B82F6]' : 'text-[#93C5FD]'
                   }`}>
                     {medida.evolucao}
                   </Text>
@@ -272,12 +272,12 @@ export default function AlunoDetailsScreen() {
 
           {/* Botões de Ação */}
           <View className="flex-row gap-3 mb-6">
-            <TouchableOpacity className="flex-1 bg-[#00C896] rounded-2xl py-4 items-center flex-row justify-center gap-2">
+            <TouchableOpacity className="flex-1 bg-[#3B82F6] rounded-2xl py-4 items-center flex-row justify-center gap-2">
               <Ionicons name="create-outline" size={20} color="white" />
               <Text className="text-white text-base font-bold">Editar</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="flex-1 bg-[#1A3333] rounded-2xl py-4 items-center flex-row justify-center gap-2">
-              <Ionicons name="calendar-outline" size={20} color="#C4F82A" />
+            <TouchableOpacity className="flex-1 bg-[#1E3A8A] rounded-2xl py-4 items-center flex-row justify-center gap-2">
+              <Ionicons name="calendar-outline" size={20} color="#93C5FD" />
               <Text className="text-white text-base font-bold">Agendar</Text>
             </TouchableOpacity>
           </View>

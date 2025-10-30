@@ -1,6 +1,9 @@
 import { Stack } from 'expo-router';
 import { View, Text, Image, useWindowDimensions } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from 'react-native-reanimated';
 import DashScreen from '../screens/DashScreen';
 import AlunosScreen from '../screens/AlunosScreen';
 import TreinosScreen from '../screens/TreinosScreen';
@@ -14,6 +17,23 @@ export default function Home() {
   
   // Define o tamanho proporcional à largura da tela
   const logoSize = width * 0.15; // 20% da largura da tela
+  
+  // Animação para efeito liquid
+  const shimmer = useSharedValue(0);
+  
+  useEffect(() => {
+    shimmer.value = withRepeat(
+      withTiming(1, { duration: 3000, easing: Easing.linear }),
+      -1,
+      false
+    );
+  }, []);
+  
+  const animatedShimmerStyle = useAnimatedStyle(() => {
+    return {
+      opacity: 0.3 + shimmer.value * 0.2,
+    };
+  });
 
   const renderScreen = () => {
     switch (activeTab) {
@@ -33,34 +53,110 @@ export default function Home() {
   };
 
   return (
-    <View className="flex-1 bg-[#0B1F1F]">
+    <View className="flex-1 bg-[#0B1120]">
       <Stack.Screen options={{ headerShown: false }} />
       
+      {/* Screen Content */}
+      {renderScreen()}
+      
       {/* Header */}
-      <View className=" bg-[#1A3333] pt-[36px] pb-[18px] px-6 rounded-b-[40px] z-[1]">
-        <View className="flex-row items-center justify-center">
-          <Image 
-            source={require('../assets/logo.png')} 
+      <View 
+        className="rounded-b-[40px] overflow-hidden"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+        }}
+      >
+        {/* Borda brilhante externa */}
+        <LinearGradient
+          colors={['rgba(59, 130, 246, 0.08)', 'rgba(139, 92, 246, 0.05)', 'rgba(59, 130, 246, 0.08)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            borderRadius: 40,
+          }}
+        />
+        
+        {/* Container interno com padding para criar efeito de borda */}
+        <View style={{ padding: 1.5 }}>
+          <BlurView 
+            intensity={30} 
+            tint="dark"
+            className="rounded-b-[40px] overflow-hidden"
             style={{
-              width: logoSize,
-              height: logoSize,
-              resizeMode: 'contain',
+              backgroundColor: 'rgba(20, 28, 48, 0.05)',
             }}
-          />
-          <Text className="text-white text-2xl font-bold ml-2">
-            High<Text className="font-normal text-[#00C896]">Training</Text>
-          </Text>
+          >
+            {/* Gradiente líquido animado */}
+            <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, animatedShimmerStyle]}>
+              <LinearGradient
+                colors={[
+                  'rgba(59, 130, 246, 0.04)',
+                  'rgba(139, 92, 246, 0.02)',
+                  'rgba(59, 130, 246, 0.04)',
+                ]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{ flex: 1 }}
+              />
+            </Animated.View>
+            
+            {/* Reflexo superior */}
+            <LinearGradient
+              colors={['rgba(255, 255, 255, 0.05)', 'transparent']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '50%',
+              }}
+            />
+            
+            <View className="pt-[36px] pb-[18px] px-6">
+              <View className="flex-row items-center justify-center">
+                <Image 
+                  source={require('../assets/logo.png')} 
+                  style={{
+                    width: logoSize,
+                    height: logoSize,
+                    resizeMode: 'contain',
+                  }}
+                />
+                <Text className="text-white text-2xl font-bold ml-2">
+                  High<Text className="font-normal text-[#3B82F6]">Training</Text>
+                </Text>
+              </View>
+            </View>
+          </BlurView>
         </View>
       </View>
 
-      {/* Screen Content */}
-      {renderScreen()}
-
       {/* Bottom Navigation */}
-      <BottomNavigation 
-        activeTab={activeTab} 
-        onTabChange={setActiveTab} 
-      />
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+        }}
+      >
+        <BottomNavigation 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab} 
+        />
+      </View>
     </View>
   );
 }
