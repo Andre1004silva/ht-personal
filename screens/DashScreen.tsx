@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { ProgressChart } from 'react-native-chart-kit';
 import Svg, { Circle } from 'react-native-svg';
+import { useSharedValue } from 'react-native-reanimated';
+import { RefreshSplash } from '@/components/RefreshSplash';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -10,6 +12,9 @@ export default function DashScreen() {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [showGreeting, setShowGreeting] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [showRefreshSplash, setShowRefreshSplash] = useState(false);
+  const splashScale = useSharedValue(1);
+  const splashOpacity = useSharedValue(0);
 
   const showGreetingToast = () => {
     setShowGreeting(true);
@@ -22,7 +27,7 @@ export default function DashScreen() {
       useNativeDriver: true,
     }).start();
 
-    // Fade out após 3 segundos
+    // Fade out após 1.8 segundos
     setTimeout(() => {
       Animated.timing(fadeAnim, {
         toValue: 0,
@@ -31,7 +36,7 @@ export default function DashScreen() {
       }).start(() => {
         setShowGreeting(false);
       });
-    }, 3000);
+    }, 1800);
   };
 
   useEffect(() => {
@@ -40,9 +45,14 @@ export default function DashScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
+    setShowRefreshSplash(true);
 
     // Simula carregamento de dados (substitua com sua lógica real)
     await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // Esconde splash antes de mostrar o toast
+    setShowRefreshSplash(false);
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // Mostra o toast novamente após recarregar
     showGreetingToast();
@@ -65,28 +75,30 @@ export default function DashScreen() {
   };
 
   return (
-    <ScrollView
-      className="flex-1 bg-[#0B1120]"
-      contentContainerStyle={{
-        paddingTop: 140,
-        paddingBottom: 100,
-      }}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor="white"
-          colors={['white']}
-          progressBackgroundColor="white"
-        />
-      }
-    >
+    <View className="flex-1">
+      <ScrollView
+        className="flex-1 bg-[#0B1120]"
+        contentContainerStyle={{
+          paddingTop: 140,
+          paddingBottom: 100,
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#3B82F6"
+            colors={['#3B82F6', '#93C5FD']}
+            progressBackgroundColor="#141c30"
+            progressViewOffset={120}
+          />
+        }
+      >
       {/* Greeting Toast */}
       {showGreeting && (
         <Animated.View
           style={{
             position: 'absolute',
-            top: 130,
+            top: 120,
             left: 24,
             right: 24,
             zIndex: 1000,
@@ -378,5 +390,12 @@ export default function DashScreen() {
       </View>
 
     </ScrollView>
+    
+    <RefreshSplash 
+      visible={showRefreshSplash} 
+      scale={splashScale} 
+      opacity={splashOpacity} 
+    />
+  </View>
   );
 }

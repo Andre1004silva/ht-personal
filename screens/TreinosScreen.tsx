@@ -2,6 +2,8 @@ import { View, Text, TouchableOpacity, ScrollView, TextInput, Image, RefreshCont
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+import { useSharedValue } from 'react-native-reanimated';
+import { RefreshSplash } from '@/components/RefreshSplash';
 
 type Treino = {
     id: string;
@@ -14,6 +16,9 @@ type Treino = {
 export default function TreinosScreen() {
     const router = useRouter();
     const [refreshing, setRefreshing] = useState(false);
+    const [showRefreshSplash, setShowRefreshSplash] = useState(false);
+    const splashScale = useSharedValue(1);
+    const splashOpacity = useSharedValue(0);
     const [activeCategory, setActiveCategory] = useState<'workouts' | 'fitness' | 'plans' | 'training'>('workouts');
     const [treinos, setTreinos] = useState<Treino[]>([
         {
@@ -48,8 +53,11 @@ export default function TreinosScreen() {
 
     const onRefresh = async () => {
         setRefreshing(true);
+        setShowRefreshSplash(true);
         // Simula carregamento de dados (substitua com sua lógica real)
         await new Promise(resolve => setTimeout(resolve, 1500));
+        setShowRefreshSplash(false);
+        await new Promise(resolve => setTimeout(resolve, 300));
         setRefreshing(false);
     };
 
@@ -154,9 +162,10 @@ export default function TreinosScreen() {
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={onRefresh}
-                        tintColor="white"
-                        colors={['white']}
-                        progressBackgroundColor="white"
+                        tintColor="#3B82F6"
+                        colors={['#3B82F6', '#93C5FD']}
+                        progressBackgroundColor="#141c30"
+                        progressViewOffset={120}
                     />
                 }
             >
@@ -221,7 +230,12 @@ export default function TreinosScreen() {
                     ))}
                 </View>
             </ScrollView>
-
+            
+            <RefreshSplash 
+                visible={showRefreshSplash} 
+                scale={splashScale} 
+                opacity={splashOpacity} 
+            />
         </View>
     );
 }

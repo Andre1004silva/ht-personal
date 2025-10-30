@@ -2,6 +2,8 @@ import { View, Text, TouchableOpacity, ScrollView, Image, StyleSheet, RefreshCon
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+import { useSharedValue } from 'react-native-reanimated';
+import { RefreshSplash } from '@/components/RefreshSplash';
 
 type Exercicio = {
   id: string;
@@ -16,6 +18,9 @@ type Exercicio = {
 export default function ExerciciosScreen() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
+  const [showRefreshSplash, setShowRefreshSplash] = useState(false);
+  const splashScale = useSharedValue(1);
+  const splashOpacity = useSharedValue(0);
   const [activeCategory, setActiveCategory] = useState<'todos' | 'peito' | 'costas' | 'pernas' | 'ombros' | 'bracos'>('todos');
   
   const exercicios: Exercicio[] = [
@@ -77,8 +82,10 @@ export default function ExerciciosScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // Simula carregamento de dados (substitua com sua lógica real)
+    setShowRefreshSplash(true);
     await new Promise(resolve => setTimeout(resolve, 1500));
+    setShowRefreshSplash(false);
+    await new Promise(resolve => setTimeout(resolve, 300));
     setRefreshing(false);
   };
 
@@ -177,9 +184,10 @@ export default function ExerciciosScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="white"
-            colors={['white']}
-            progressBackgroundColor="white"
+            tintColor="#3B82F6"
+            colors={['#3B82F6', '#93C5FD']}
+            progressBackgroundColor="#141c30"
+            progressViewOffset={120}
           />
         }
       >
@@ -255,6 +263,12 @@ export default function ExerciciosScreen() {
           ))}
         </View>
       </ScrollView>
+      
+      <RefreshSplash 
+        visible={showRefreshSplash} 
+        scale={splashScale} 
+        opacity={splashOpacity} 
+      />
     </View>
   );
 }
