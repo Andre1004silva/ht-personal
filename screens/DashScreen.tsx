@@ -86,7 +86,7 @@ export default function DashScreen() {
         <Animated.View
           style={{
             position: 'absolute',
-            top: 10,
+            top: 130,
             left: 24,
             right: 24,
             zIndex: 1000,

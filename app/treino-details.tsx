@@ -49,7 +49,7 @@ export default function TreinoDetailsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-[#0B1F1F]">
+    <View className="flex-1 bg-[#0B1120]">
       <ScrollView className="flex-1">
         {/* Header com imagem */}
         <View style={styles.headerContainer}>
@@ -61,7 +61,7 @@ export default function TreinoDetailsScreen() {
           
           {/* Gradient overlay */}
           <LinearGradient
-            colors={['transparent', 'rgba(11, 31, 31, 0.8)', '#0B1F1F']}
+            colors={['transparent', 'rgba(11, 17, 32, 0.8)', '#0B1120']}
             style={styles.gradient}
           />
 
@@ -94,7 +94,17 @@ export default function TreinoDetailsScreen() {
         {/* Conteúdo */}
         <View className="px-5 pb-6">
           {/* About Section */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-lg font-bold mb-3">About</Text>
             <Text className="text-gray-300 text-sm leading-6 mb-4">
               {treino.descricao}
@@ -104,11 +114,11 @@ export default function TreinoDetailsScreen() {
             <View className="flex-row justify-between">
               <View className="flex-1">
                 <Text className="text-gray-400 text-xs mb-1">Level</Text>
-                <Text className="text-[#C4F82A] text-sm font-bold">{treino.nivel}</Text>
+                <Text className="text-[#3B82F6] text-sm font-bold">{treino.nivel}</Text>
               </View>
               <View className="flex-1">
                 <Text className="text-gray-400 text-xs mb-1">Progress</Text>
-                <Text className="text-[#00C896] text-sm font-bold">{treino.progresso}</Text>
+                <Text className="text-[#2563EB] text-sm font-bold">{treino.progresso}</Text>
               </View>
               <View className="flex-1">
                 <Text className="text-gray-400 text-xs mb-1">Focus Area</Text>
@@ -118,19 +128,55 @@ export default function TreinoDetailsScreen() {
           </View>
 
           {/* Sound & Music */}
-          <TouchableOpacity className="bg-[#1A3333] rounded-2xl p-5 mb-4 flex-row items-center justify-between">
+          <TouchableOpacity style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-base font-semibold">Sound & Music</Text>
-            <Ionicons name="chevron-forward" size={20} color="#00C896" />
+            <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
           </TouchableOpacity>
 
           {/* Guide */}
-          <TouchableOpacity className="bg-[#1A3333] rounded-2xl p-5 mb-4 flex-row items-center justify-between">
+          <TouchableOpacity style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-base font-semibold">Guide</Text>
-            <Ionicons name="chevron-forward" size={20} color="#00C896" />
+            <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
           </TouchableOpacity>
 
           {/* Trainer */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-lg font-bold mb-3">Trainer</Text>
             <TouchableOpacity className="flex-row items-center">
               <Image
@@ -140,16 +186,26 @@ export default function TreinoDetailsScreen() {
               <View className="flex-1 ml-3">
                 <Text className="text-white text-base font-bold">{treino.trainer.nome}</Text>
                 <Text className="text-gray-400 text-xs">{treino.trainer.cargo}</Text>
-                <Text className="text-[#C4F82A] text-xs font-semibold mt-1">
+                <Text className="text-[#3B82F6] text-xs font-semibold mt-1">
                   {treino.trainer.experiencia}
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#00C896" />
+              <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
             </TouchableOpacity>
           </View>
 
           {/* Rating */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <View className="flex-row items-center justify-between mb-4">
               <View className="flex-row items-center">
                 <Text className="text-white text-5xl font-bold mr-4">{treino.rating}</Text>
@@ -160,7 +216,7 @@ export default function TreinoDetailsScreen() {
                         key={star}
                         name="star"
                         size={12}
-                        color={star <= Math.floor(treino.rating) ? "#C4F82A" : "#444"}
+                        color={star <= Math.floor(treino.rating) ? "#3B82F6" : "#444"}
                       />
                     ))}
                   </View>
@@ -168,7 +224,7 @@ export default function TreinoDetailsScreen() {
                 </View>
               </View>
               <TouchableOpacity>
-                <Text className="text-[#C4F82A] text-sm font-semibold">See all</Text>
+                <Text className="text-[#93C5FD] text-sm font-semibold">See all</Text>
               </TouchableOpacity>
             </View>
 
@@ -187,14 +243,24 @@ export default function TreinoDetailsScreen() {
                   I had such an amazing session with Chris. He instantly picked up on the level of my fitness and adjusted the workout to suit me...
                 </Text>
               </View>
-              <View className="bg-[#C4F82A] w-10 h-10 rounded-lg items-center justify-center ml-2">
-                <Text className="text-black text-sm font-bold">4.8</Text>
+              <View className="bg-[#3B82F6] w-10 h-10 rounded-lg items-center justify-center ml-2">
+                <Text className="text-white text-sm font-bold">4.8</Text>
               </View>
             </View>
           </View>
 
           {/* Exercises */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-lg font-bold mb-1">Exercises</Text>
             <Text className="text-gray-400 text-xs mb-4">8 STEPS • 4 SETS</Text>
 
@@ -208,7 +274,7 @@ export default function TreinoDetailsScreen() {
                   style={styles.exerciseImage}
                 />
                 <View className="flex-1 ml-3">
-                  <Text className="text-[#C4F82A] text-sm font-bold mb-1">
+                  <Text className="text-[#3B82F6] text-sm font-bold mb-1">
                     {exercicio.nome}
                   </Text>
                   <Text className="text-gray-400 text-xs">
@@ -221,13 +287,22 @@ export default function TreinoDetailsScreen() {
 
           {/* Botões de Ação */}
           <View className="flex-row gap-3 mb-6">
-            <TouchableOpacity className="flex-1 bg-[#00C896] rounded-2xl py-4 items-center flex-row justify-center gap-2">
+            <TouchableOpacity className="flex-1 bg-[#3B82F6] rounded-2xl py-4 items-center flex-row justify-center gap-2">
               <Ionicons name="create-outline" size={20} color="white" />
               <Text className="text-white text-base font-bold">Editar</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="flex-1 bg-red-500 rounded-2xl py-4 items-center flex-row justify-center gap-2">
-              <Ionicons name="trash-outline" size={20} color="white" />
-              <Text className="text-white text-base font-bold">Excluir</Text>
+            <TouchableOpacity style={{
+              flex: 1,
+              backgroundColor: '#141c30',
+              borderRadius: 24,
+              paddingVertical: 16,
+              alignItems: 'center',
+              flexDirection: 'row',
+              justifyContent: 'center',
+              gap: 8
+            }}>
+              <Ionicons name="trash-outline" size={20} color="#EF4444" />
+              <Text style={{ color: '#EF4444', fontSize: 16, fontWeight: 'bold' }}>Excluir</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -15,6 +15,10 @@ export default function FinancasScreen() {
   return (
     <ScrollView 
       className="flex-1 bg-[#0B1120]"
+      contentContainerStyle={{
+        paddingTop: 140,
+        paddingBottom: 100,
+      }}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -25,34 +29,74 @@ export default function FinancasScreen() {
         />
       }
     >
-      <View className="px-6 py-6">
-        <Text className="text-xl font-bold text-white mb-4">Finanças</Text>
+      <View style={{ paddingHorizontal: 24 }}>
+        <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginBottom: 24 }}>Finanças</Text>
         
         {/* Resumo Financeiro */}
-        <View className="bg-[#1E3A8A] rounded-2xl p-6 mb-4">
-          <Text className="text-gray-400 text-sm mb-2">Receita Total</Text>
-          <Text className="text-white text-3xl font-bold">R$ 0,00</Text>
+        <View style={{
+          backgroundColor: '#141c30',
+          borderRadius: 24,
+          padding: 24,
+          marginBottom: 16,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          elevation: 5
+        }}>
+          <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 8 }}>Receita Total</Text>
+          <Text style={{ color: 'white', fontSize: 36, fontWeight: 'bold' }}>R$ 0,00</Text>
         </View>
 
-        <View className="flex-row gap-3 mb-4">
-          <View className="flex-1 bg-[#1E3A8A] rounded-2xl p-4">
-            <Ionicons name="trending-up" size={24} color="#3B82F6" />
-            <Text className="text-gray-400 text-xs mt-2">Recebido</Text>
-            <Text className="text-white text-lg font-bold">R$ 0,00</Text>
+        <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
+          <View style={{
+            flex: 1,
+            backgroundColor: '#141c30',
+            borderRadius: 20,
+            padding: 20,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
+            <Ionicons name="trending-up" size={28} color="#3B82F6" />
+            <Text style={{ color: '#9CA3AF', fontSize: 12, marginTop: 12 }}>Recebido</Text>
+            <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginTop: 4 }}>R$ 0,00</Text>
           </View>
           
-          <View className="flex-1 bg-[#1E3A8A] rounded-2xl p-4">
-            <Ionicons name="trending-down" size={24} color="#3B82F6" />
-            <Text className="text-gray-400 text-xs mt-2">Pendente</Text>
-            <Text className="text-white text-lg font-bold">R$ 0,00</Text>
+          <View style={{
+            flex: 1,
+            backgroundColor: '#141c30',
+            borderRadius: 20,
+            padding: 20,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
+            <Ionicons name="trending-down" size={28} color="#3B82F6" />
+            <Text style={{ color: '#9CA3AF', fontSize: 12, marginTop: 12 }}>Pendente</Text>
+            <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginTop: 4 }}>R$ 0,00</Text>
           </View>
         </View>
 
         {/* Transações Recentes */}
-        <Text className="text-lg font-bold text-white mb-3">Transações Recentes</Text>
-        <View className="bg-[#1E3A8A] rounded-2xl p-6 items-center">
+        <Text style={{ color: 'white', fontSize: 18, fontWeight: '600', marginBottom: 12 }}>Transações Recentes</Text>
+        <View style={{
+          backgroundColor: '#141c30',
+          borderRadius: 24,
+          padding: 32,
+          alignItems: 'center',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          elevation: 5
+        }}>
           <Ionicons name="receipt-outline" size={48} color="#3B82F6" />
-          <Text className="text-white mt-2">Nenhuma transação ainda</Text>
+          <Text style={{ color: '#9CA3AF', marginTop: 12, fontSize: 16 }}>Nenhuma transação ainda</Text>
         </View>
       </View>
     </ScrollView>

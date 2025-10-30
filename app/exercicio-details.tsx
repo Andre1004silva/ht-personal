@@ -56,18 +56,18 @@ export default function ExercicioDetailsScreen() {
   const getDificuldadeColor = (dificuldade: string) => {
     switch (dificuldade) {
       case 'Iniciante':
-        return '#00C896';
+        return '#3B82F6';
       case 'Intermediário':
-        return '#C4F82A';
+        return '#2563EB';
       case 'Avançado':
-        return '#EF4444';
+        return '#93C5FD';
       default:
         return '#9CA3AF';
     }
   };
 
   return (
-    <View className="flex-1 bg-[#0B1F1F]">
+    <View className="flex-1 bg-[#0B1120]">
       <ScrollView className="flex-1">
         {/* Header com imagem */}
         <View style={styles.headerContainer}>
@@ -79,7 +79,7 @@ export default function ExercicioDetailsScreen() {
           
           {/* Gradient overlay */}
           <LinearGradient
-            colors={['transparent', 'rgba(11, 31, 31, 0.8)', '#0B1F1F']}
+            colors={['transparent', 'rgba(11, 17, 32, 0.8)', '#0B1120']}
             style={styles.gradient}
           />
 
@@ -125,7 +125,17 @@ export default function ExercicioDetailsScreen() {
         {/* Conteúdo */}
         <View className="px-5 pb-6">
           {/* Descrição */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-lg font-bold mb-3">Sobre o Exercício</Text>
             <Text className="text-gray-300 text-sm leading-6">
               {exercicio.descricao}
@@ -133,7 +143,17 @@ export default function ExercicioDetailsScreen() {
           </View>
 
           {/* Músculos Trabalhados */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-lg font-bold mb-3">Músculos Trabalhados</Text>
             {exercicio.musculos.map((musculo, index) => (
               <View 
@@ -145,12 +165,12 @@ export default function ExercicioDetailsScreen() {
                 <View 
                   className="px-3 py-1 rounded-full"
                   style={{ 
-                    backgroundColor: musculo.tipo === 'Principal' ? 'rgba(196, 248, 42, 0.2)' : 'rgba(0, 200, 150, 0.2)' 
+                    backgroundColor: musculo.tipo === 'Principal' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(37, 99, 235, 0.2)' 
                   }}
                 >
                   <Text 
                     className="text-xs font-semibold"
-                    style={{ color: musculo.tipo === 'Principal' ? '#C4F82A' : '#00C896' }}
+                    style={{ color: musculo.tipo === 'Principal' ? '#3B82F6' : '#2563EB' }}
                   >
                     {musculo.tipo}
                   </Text>
@@ -160,11 +180,21 @@ export default function ExercicioDetailsScreen() {
           </View>
 
           {/* Instruções */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-lg font-bold mb-3">Como Executar</Text>
             {exercicio.instrucoes.map((instrucao, index) => (
               <View key={index} className="flex-row mb-3">
-                <View className="bg-[#00C896] w-6 h-6 rounded-full items-center justify-center mr-3">
+                <View className="bg-[#3B82F6] w-6 h-6 rounded-full items-center justify-center mr-3">
                   <Text className="text-white text-xs font-bold">{index + 1}</Text>
                 </View>
                 <Text className="text-gray-300 text-sm flex-1 leading-6">{instrucao}</Text>
@@ -173,18 +203,38 @@ export default function ExercicioDetailsScreen() {
           </View>
 
           {/* Dicas */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-lg font-bold mb-3">Dicas Importantes</Text>
             {exercicio.dicas.map((dica, index) => (
               <View key={index} className="flex-row items-start mb-2">
-                <Ionicons name="checkmark-circle" size={20} color="#C4F82A" style={{ marginRight: 8, marginTop: 2 }} />
+                <Ionicons name="checkmark-circle" size={20} color="#3B82F6" style={{ marginRight: 8, marginTop: 2 }} />
                 <Text className="text-gray-300 text-sm flex-1 leading-6">{dica}</Text>
               </View>
             ))}
           </View>
 
           {/* Variações */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-lg font-bold mb-3">Variações</Text>
             {exercicio.variacoes.map((variacao, index) => (
               <TouchableOpacity
@@ -196,13 +246,23 @@ export default function ExercicioDetailsScreen() {
                   <Text className="text-white text-base font-semibold mb-1">{variacao.nome}</Text>
                   <Text className="text-gray-400 text-xs">{variacao.foco}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color="#C4F82A" />
+                <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
               </TouchableOpacity>
             ))}
           </View>
 
           {/* Adicionar ao Treino */}
-          <View className="bg-[#1A3333] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-lg font-bold mb-3">Adicionar ao Treino</Text>
             <Text className="text-gray-400 text-sm mb-4">
               Selecione um treino para adicionar este exercício
@@ -212,7 +272,7 @@ export default function ExercicioDetailsScreen() {
               <TouchableOpacity
                 key={treino.id}
                 className={`rounded-xl p-4 mb-3 flex-row items-center justify-between ${
-                  selectedTreino === treino.id ? 'bg-[#00C896]/20 border-2 border-[#00C896]' : 'bg-[#0B1F1F]'
+                  selectedTreino === treino.id ? 'bg-[#3B82F6]/20 border-2 border-[#3B82F6]' : 'bg-[#0B1120]'
                 }`}
                 onPress={() => setSelectedTreino(treino.id)}
               >
@@ -221,13 +281,13 @@ export default function ExercicioDetailsScreen() {
                   <Text className="text-gray-400 text-xs">{treino.exercicios} exercícios</Text>
                 </View>
                 {selectedTreino === treino.id && (
-                  <Ionicons name="checkmark-circle" size={24} color="#00C896" />
+                  <Ionicons name="checkmark-circle" size={24} color="#3B82F6" />
                 )}
               </TouchableOpacity>
             ))}
 
             {selectedTreino && (
-              <TouchableOpacity className="bg-[#00C896] rounded-xl py-4 items-center mt-2">
+              <TouchableOpacity className="bg-[#3B82F6] rounded-xl py-4 items-center mt-2">
                 <Text className="text-white text-base font-bold">Confirmar Adição</Text>
               </TouchableOpacity>
             )}
@@ -235,13 +295,22 @@ export default function ExercicioDetailsScreen() {
 
           {/* Botões de Ação */}
           <View className="flex-row gap-3 mb-6">
-            <TouchableOpacity className="flex-1 bg-[#C4F82A] rounded-2xl py-4 items-center flex-row justify-center gap-2">
-              <Ionicons name="create-outline" size={20} color="#0B1F1F" />
-              <Text className="text-[#0B1F1F] text-base font-bold">Editar</Text>
+            <TouchableOpacity className="flex-1 bg-[#3B82F6] rounded-2xl py-4 items-center flex-row justify-center gap-2">
+              <Ionicons name="create-outline" size={20} color="white" />
+              <Text className="text-white text-base font-bold">Editar</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="flex-1 bg-red-500 rounded-2xl py-4 items-center flex-row justify-center gap-2">
-              <Ionicons name="trash-outline" size={20} color="white" />
-              <Text className="text-white text-base font-bold">Excluir</Text>
+            <TouchableOpacity style={{
+              flex: 1,
+              backgroundColor: '#141c30',
+              borderRadius: 24,
+              paddingVertical: 16,
+              alignItems: 'center',
+              flexDirection: 'row',
+              justifyContent: 'center',
+              gap: 8
+            }}>
+              <Ionicons name="trash-outline" size={20} color="#EF4444" />
+              <Text style={{ color: '#EF4444', fontSize: 16, fontWeight: 'bold' }}>Excluir</Text>
             </TouchableOpacity>
           </View>
         </View>

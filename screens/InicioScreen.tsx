@@ -1,74 +1,173 @@
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
 
 export default function InicioScreen() {
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setRefreshing(false);
+  };
+
   return (
-    <ScrollView className="flex-1">
+    <ScrollView 
+      className="flex-1 bg-[#0B1120]"
+      contentContainerStyle={{
+        paddingTop: 140,
+        paddingBottom: 100,
+      }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="white"
+          colors={['white']}
+          progressBackgroundColor="white"
+        />
+      }
+    >
       {/* Action Icons */}
-      <View className="flex-row justify-around py-6 px-6">
-        <TouchableOpacity className="items-center">
-          <View className="w-16 h-16 rounded-full bg-[#47c98a]/20 items-center justify-center mb-2">
-            <Ionicons name="chatbubbles-outline" size={28} color="#47c98a" />
+      <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: 24, paddingBottom: 24 }}>
+        <TouchableOpacity style={{ alignItems: 'center' }}>
+          <View style={{
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 8
+          }}>
+            <Ionicons name="chatbubbles-outline" size={28} color="#3B82F6" />
           </View>
-          <Text className="text-gray-700 text-sm">Feedbacks</Text>
+          <Text style={{ color: '#9CA3AF', fontSize: 14 }}>Feedbacks</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity className="items-center">
-          <View className="w-16 h-16 rounded-full bg-[#47c98a]/20 items-center justify-center mb-2">
-            <Ionicons name="calendar-outline" size={28} color="#47c98a" />
+        <TouchableOpacity style={{ alignItems: 'center' }}>
+          <View style={{
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 8
+          }}>
+            <Ionicons name="calendar-outline" size={28} color="#3B82F6" />
           </View>
-          <Text className="text-gray-700 text-sm">Atualizações</Text>
+          <Text style={{ color: '#9CA3AF', fontSize: 14 }}>Atualizações</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity className="items-center">
-          <View className="w-16 h-16 rounded-full bg-[#47c98a]/20 items-center justify-center mb-2">
-            <Ionicons name="paper-plane-outline" size={28} color="#47c98a" />
+        <TouchableOpacity style={{ alignItems: 'center' }}>
+          <View style={{
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 8
+          }}>
+            <Ionicons name="paper-plane-outline" size={28} color="#3B82F6" />
           </View>
-          <Text className="text-gray-700 text-sm">Notificações</Text>
+          <Text style={{ color: '#9CA3AF', fontSize: 14 }}>Notificações</Text>
         </TouchableOpacity>
       </View>
 
       {/* Seus Alunos Section */}
-      <View className="px-6 pb-6">
-        <Text className="text-xl font-bold text-gray-900 mb-4">Seus alunos</Text>
+      <View style={{ paddingHorizontal: 24, paddingBottom: 24 }}>
+        <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>Seus alunos</Text>
         
-        <View className="flex-row gap-3 mb-3">
-          <TouchableOpacity className="flex-1 bg-[#47c98a] rounded-2xl p-5 h-32 justify-center">
+        <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>
+          <TouchableOpacity style={{
+            flex: 1,
+            backgroundColor: '#3B82F6',
+            borderRadius: 24,
+            padding: 20,
+            height: 128,
+            justifyContent: 'center',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Ionicons name="person-add-outline" size={32} color="white" />
-            <Text className="text-white font-bold text-base mt-2">Adicionar{'\n'}alunos</Text>
+            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16, marginTop: 8 }}>Adicionar{'\n'}alunos</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity className="flex-1 bg-[#47c98a] rounded-2xl p-5 h-32 justify-center">
+          <TouchableOpacity style={{
+            flex: 1,
+            backgroundColor: '#3B82F6',
+            borderRadius: 24,
+            padding: 20,
+            height: 128,
+            justifyContent: 'center',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Ionicons name="link-outline" size={32} color="white" />
-            <Text className="text-white font-bold text-base mt-2">Link de{'\n'}cadastro</Text>
+            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16, marginTop: 8 }}>Link de{'\n'}cadastro</Text>
           </TouchableOpacity>
         </View>
         
-        <TouchableOpacity className="bg-[#155e28] rounded-2xl p-5 flex-row items-center justify-between mb-3">
-          <View className="flex-row items-center flex-1">
-            <Ionicons name="people" size={32} color="white" />
-            <View className="ml-4">
-              <Text className="text-white font-bold text-base mb-2">Alunos</Text>
-              <View className="flex-row gap-2">
-                <View className="bg-[#47c98a] rounded-full px-3 py-1">
-                  <Text className="text-white font-semibold text-xs">Ativos: 1</Text>
+        <TouchableOpacity style={{
+          backgroundColor: '#141c30',
+          borderRadius: 24,
+          padding: 20,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 12,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          elevation: 5
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <Ionicons name="people" size={32} color="#3B82F6" />
+            <View style={{ marginLeft: 16 }}>
+              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16, marginBottom: 8 }}>Alunos</Text>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <View style={{ backgroundColor: '#3B82F6', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 4 }}>
+                  <Text style={{ color: 'white', fontWeight: '600', fontSize: 12 }}>Ativos: 1</Text>
                 </View>
-                <View className="bg-orange-500 rounded-full px-3 py-1">
-                  <Text className="text-white font-semibold text-xs">Inativos: 0</Text>
+                <View style={{ backgroundColor: '#2563EB', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 4 }}>
+                  <Text style={{ color: 'white', fontWeight: '600', fontSize: 12 }}>Inativos: 0</Text>
                 </View>
               </View>
             </View>
           </View>
-          <Ionicons name="chevron-forward" size={24} color="white" />
+          <Ionicons name="chevron-forward" size={24} color="#93C5FD" />
         </TouchableOpacity>
         
-        <View className="flex-row gap-3">
-          <TouchableOpacity className="flex-1 bg-[#47c98a]/20 rounded-2xl p-5 h-24 justify-center">
-            <Text className="text-[#165426] font-semibold text-sm">Grupo de alunos</Text>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
+          <TouchableOpacity style={{
+            flex: 1,
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderRadius: 24,
+            padding: 20,
+            height: 96,
+            justifyContent: 'center'
+          }}>
+            <Text style={{ color: '#3B82F6', fontWeight: '600', fontSize: 14 }}>Grupo de alunos</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity className="flex-1 bg-[#47c98a]/20 rounded-2xl p-5 h-24 justify-center">
-            <Text className="text-[#165426] font-semibold text-sm">Grupo de desafio</Text>
+          <TouchableOpacity style={{
+            flex: 1,
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderRadius: 24,
+            padding: 20,
+            height: 96,
+            justifyContent: 'center'
+          }}>
+            <Text style={{ color: '#3B82F6', fontWeight: '600', fontSize: 14 }}>Grupo de desafio</Text>
           </TouchableOpacity>
         </View>
       </View>

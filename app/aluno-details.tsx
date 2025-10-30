@@ -112,7 +112,17 @@ export default function AlunoDetailsScreen() {
         {/* Conteúdo */}
         <View className="px-5 pb-6">
           {/* Estatísticas */}
-          <View className="bg-[#1E3A8A] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-lg font-bold mb-4">Estatísticas</Text>
             <View className="flex-row justify-between">
               <View className="flex-1 items-center">
@@ -133,7 +143,17 @@ export default function AlunoDetailsScreen() {
           </View>
 
           {/* Informações Pessoais */}
-          <View className="bg-[#1E3A8A] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-lg font-bold mb-3">Informações Pessoais</Text>
             
             <View className="mb-3">
@@ -164,7 +184,17 @@ export default function AlunoDetailsScreen() {
           </View>
 
           {/* Contato */}
-          <View className="bg-[#1E3A8A] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-lg font-bold mb-3">Contato</Text>
             
             <TouchableOpacity className="flex-row items-center mb-3">
@@ -191,7 +221,17 @@ export default function AlunoDetailsScreen() {
           </View>
 
           {/* Próximo Treino */}
-          <View className="bg-[#1E3A8A] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-lg font-bold mb-3">Próximo Treino</Text>
             <View className="bg-[#0B1120] rounded-xl p-4">
               <Text className="text-white text-base font-bold mb-2">
@@ -211,7 +251,17 @@ export default function AlunoDetailsScreen() {
           </View>
 
           {/* Últimos Treinos */}
-          <View className="bg-[#1E3A8A] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <View className="flex-row items-center justify-between mb-3">
               <Text className="text-white text-lg font-bold">Últimos Treinos</Text>
               <TouchableOpacity>
@@ -248,7 +298,17 @@ export default function AlunoDetailsScreen() {
           </View>
 
           {/* Medidas */}
-          <View className="bg-[#1E3A8A] rounded-2xl p-5 mb-4">
+          <View style={{
+            backgroundColor: '#141c30',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5
+          }}>
             <Text className="text-white text-lg font-bold mb-3">Medidas Corporais</Text>
             
             {aluno.medidas.map((medida, index) => (
@@ -276,7 +336,21 @@ export default function AlunoDetailsScreen() {
               <Ionicons name="create-outline" size={20} color="white" />
               <Text className="text-white text-base font-bold">Editar</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="flex-1 bg-[#1E3A8A] rounded-2xl py-4 items-center flex-row justify-center gap-2">
+            <TouchableOpacity style={{
+              flex: 1,
+              backgroundColor: '#141c30',
+              borderRadius: 24,
+              paddingVertical: 16,
+              alignItems: 'center',
+              flexDirection: 'row',
+              justifyContent: 'center',
+              gap: 8,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 5
+            }}>
               <Ionicons name="calendar-outline" size={20} color="#93C5FD" />
               <Text className="text-white text-base font-bold">Agendar</Text>
             </TouchableOpacity>

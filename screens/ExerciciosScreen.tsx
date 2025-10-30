@@ -110,42 +110,42 @@ export default function ExerciciosScreen() {
         >
         <TouchableOpacity
           onPress={() => setActiveCategory('todos')}
-          className={`px-5 py-2 rounded-full ${activeCategory === 'todos' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
+          className={`px-5 py-2 rounded-full ${activeCategory === 'todos' ? 'bg-[#3B82F6]' : 'bg-[#141c30]'}`}
         >
           <Text className="font-semibold text-white">Todos</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => setActiveCategory('peito')}
-          className={`px-5 py-2 rounded-full ${activeCategory === 'peito' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
+          className={`px-5 py-2 rounded-full ${activeCategory === 'peito' ? 'bg-[#3B82F6]' : 'bg-[#141c30]'}`}
         >
           <Text className="font-semibold text-white">Peito</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => setActiveCategory('costas')}
-          className={`px-5 py-2 rounded-full ${activeCategory === 'costas' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
+          className={`px-5 py-2 rounded-full ${activeCategory === 'costas' ? 'bg-[#3B82F6]' : 'bg-[#141c30]'}`}
         >
           <Text className="font-semibold text-white">Costas</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => setActiveCategory('pernas')}
-          className={`px-5 py-2 rounded-full ${activeCategory === 'pernas' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
+          className={`px-5 py-2 rounded-full ${activeCategory === 'pernas' ? 'bg-[#3B82F6]' : 'bg-[#141c30]'}`}
         >
           <Text className="font-semibold text-white">Pernas</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => setActiveCategory('ombros')}
-          className={`px-5 py-2 rounded-full ${activeCategory === 'ombros' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
+          className={`px-5 py-2 rounded-full ${activeCategory === 'ombros' ? 'bg-[#3B82F6]' : 'bg-[#141c30]'}`}
         >
           <Text className="font-semibold text-white">Ombros</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => setActiveCategory('bracos')}
-          className={`px-5 py-2 rounded-full ${activeCategory === 'bracos' ? 'bg-[#3B82F6]' : 'bg-[#1E3A8A]'}`}
+          className={`px-5 py-2 rounded-full ${activeCategory === 'bracos' ? 'bg-[#3B82F6]' : 'bg-[#141c30]'}`}
         >
           <Text className="font-semibold text-white">Braços</Text>
         </TouchableOpacity>
@@ -154,12 +154,12 @@ export default function ExerciciosScreen() {
 
       {/* Action Bar */}
       <View className="flex-row items-center justify-between px-4 py-4">
-        <TouchableOpacity className="flex-row items-center gap-2 bg-[#1E3A8A] px-4 py-2 rounded-lg">
+        <TouchableOpacity className="flex-row items-center gap-2 bg-[#141c30] px-4 py-2 rounded-lg">
           <Ionicons name="filter" size={20} color="#3B82F6" />
           <Text className="text-white font-medium">Filtros</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="flex-row items-center gap-2 bg-[#1E3A8A] px-4 py-2 rounded-lg">
+        <TouchableOpacity className="flex-row items-center gap-2 bg-[#141c30] px-4 py-2 rounded-lg">
           <Ionicons name="search" size={20} color="#3B82F6" />
           <Text className="text-white font-medium">Buscar</Text>
         </TouchableOpacity>
@@ -187,7 +187,7 @@ export default function ExerciciosScreen() {
           {filteredExercicios.map((exercicio) => (
             <TouchableOpacity
               key={exercicio.id}
-              className="bg-[#1E3A8A] rounded-2xl mb-4 overflow-hidden"
+              className="rounded-2xl mb-4 overflow-hidden"
               style={styles.card}
               activeOpacity={0.7}
               onPress={() => router.push(`/exercicio-details?id=${exercicio.id}`)}
@@ -261,11 +261,12 @@ export default function ExerciciosScreen() {
 
 const styles = StyleSheet.create({
   card: {
+    backgroundColor: '#141c30',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   exerciseImage: {
     width: 120,

@@ -77,7 +77,7 @@ export default function AlunosScreen() {
       {alunos.map((aluno) => (
         <TouchableOpacity
           key={aluno.id}
-          className="bg-[#1E3A8A] px-2 py-4 flex-row items-center"
+          className="px-2 py-4 flex-row items-center"
           style={styles.card}
           activeOpacity={0.7}
           onPress={() => router.push(`/aluno-details?id=${aluno.id}`)}
@@ -114,13 +114,17 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '100%',
-    borderRadius: 24, // Bordas arredondadas (rounded-3xl)
-    borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.3)',
+    backgroundColor: '#141c30',
+    borderRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   avatar: {
     width: 64,
     height: 64,
-    borderRadius: 32, // Circular
+    borderRadius: 32,
   },
 });
