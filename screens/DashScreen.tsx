@@ -2,9 +2,12 @@ import { View, Text, TouchableOpacity, ScrollView, Dimensions, Image, Animated, 
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { ProgressChart } from 'react-native-chart-kit';
-import Svg, { Circle } from 'react-native-svg';
+import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { useSharedValue } from 'react-native-reanimated';
 import { RefreshSplash } from '@/components/RefreshSplash';
+import LiquidGlassCard from '@/components/LiquidGlassCard';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Video, ResizeMode } from 'expo-av';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -75,9 +78,38 @@ export default function DashScreen() {
   };
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-[#0B1120]">
+      {/* Video Background */}
+      <Video
+        source={require('../assets/video-bg.mp4')}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          height: '100%',
+        }}
+        resizeMode={ResizeMode.COVER}
+        shouldPlay
+        isLooping
+        isMuted
+      />
+      
+      {/* Dark Overlay for readability */}
+      <View style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(11, 17, 32, 0.7)',
+      }} />
+
+      
       <ScrollView
-        className="flex-1 bg-[#0B1120]"
+        className="flex-1"
         contentContainerStyle={{
           paddingTop: 140,
           paddingBottom: 100,
@@ -144,16 +176,7 @@ export default function DashScreen() {
 
       {/* Stats Card - Passos */}
       <View style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
-        <View style={{
-          backgroundColor: '#141c30',
-          borderRadius: 24,
-          padding: 24,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 8
-        }}>
+        <LiquidGlassCard>
           <Text style={{ color: 'white', fontSize: 18, fontWeight: '600', marginBottom: 12 }}>
             Passos
           </Text>
@@ -180,21 +203,12 @@ export default function DashScreen() {
               borderRadius: 6
             }} />
           </View>
-        </View>
+        </LiquidGlassCard>
       </View>
 
       {/* Daily Activity Card */}
       <View style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
-        <View style={{
-          backgroundColor: '#141c30',
-          borderRadius: 24,
-          padding: 24,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 5
-        }}>
+        <LiquidGlassCard>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <Text style={{ color: 'white', fontSize: 18, fontWeight: '600' }}>
               Atividade Diária
@@ -247,8 +261,8 @@ export default function DashScreen() {
                 strokeWidth={10}
                 radius={24}
                 chartConfig={{
-                  backgroundGradientFrom: '#141c30',
-                  backgroundGradientTo: '#141c30',
+                  backgroundGradientFrom: 'transparent',
+                  backgroundGradientTo: 'transparent',
                   color: (opacity = 1, index = 0) => {
                     const colors = ['#3B82F6', '#2563EB', '#93C5FD'];
                     return colors[index as number] || `rgba(59, 130, 246, ${opacity})`;
@@ -261,21 +275,12 @@ export default function DashScreen() {
               />
             </View>
           </View>
-        </View>
+        </LiquidGlassCard>
       </View>
 
       {/* Workouts Card */}
       <View style={{ paddingHorizontal: 24, paddingBottom: 24 }}>
-        <View style={{
-          backgroundColor: '#141c30',
-          borderRadius: 24,
-          padding: 24,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 5
-        }}>
+        <LiquidGlassCard>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <Text style={{ color: 'white', fontSize: 18, fontWeight: '600' }}>Treinos</Text>
             <TouchableOpacity>
@@ -386,7 +391,7 @@ export default function DashScreen() {
               <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
             </View>
           </TouchableOpacity>
-        </View>
+        </LiquidGlassCard>
       </View>
 
     </ScrollView>

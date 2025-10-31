@@ -1,7 +1,11 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import LiquidGlassCard from '../components/LiquidGlassCard';
+import Svg, { Line, Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default function TreinoDetailsScreen() {
   const router = useRouter();
@@ -50,6 +54,94 @@ export default function TreinoDetailsScreen() {
 
   return (
     <View className="flex-1 bg-[#0B1120]">
+      {/* Background Design - Linhas Diagonais e Orbs Dinâmicos */}
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden' }}>
+        {/* Diagonal Lines Pattern */}
+        <Svg width={screenWidth} height={screenHeight} style={{ position: 'absolute', opacity: 0.04 }}>
+          {[...Array(30)].map((_, i) => (
+            <Line
+              key={`diag-${i}`}
+              x1={i * 40 - 200}
+              y1={0}
+              x2={i * 40 + screenHeight}
+              y2={screenHeight}
+              stroke="#3B82F6"
+              strokeWidth="2"
+            />
+          ))}
+        </Svg>
+        
+        {/* Dynamic Gradient Orbs */}
+        <LinearGradient
+          colors={['rgba(59, 130, 246, 0.35)', 'rgba(59, 130, 246, 0.12)', 'transparent']}
+          style={{
+            position: 'absolute',
+            top: 80,
+            right: -120,
+            width: 380,
+            height: 380,
+            borderRadius: 190,
+          }}
+        />
+        
+        <LinearGradient
+          colors={['rgba(96, 165, 250, 0.3)', 'rgba(96, 165, 250, 0.1)', 'transparent']}
+          style={{
+            position: 'absolute',
+            top: 350,
+            left: -140,
+            width: 420,
+            height: 420,
+            borderRadius: 210,
+          }}
+        />
+        
+        <LinearGradient
+          colors={['rgba(37, 99, 235, 0.28)', 'rgba(37, 99, 235, 0.08)', 'transparent']}
+          style={{
+            position: 'absolute',
+            bottom: 150,
+            right: -90,
+            width: 340,
+            height: 340,
+            borderRadius: 170,
+          }}
+        />
+        
+        {/* Pulsing Circles */}
+        <Svg width={screenWidth} height={screenHeight} style={{ position: 'absolute', opacity: 0.12 }}>
+          <Defs>
+            <RadialGradient id="pulseGrad" cx="50%" cy="50%">
+              <Stop offset="0%" stopColor="#3B82F6" stopOpacity="0.8" />
+              <Stop offset="50%" stopColor="#3B82F6" stopOpacity="0.4" />
+              <Stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+            </RadialGradient>
+          </Defs>
+          {[...Array(12)].map((_, i) => (
+            <Circle
+              key={`pulse-${i}`}
+              cx={Math.random() * screenWidth}
+              cy={Math.random() * screenHeight}
+              r={Math.random() * 80 + 40}
+              fill="url(#pulseGrad)"
+            />
+          ))}
+        </Svg>
+        
+        {/* Accent Dots */}
+        <Svg width={screenWidth} height={screenHeight} style={{ position: 'absolute', opacity: 0.2 }}>
+          {[...Array(25)].map((_, i) => (
+            <Circle
+              key={`accent-${i}`}
+              cx={Math.random() * screenWidth}
+              cy={Math.random() * screenHeight}
+              r={Math.random() * 4 + 1.5}
+              fill="#60A5FA"
+            />
+          ))}
+        </Svg>
+      </View>
+      
       <ScrollView className="flex-1">
         {/* Header com imagem */}
         <View style={styles.headerContainer}>
@@ -94,17 +186,7 @@ export default function TreinoDetailsScreen() {
         {/* Conteúdo */}
         <View className="px-5 pb-6">
           {/* About Section */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-3">About</Text>
             <Text className="text-gray-300 text-sm leading-6 mb-4">
               {treino.descricao}
@@ -125,58 +207,26 @@ export default function TreinoDetailsScreen() {
                 <Text className="text-white text-sm font-bold">{treino.focoArea}</Text>
               </View>
             </View>
-          </View>
+          </LiquidGlassCard>
 
           {/* Sound & Music */}
-          <TouchableOpacity style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
-            <Text className="text-white text-base font-semibold">Sound & Music</Text>
-            <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
-          </TouchableOpacity>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
+            <TouchableOpacity className="flex-row items-center justify-between">
+              <Text className="text-white text-base font-semibold">Sound & Music</Text>
+              <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
+            </TouchableOpacity>
+          </LiquidGlassCard>
 
           {/* Guide */}
-          <TouchableOpacity style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
-            <Text className="text-white text-base font-semibold">Guide</Text>
-            <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
-          </TouchableOpacity>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
+            <TouchableOpacity className="flex-row items-center justify-between">
+              <Text className="text-white text-base font-semibold">Guide</Text>
+              <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
+            </TouchableOpacity>
+          </LiquidGlassCard>
 
           {/* Trainer */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-3">Trainer</Text>
             <TouchableOpacity className="flex-row items-center">
               <Image
@@ -192,20 +242,10 @@ export default function TreinoDetailsScreen() {
               </View>
               <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
             </TouchableOpacity>
-          </View>
+          </LiquidGlassCard>
 
           {/* Rating */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <View className="flex-row items-center justify-between mb-4">
               <View className="flex-row items-center">
                 <Text className="text-white text-5xl font-bold mr-4">{treino.rating}</Text>
@@ -247,20 +287,10 @@ export default function TreinoDetailsScreen() {
                 <Text className="text-white text-sm font-bold">4.8</Text>
               </View>
             </View>
-          </View>
+          </LiquidGlassCard>
 
           {/* Exercises */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-1">Exercises</Text>
             <Text className="text-gray-400 text-xs mb-4">8 STEPS • 4 SETS</Text>
 
@@ -283,7 +313,7 @@ export default function TreinoDetailsScreen() {
                 </View>
               </TouchableOpacity>
             ))}
-          </View>
+          </LiquidGlassCard>
 
           {/* Botões de Ação */}
           <View className="flex-row gap-3 mb-6">

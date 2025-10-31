@@ -1,8 +1,12 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
+import LiquidGlassCard from '../components/LiquidGlassCard';
+import Svg, { Circle, Polygon, Defs, RadialGradient, Stop } from 'react-native-svg';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default function ExercicioDetailsScreen() {
   const router = useRouter();
@@ -68,6 +72,117 @@ export default function ExercicioDetailsScreen() {
 
   return (
     <View className="flex-1 bg-[#0B1120]">
+      {/* Background Design - Estrelas e Nebulosa */}
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden' }}>
+        {/* Nebula Gradients */}
+        <LinearGradient
+          colors={['rgba(139, 92, 246, 0.25)', 'rgba(59, 130, 246, 0.15)', 'transparent']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            position: 'absolute',
+            top: -150,
+            right: -200,
+            width: 600,
+            height: 600,
+            borderRadius: 300,
+          }}
+        />
+        
+        <LinearGradient
+          colors={['transparent', 'rgba(96, 165, 250, 0.2)', 'rgba(37, 99, 235, 0.12)']}
+          start={{ x: 1, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{
+            position: 'absolute',
+            top: screenHeight * 0.4,
+            left: -180,
+            width: 500,
+            height: 500,
+            borderRadius: 250,
+          }}
+        />
+        
+        <LinearGradient
+          colors={['transparent', 'rgba(59, 130, 246, 0.18)', 'transparent']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            position: 'absolute',
+            bottom: -100,
+            right: -150,
+            width: 450,
+            height: 450,
+            borderRadius: 225,
+          }}
+        />
+        
+        {/* Star Field */}
+        <Svg width={screenWidth} height={screenHeight} style={{ position: 'absolute', opacity: 0.3 }}>
+          <Defs>
+            <RadialGradient id="starGrad" cx="50%" cy="50%">
+              <Stop offset="0%" stopColor="#FFFFFF" stopOpacity="1" />
+              <Stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+            </RadialGradient>
+          </Defs>
+          {[...Array(60)].map((_, i) => {
+            const size = Math.random() * 3 + 0.5;
+            return (
+              <Circle
+                key={`star-${i}`}
+                cx={Math.random() * screenWidth}
+                cy={Math.random() * screenHeight}
+                r={size}
+                fill="url(#starGrad)"
+                opacity={Math.random() * 0.8 + 0.2}
+              />
+            );
+          })}
+        </Svg>
+        
+        {/* Star Shapes */}
+        <Svg width={screenWidth} height={screenHeight} style={{ position: 'absolute', opacity: 0.15 }}>
+          {[...Array(15)].map((_, i) => {
+            const x = Math.random() * screenWidth;
+            const y = Math.random() * screenHeight;
+            const size = Math.random() * 8 + 4;
+            const points = [
+              [x, y - size],
+              [x + size * 0.3, y - size * 0.3],
+              [x + size, y],
+              [x + size * 0.3, y + size * 0.3],
+              [x, y + size],
+              [x - size * 0.3, y + size * 0.3],
+              [x - size, y],
+              [x - size * 0.3, y - size * 0.3],
+            ].map(p => p.join(',')).join(' ');
+            
+            return (
+              <Polygon
+                key={`star-shape-${i}`}
+                points={points}
+                fill="#60A5FA"
+                opacity={Math.random() * 0.6 + 0.4}
+              />
+            );
+          })}
+        </Svg>
+        
+        {/* Glowing Particles */}
+        <Svg width={screenWidth} height={screenHeight} style={{ position: 'absolute', opacity: 0.2 }}>
+          {[...Array(30)].map((_, i) => (
+            <Circle
+              key={`glow-${i}`}
+              cx={Math.random() * screenWidth}
+              cy={Math.random() * screenHeight}
+              r={Math.random() * 5 + 2}
+              fill="#93C5FD"
+              opacity={Math.random() * 0.7 + 0.3}
+            />
+          ))}
+        </Svg>
+      </View>
+      
       <ScrollView className="flex-1">
         {/* Header com imagem */}
         <View style={styles.headerContainer}>
@@ -125,35 +240,15 @@ export default function ExercicioDetailsScreen() {
         {/* Conteúdo */}
         <View className="px-5 pb-6">
           {/* Descrição */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-3">Sobre o Exercício</Text>
             <Text className="text-gray-300 text-sm leading-6">
               {exercicio.descricao}
             </Text>
-          </View>
+          </LiquidGlassCard>
 
           {/* Músculos Trabalhados */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-3">Músculos Trabalhados</Text>
             {exercicio.musculos.map((musculo, index) => (
               <View 
@@ -177,20 +272,10 @@ export default function ExercicioDetailsScreen() {
                 </View>
               </View>
             ))}
-          </View>
+          </LiquidGlassCard>
 
           {/* Instruções */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-3">Como Executar</Text>
             {exercicio.instrucoes.map((instrucao, index) => (
               <View key={index} className="flex-row mb-3">
@@ -200,20 +285,10 @@ export default function ExercicioDetailsScreen() {
                 <Text className="text-gray-300 text-sm flex-1 leading-6">{instrucao}</Text>
               </View>
             ))}
-          </View>
+          </LiquidGlassCard>
 
           {/* Dicas */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-3">Dicas Importantes</Text>
             {exercicio.dicas.map((dica, index) => (
               <View key={index} className="flex-row items-start mb-2">
@@ -221,20 +296,10 @@ export default function ExercicioDetailsScreen() {
                 <Text className="text-gray-300 text-sm flex-1 leading-6">{dica}</Text>
               </View>
             ))}
-          </View>
+          </LiquidGlassCard>
 
           {/* Variações */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-3">Variações</Text>
             {exercicio.variacoes.map((variacao, index) => (
               <TouchableOpacity
@@ -249,20 +314,10 @@ export default function ExercicioDetailsScreen() {
                 <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
               </TouchableOpacity>
             ))}
-          </View>
+          </LiquidGlassCard>
 
           {/* Adicionar ao Treino */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-3">Adicionar ao Treino</Text>
             <Text className="text-gray-400 text-sm mb-4">
               Selecione um treino para adicionar este exercício
@@ -291,7 +346,7 @@ export default function ExercicioDetailsScreen() {
                 <Text className="text-white text-base font-bold">Confirmar Adição</Text>
               </TouchableOpacity>
             )}
-          </View>
+          </LiquidGlassCard>
 
           {/* Botões de Ação */}
           <View className="flex-row gap-3 mb-6">

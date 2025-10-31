@@ -1,9 +1,14 @@
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Image, RefreshControl } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Image, RefreshControl, Dimensions, ImageBackground } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useSharedValue } from 'react-native-reanimated';
 import { RefreshSplash } from '@/components/RefreshSplash';
+import LiquidGlassCard from '@/components/LiquidGlassCard';
+import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Circle, Line, Defs, RadialGradient, Stop } from 'react-native-svg';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 type Treino = {
     id: string;
@@ -76,6 +81,31 @@ export default function TreinosScreen() {
 
     return (
         <View className="flex-1 bg-[#0B1120]">
+            {/* Background Image */}
+            <ImageBackground
+                source={require('../assets/images/bg-image.png')}
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: screenWidth,
+                    height: screenHeight,
+                }}
+                resizeMode="cover"
+            >
+                {/* Dark Overlay para manter legibilidade */}
+                <View style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(11, 17, 32, 0.85)',
+                }} />
+            </ImageBackground>
+            
             {/* Category Tabs */}
             <View className="flex-row px-4 gap-2" style={{ paddingTop: 140 }}>
                 <TouchableOpacity
@@ -135,23 +165,12 @@ export default function TreinosScreen() {
 
             {/* Add New Button */}
             <View className="px-4 py-4">
-                <TouchableOpacity style={{
-                    backgroundColor: '#141c30',
-                    borderRadius: 24,
-                    padding: 16,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 8,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 8,
-                    elevation: 5
-                }}>
-                    <Ionicons name="add-circle-outline" size={24} color="#3B82F6" />
-                    <Text className="text-white font-bold text-base">Criar Novo Treino</Text>
-                </TouchableOpacity>
+                <LiquidGlassCard>
+                    <TouchableOpacity className="flex-row items-center justify-center gap-2">
+                        <Ionicons name="add-circle-outline" size={24} color="#3B82F6" />
+                        <Text className="text-white font-bold text-base">Criar Novo Treino</Text>
+                    </TouchableOpacity>
+                </LiquidGlassCard>
             </View>
 
             {/* Treinos Grid */}

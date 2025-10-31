@@ -1,7 +1,11 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import LiquidGlassCard from '../components/LiquidGlassCard';
+import Svg, { Circle, Rect, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default function AlunoDetailsScreen() {
   const router = useRouter();
@@ -65,6 +69,89 @@ export default function AlunoDetailsScreen() {
 
   return (
     <View className="flex-1 bg-[#0B1120]">
+      {/* Background Design - Mesh Gradient e Partículas */}
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden' }}>
+        {/* Mesh Gradient Layers */}
+        <LinearGradient
+          colors={['rgba(59, 130, 246, 0.25)', 'transparent', 'rgba(139, 92, 246, 0.2)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: screenHeight * 0.5,
+          }}
+        />
+        
+        <LinearGradient
+          colors={['transparent', 'rgba(96, 165, 250, 0.18)', 'transparent']}
+          start={{ x: 1, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{
+            position: 'absolute',
+            top: screenHeight * 0.3,
+            left: 0,
+            right: 0,
+            height: screenHeight * 0.4,
+          }}
+        />
+        
+        <LinearGradient
+          colors={['transparent', 'rgba(37, 99, 235, 0.15)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: screenHeight * 0.4,
+          }}
+        />
+        
+        {/* Floating Particles */}
+        <Svg width={screenWidth} height={screenHeight} style={{ position: 'absolute', opacity: 0.15 }}>
+          <Defs>
+            <SvgLinearGradient id="particleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <Stop offset="0%" stopColor="#3B82F6" stopOpacity="1" />
+              <Stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.5" />
+            </SvgLinearGradient>
+          </Defs>
+          {[...Array(50)].map((_, i) => {
+            const size = Math.random() * 6 + 2;
+            return (
+              <Circle
+                key={`particle-${i}`}
+                cx={Math.random() * screenWidth}
+                cy={Math.random() * screenHeight}
+                r={size}
+                fill="url(#particleGrad)"
+                opacity={Math.random() * 0.7 + 0.3}
+              />
+            );
+          })}
+        </Svg>
+        
+        {/* Accent Rectangles */}
+        <Svg width={screenWidth} height={screenHeight} style={{ position: 'absolute', opacity: 0.05 }}>
+          {[...Array(8)].map((_, i) => (
+            <Rect
+              key={`rect-${i}`}
+              x={Math.random() * screenWidth}
+              y={Math.random() * screenHeight}
+              width={Math.random() * 100 + 50}
+              height={Math.random() * 100 + 50}
+              fill="none"
+              stroke="#3B82F6"
+              strokeWidth="2"
+              transform={`rotate(${Math.random() * 45}, ${Math.random() * screenWidth}, ${Math.random() * screenHeight})`}
+            />
+          ))}
+        </Svg>
+      </View>
+      
       <ScrollView className="flex-1">
         {/* Header com foto */}
         <View style={styles.headerContainer}>
@@ -112,17 +199,7 @@ export default function AlunoDetailsScreen() {
         {/* Conteúdo */}
         <View className="px-5 pb-6">
           {/* Estatísticas */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-4">Estatísticas</Text>
             <View className="flex-row justify-between">
               <View className="flex-1 items-center">
@@ -140,20 +217,10 @@ export default function AlunoDetailsScreen() {
                 <Text className="text-gray-400 text-xs mt-1">Evolução</Text>
               </View>
             </View>
-          </View>
+          </LiquidGlassCard>
 
           {/* Informações Pessoais */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-3">Informações Pessoais</Text>
             
             <View className="mb-3">
@@ -181,20 +248,10 @@ export default function AlunoDetailsScreen() {
               <Text className="text-gray-400 text-xs mb-1">Cliente desde</Text>
               <Text className="text-white text-base">{aluno.dataInicio}</Text>
             </View>
-          </View>
+          </LiquidGlassCard>
 
           {/* Contato */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-3">Contato</Text>
             
             <TouchableOpacity className="flex-row items-center mb-3">
@@ -218,20 +275,10 @@ export default function AlunoDetailsScreen() {
               </View>
               <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
             </TouchableOpacity>
-          </View>
+          </LiquidGlassCard>
 
           {/* Próximo Treino */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-3">Próximo Treino</Text>
             <View className="bg-[#0B1120] rounded-xl p-4">
               <Text className="text-white text-base font-bold mb-2">
@@ -248,20 +295,10 @@ export default function AlunoDetailsScreen() {
                 </View>
               </View>
             </View>
-          </View>
+          </LiquidGlassCard>
 
           {/* Últimos Treinos */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <View className="flex-row items-center justify-between mb-3">
               <Text className="text-white text-lg font-bold">Últimos Treinos</Text>
               <TouchableOpacity>
@@ -295,20 +332,10 @@ export default function AlunoDetailsScreen() {
                 <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
               </TouchableOpacity>
             ))}
-          </View>
+          </LiquidGlassCard>
 
           {/* Medidas */}
-          <View style={{
-            backgroundColor: '#141c30',
-            borderRadius: 24,
-            padding: 20,
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-          }}>
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-3">Medidas Corporais</Text>
             
             {aluno.medidas.map((medida, index) => (
@@ -328,7 +355,7 @@ export default function AlunoDetailsScreen() {
                 </View>
               </View>
             ))}
-          </View>
+          </LiquidGlassCard>
 
           {/* Botões de Ação */}
           <View className="flex-row gap-3 mb-6">

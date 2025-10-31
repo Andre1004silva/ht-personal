@@ -1,8 +1,13 @@
-import { View, Text, ScrollView, TouchableOpacity, Image, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, RefreshControl, Dimensions, ImageBackground } from 'react-native';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useSharedValue } from 'react-native-reanimated';
 import { RefreshSplash } from '@/components/RefreshSplash';
+import LiquidGlassCard from '@/components/LiquidGlassCard';
+import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default function PerfilScreen() {
   const [refreshing, setRefreshing] = useState(false);
@@ -21,9 +26,34 @@ export default function PerfilScreen() {
   };
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-[#0B1120]">
+      {/* Background Image */}
+      <ImageBackground
+        source={require('../assets/images/bg-image.png')}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: screenWidth,
+          height: screenHeight,
+        }}
+        resizeMode="cover"
+      >
+        {/* Dark Overlay para manter legibilidade */}
+        <View style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(11, 17, 32, 0.85)',
+        }} />
+      </ImageBackground>
+      
       <ScrollView 
-      className="flex-1 bg-[#0B1120]"
+      className="flex-1"
       contentContainerStyle={{
         paddingTop: 140,
         paddingBottom: 100,
@@ -68,34 +98,24 @@ export default function PerfilScreen() {
         </View>
 
         {/* Estatísticas */}
-        <View style={{ 
-          flexDirection: 'row', 
-          justifyContent: 'space-around', 
-          backgroundColor: '#1E3A8A',
-          borderRadius: 20,
-          padding: 20,
-          marginBottom: 24,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 5
-        }}>
-          <View style={{ alignItems: 'center' }}>
-            <Text style={{ color: '#3B82F6', fontSize: 28, fontWeight: 'bold' }}>42</Text>
-            <Text style={{ color: '#9CA3AF', fontSize: 14, marginTop: 4 }}>Alunos</Text>
+        <LiquidGlassCard style={{ marginBottom: 24 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ color: '#3B82F6', fontSize: 28, fontWeight: 'bold' }}>42</Text>
+              <Text style={{ color: '#9CA3AF', fontSize: 14, marginTop: 4 }}>Alunos</Text>
+            </View>
+            <View style={{ width: 1, backgroundColor: 'rgba(156, 163, 175, 0.3)' }} />
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ color: '#3B82F6', fontSize: 28, fontWeight: 'bold' }}>5</Text>
+              <Text style={{ color: '#9CA3AF', fontSize: 14, marginTop: 4 }}>Anos</Text>
+            </View>
+            <View style={{ width: 1, backgroundColor: 'rgba(156, 163, 175, 0.3)' }} />
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ color: '#3B82F6', fontSize: 28, fontWeight: 'bold' }}>4.8</Text>
+              <Text style={{ color: '#9CA3AF', fontSize: 14, marginTop: 4 }}>Avaliação</Text>
+            </View>
           </View>
-          <View style={{ width: 1, backgroundColor: 'rgba(156, 163, 175, 0.3)' }} />
-          <View style={{ alignItems: 'center' }}>
-            <Text style={{ color: '#3B82F6', fontSize: 28, fontWeight: 'bold' }}>5</Text>
-            <Text style={{ color: '#9CA3AF', fontSize: 14, marginTop: 4 }}>Anos</Text>
-          </View>
-          <View style={{ width: 1, backgroundColor: 'rgba(156, 163, 175, 0.3)' }} />
-          <View style={{ alignItems: 'center' }}>
-            <Text style={{ color: '#3B82F6', fontSize: 28, fontWeight: 'bold' }}>4.8</Text>
-            <Text style={{ color: '#9CA3AF', fontSize: 14, marginTop: 4 }}>Avaliação</Text>
-          </View>
-        </View>
+        </LiquidGlassCard>
 
         {/* Especialidades */}
         <View style={{ marginBottom: 24 }}>
@@ -153,23 +173,15 @@ export default function PerfilScreen() {
           </Text>
 
           {/* Editar Perfil */}
-          <TouchableOpacity 
-            style={{ 
-              backgroundColor: '#1E3A8A',
-              borderRadius: 16,
-              padding: 16,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 12,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.2,
-              shadowRadius: 4,
-              elevation: 3
-            }}
-            activeOpacity={0.7}
-          >
+          <LiquidGlassCard style={{ marginBottom: 12 }}>
+            <TouchableOpacity 
+              style={{ 
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+              activeOpacity={0.7}
+            >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View style={{ 
                 width: 40, 
@@ -187,26 +199,19 @@ export default function PerfilScreen() {
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </LiquidGlassCard>
 
           {/* Notificações */}
-          <TouchableOpacity 
-            style={{ 
-              backgroundColor: '#1E3A8A',
-              borderRadius: 16,
-              padding: 16,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 12,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.2,
-              shadowRadius: 4,
-              elevation: 3
-            }}
-            activeOpacity={0.7}
-          >
+          <LiquidGlassCard style={{ marginBottom: 12 }}>
+            <TouchableOpacity 
+              style={{ 
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+              activeOpacity={0.7}
+            >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View style={{ 
                 width: 40, 
@@ -224,26 +229,19 @@ export default function PerfilScreen() {
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </LiquidGlassCard>
 
           {/* Planos e Assinatura */}
-          <TouchableOpacity 
-            style={{ 
-              backgroundColor: '#1E3A8A',
-              borderRadius: 16,
-              padding: 16,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 12,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.2,
-              shadowRadius: 4,
-              elevation: 3
-            }}
-            activeOpacity={0.7}
-          >
+          <LiquidGlassCard style={{ marginBottom: 12 }}>
+            <TouchableOpacity 
+              style={{ 
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+              activeOpacity={0.7}
+            >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View style={{ 
                 width: 40, 
@@ -261,26 +259,19 @@ export default function PerfilScreen() {
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </LiquidGlassCard>
 
           {/* Ajuda e Suporte */}
-          <TouchableOpacity 
-            style={{ 
-              backgroundColor: '#1E3A8A',
-              borderRadius: 16,
-              padding: 16,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 12,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.2,
-              shadowRadius: 4,
-              elevation: 3
-            }}
-            activeOpacity={0.7}
-          >
+          <LiquidGlassCard style={{ marginBottom: 12 }}>
+            <TouchableOpacity 
+              style={{ 
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+              activeOpacity={0.7}
+            >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View style={{ 
                 width: 40, 
@@ -298,26 +289,19 @@ export default function PerfilScreen() {
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </LiquidGlassCard>
 
           {/* Configurações */}
-          <TouchableOpacity 
-            style={{ 
-              backgroundColor: '#1E3A8A',
-              borderRadius: 16,
-              padding: 16,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 12,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.2,
-              shadowRadius: 4,
-              elevation: 3
-            }}
-            activeOpacity={0.7}
-          >
+          <LiquidGlassCard style={{ marginBottom: 12 }}>
+            <TouchableOpacity 
+              style={{ 
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+              activeOpacity={0.7}
+            >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View style={{ 
                 width: 40, 
@@ -335,7 +319,8 @@ export default function PerfilScreen() {
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </LiquidGlassCard>
         </View>
 
         {/* Botão de Sair */}
