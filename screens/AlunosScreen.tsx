@@ -1,4 +1,5 @@
 import { View, Text, TouchableOpacity, ScrollView, Image, RefreshControl, StyleSheet, Dimensions, ImageBackground } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -77,27 +78,30 @@ export default function AlunosScreen() {
     <View className="flex-1 bg-[#0B1120]">
       {/* Background Image */}
       <ImageBackground
-        source={require('../assets/images/bg-image.png')}
+        source={require('../assets/images/background.png')}
         style={{
           position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          width: screenWidth,
-          height: screenHeight,
+          width: '100%',
+          height: '100%',
         }}
         resizeMode="cover"
       >
-        {/* Dark Overlay para manter legibilidade */}
-        <View style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(11, 17, 32, 0.85)',
-        }} />
+        {/* Blur Overlay */}
+        <BlurView
+          intensity={50}
+          tint="dark"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+        />
       </ImageBackground>
       
       <ScrollView 

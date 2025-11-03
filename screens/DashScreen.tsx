@@ -1,11 +1,11 @@
-import { View, Text, TouchableOpacity, ScrollView, Dimensions, Image, Animated, RefreshControl } from 'react-native';
-import { useState, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions, Image, Animated, RefreshControl, ImageBackground } from 'react-native';
+import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { ProgressChart } from 'react-native-chart-kit';
-import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { useSharedValue } from 'react-native-reanimated';
 import { RefreshSplash } from '@/components/RefreshSplash';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
+import { BlurView } from 'expo-blur';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -16,11 +16,6 @@ export default function DashScreen() {
   const [showRefreshSplash, setShowRefreshSplash] = useState(false);
   const splashScale = useSharedValue(1);
   const splashOpacity = useSharedValue(0);
-  
-  // Animações para as bolas decorativas
-  const ball1Anim = useRef(new Animated.Value(0)).current;
-  const ball2Anim = useRef(new Animated.Value(0)).current;
-  const ball3Anim = useRef(new Animated.Value(0)).current;
 
   const showGreetingToast = () => {
     setShowGreeting(true);
@@ -47,48 +42,6 @@ export default function DashScreen() {
 
   useEffect(() => {
     showGreetingToast();
-    
-    // Animação das bolas decorativas
-    Animated.loop(
-      Animated.parallel([
-        Animated.sequence([
-          Animated.timing(ball1Anim, {
-            toValue: 1,
-            duration: 8000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(ball1Anim, {
-            toValue: 0,
-            duration: 8000,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.sequence([
-          Animated.timing(ball2Anim, {
-            toValue: 1,
-            duration: 10000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(ball2Anim, {
-            toValue: 0,
-            duration: 10000,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.sequence([
-          Animated.timing(ball3Anim, {
-            toValue: 1,
-            duration: 12000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(ball3Anim, {
-            toValue: 0,
-            duration: 12000,
-            useNativeDriver: true,
-          }),
-        ]),
-      ])
-    ).start();
   }, []);
 
   const onRefresh = async () => {
@@ -124,102 +77,33 @@ export default function DashScreen() {
 
   return (
     <View className="flex-1 bg-[#0B1120]">
-      {/* Decorative Background Balls */}
-      <Svg
-        height="100%"
-        width="100%"
+      {/* Background Image */}
+      <ImageBackground
+        source={require('../assets/images/background.png')}
         style={{
           position: 'absolute',
           top: 0,
           left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          height: '100%',
         }}
+        resizeMode="cover"
       >
-        <Defs>
-          <RadialGradient id="grad1" cx="50%" cy="50%">
-            <Stop offset="0%" stopColor="#3B82F6" stopOpacity="0.4" />
-            <Stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
-          </RadialGradient>
-          <RadialGradient id="grad2" cx="50%" cy="50%">
-            <Stop offset="0%" stopColor="#2563EB" stopOpacity="0.3" />
-            <Stop offset="100%" stopColor="#2563EB" stopOpacity="0" />
-          </RadialGradient>
-          <RadialGradient id="grad3" cx="50%" cy="50%">
-            <Stop offset="0%" stopColor="#1D4ED8" stopOpacity="0.35" />
-            <Stop offset="100%" stopColor="#1D4ED8" stopOpacity="0" />
-          </RadialGradient>
-        </Defs>
-        
-        <Circle cx="-50" cy="150" r="200" fill="url(#grad1)" />
-        <Circle cx="350" cy="100" r="150" fill="url(#grad2)" />
-        <Circle cx="200" cy="600" r="180" fill="url(#grad3)" />
-      </Svg>
-      
-      {/* Animated Decorative Balls */}
-      <Animated.View
-        style={{
-          position: 'absolute',
-          top: ball1Anim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [100, 200],
-          }),
-          left: ball1Anim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [-100, -50],
-          }),
-          opacity: ball1Anim.interpolate({
-            inputRange: [0, 0.5, 1],
-            outputRange: [0.3, 0.5, 0.3],
-          }),
-        }}
-      >
-        <Svg height="400" width="400">
-          <Circle cx="200" cy="200" r="200" fill="url(#grad1)" />
-        </Svg>
-      </Animated.View>
-      
-      <Animated.View
-        style={{
-          position: 'absolute',
-          top: ball2Anim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [50, 150],
-          }),
-          right: ball2Anim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [-80, -30],
-          }),
-          opacity: ball2Anim.interpolate({
-            inputRange: [0, 0.5, 1],
-            outputRange: [0.25, 0.4, 0.25],
-          }),
-        }}
-      >
-        <Svg height="300" width="300">
-          <Circle cx="150" cy="150" r="150" fill="url(#grad2)" />
-        </Svg>
-      </Animated.View>
-      
-      <Animated.View
-        style={{
-          position: 'absolute',
-          bottom: ball3Anim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [100, 200],
-          }),
-          left: ball3Anim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [50, 150],
-          }),
-          opacity: ball3Anim.interpolate({
-            inputRange: [0, 0.5, 1],
-            outputRange: [0.3, 0.45, 0.3],
-          }),
-        }}
-      >
-        <Svg height="360" width="360">
-          <Circle cx="180" cy="180" r="180" fill="url(#grad3)" />
-        </Svg>
-      </Animated.View>
+        {/* Blur Overlay */}
+        <BlurView
+          intensity={50}
+          tint="dark"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+        />
+      </ImageBackground>
 
       
       <ScrollView
