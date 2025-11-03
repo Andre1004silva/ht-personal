@@ -6,7 +6,6 @@ import { useSharedValue } from 'react-native-reanimated';
 import { RefreshSplash } from '@/components/RefreshSplash';
 import { ChevronRight } from 'lucide-react-native';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
-import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, Path, Defs, RadialGradient, Stop } from 'react-native-svg';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');

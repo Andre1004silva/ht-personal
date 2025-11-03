@@ -4,8 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSharedValue } from 'react-native-reanimated';
 import { RefreshSplash } from '@/components/RefreshSplash';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
-import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
