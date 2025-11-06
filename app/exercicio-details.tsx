@@ -60,7 +60,7 @@ export default function ExercicioDetailsScreen() {
   const getDificuldadeColor = (dificuldade: string) => {
     switch (dificuldade) {
       case 'Iniciante':
-        return '#3B82F6';
+        return '#60A5FA';
       case 'Intermediário':
         return '#2563EB';
       case 'Avançado':
@@ -122,7 +122,7 @@ export default function ExercicioDetailsScreen() {
           <Defs>
             <RadialGradient id="starGrad" cx="50%" cy="50%">
               <Stop offset="0%" stopColor="#FFFFFF" stopOpacity="1" />
-              <Stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+              <Stop offset="100%" stopColor="#60A5FA" stopOpacity="0" />
             </RadialGradient>
           </Defs>
           {[...Array(60)].map((_, i) => {
@@ -265,7 +265,7 @@ export default function ExercicioDetailsScreen() {
                 >
                   <Text 
                     className="text-xs font-semibold"
-                    style={{ color: musculo.tipo === 'Principal' ? '#3B82F6' : '#2563EB' }}
+                    style={{ color: musculo.tipo === 'Principal' ? '#60A5FA' : '#2563EB' }}
                   >
                     {musculo.tipo}
                   </Text>
@@ -279,7 +279,7 @@ export default function ExercicioDetailsScreen() {
             <Text className="text-white text-lg font-bold mb-3">Como Executar</Text>
             {exercicio.instrucoes.map((instrucao, index) => (
               <View key={index} className="flex-row mb-3">
-                <View className="bg-[#3B82F6] w-6 h-6 rounded-full items-center justify-center mr-3">
+                <View className="bg-[#60A5FA] w-6 h-6 rounded-full items-center justify-center mr-3">
                   <Text className="text-white text-xs font-bold">{index + 1}</Text>
                 </View>
                 <Text className="text-gray-300 text-sm flex-1 leading-6">{instrucao}</Text>
@@ -292,7 +292,7 @@ export default function ExercicioDetailsScreen() {
             <Text className="text-white text-lg font-bold mb-3">Dicas Importantes</Text>
             {exercicio.dicas.map((dica, index) => (
               <View key={index} className="flex-row items-start mb-2">
-                <Ionicons name="checkmark-circle" size={20} color="#3B82F6" style={{ marginRight: 8, marginTop: 2 }} />
+                <Ionicons name="checkmark-circle" size={20} color="#60A5FA" style={{ marginRight: 8, marginTop: 2 }} />
                 <Text className="text-gray-300 text-sm flex-1 leading-6">{dica}</Text>
               </View>
             ))}
@@ -327,7 +327,7 @@ export default function ExercicioDetailsScreen() {
               <TouchableOpacity
                 key={treino.id}
                 className={`rounded-xl p-4 mb-3 flex-row items-center justify-between ${
-                  selectedTreino === treino.id ? 'bg-[#3B82F6]/20 border-2 border-[#3B82F6]' : 'bg-[#0B1120]'
+                  selectedTreino === treino.id ? 'bg-[#60A5FA]/20 border-2 border-[#60A5FA]' : 'bg-[#0B1120]'
                 }`}
                 onPress={() => setSelectedTreino(treino.id)}
               >
@@ -336,13 +336,13 @@ export default function ExercicioDetailsScreen() {
                   <Text className="text-gray-400 text-xs">{treino.exercicios} exercícios</Text>
                 </View>
                 {selectedTreino === treino.id && (
-                  <Ionicons name="checkmark-circle" size={24} color="#3B82F6" />
+                  <Ionicons name="checkmark-circle" size={24} color="#60A5FA" />
                 )}
               </TouchableOpacity>
             ))}
 
             {selectedTreino && (
-              <TouchableOpacity className="bg-[#3B82F6] rounded-xl py-4 items-center mt-2">
+              <TouchableOpacity className="bg-[#60A5FA] rounded-xl py-4 items-center mt-2">
                 <Text className="text-white text-base font-bold">Confirmar Adição</Text>
               </TouchableOpacity>
             )}
@@ -350,7 +350,7 @@ export default function ExercicioDetailsScreen() {
 
           {/* Botões de Ação */}
           <View className="flex-row gap-3 mb-6">
-            <TouchableOpacity className="flex-1 bg-[#3B82F6] rounded-2xl py-4 items-center flex-row justify-center gap-2">
+            <TouchableOpacity className="flex-1 bg-[#60A5FA] rounded-2xl py-4 items-center flex-row justify-center gap-2">
               <Ionicons name="create-outline" size={20} color="white" />
               <Text className="text-white text-base font-bold">Editar</Text>
             </TouchableOpacity>

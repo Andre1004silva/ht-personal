@@ -65,7 +65,7 @@ export default function TreinoDetailsScreen() {
               y1={0}
               x2={i * 40 + screenHeight}
               y2={screenHeight}
-              stroke="#3B82F6"
+              stroke="#60A5FA"
               strokeWidth="2"
             />
           ))}
@@ -112,9 +112,9 @@ export default function TreinoDetailsScreen() {
         <Svg width={screenWidth} height={screenHeight} style={{ position: 'absolute', opacity: 0.12 }}>
           <Defs>
             <RadialGradient id="pulseGrad" cx="50%" cy="50%">
-              <Stop offset="0%" stopColor="#3B82F6" stopOpacity="0.8" />
-              <Stop offset="50%" stopColor="#3B82F6" stopOpacity="0.4" />
-              <Stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+              <Stop offset="0%" stopColor="#60A5FA" stopOpacity="0.8" />
+              <Stop offset="50%" stopColor="#60A5FA" stopOpacity="0.4" />
+              <Stop offset="100%" stopColor="#60A5FA" stopOpacity="0" />
             </RadialGradient>
           </Defs>
           {[...Array(12)].map((_, i) => (
@@ -196,7 +196,7 @@ export default function TreinoDetailsScreen() {
             <View className="flex-row justify-between">
               <View className="flex-1">
                 <Text className="text-gray-400 text-xs mb-1">Level</Text>
-                <Text className="text-[#3B82F6] text-sm font-bold">{treino.nivel}</Text>
+                <Text className="text-[#60A5FA] text-sm font-bold">{treino.nivel}</Text>
               </View>
               <View className="flex-1">
                 <Text className="text-gray-400 text-xs mb-1">Progress</Text>
@@ -236,7 +236,7 @@ export default function TreinoDetailsScreen() {
               <View className="flex-1 ml-3">
                 <Text className="text-white text-base font-bold">{treino.trainer.nome}</Text>
                 <Text className="text-gray-400 text-xs">{treino.trainer.cargo}</Text>
-                <Text className="text-[#3B82F6] text-xs font-semibold mt-1">
+                <Text className="text-[#60A5FA] text-xs font-semibold mt-1">
                   {treino.trainer.experiencia}
                 </Text>
               </View>
@@ -256,7 +256,7 @@ export default function TreinoDetailsScreen() {
                         key={star}
                         name="star"
                         size={12}
-                        color={star <= Math.floor(treino.rating) ? "#3B82F6" : "#444"}
+                        color={star <= Math.floor(treino.rating) ? "#60A5FA" : "#444"}
                       />
                     ))}
                   </View>
@@ -283,7 +283,7 @@ export default function TreinoDetailsScreen() {
                   I had such an amazing session with Chris. He instantly picked up on the level of my fitness and adjusted the workout to suit me...
                 </Text>
               </View>
-              <View className="bg-[#3B82F6] w-10 h-10 rounded-lg items-center justify-center ml-2">
+              <View className="bg-[#60A5FA] w-10 h-10 rounded-lg items-center justify-center ml-2">
                 <Text className="text-white text-sm font-bold">4.8</Text>
               </View>
             </View>
@@ -304,7 +304,7 @@ export default function TreinoDetailsScreen() {
                   style={styles.exerciseImage}
                 />
                 <View className="flex-1 ml-3">
-                  <Text className="text-[#3B82F6] text-sm font-bold mb-1">
+                  <Text className="text-[#60A5FA] text-sm font-bold mb-1">
                     {exercicio.nome}
                   </Text>
                   <Text className="text-gray-400 text-xs">
@@ -317,7 +317,7 @@ export default function TreinoDetailsScreen() {
 
           {/* Botões de Ação */}
           <View className="flex-row gap-3 mb-6">
-            <TouchableOpacity className="flex-1 bg-[#3B82F6] rounded-2xl py-4 items-center flex-row justify-center gap-2">
+            <TouchableOpacity className="flex-1 bg-[#60A5FA] rounded-2xl py-4 items-center flex-row justify-center gap-2">
               <Ionicons name="create-outline" size={20} color="white" />
               <Text className="text-white text-base font-bold">Editar</Text>
             </TouchableOpacity>

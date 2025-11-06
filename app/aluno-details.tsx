@@ -115,7 +115,7 @@ export default function AlunoDetailsScreen() {
         <Svg width={screenWidth} height={screenHeight} style={{ position: 'absolute', opacity: 0.15 }}>
           <Defs>
             <SvgLinearGradient id="particleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <Stop offset="0%" stopColor="#3B82F6" stopOpacity="1" />
+              <Stop offset="0%" stopColor="#60A5FA" stopOpacity="1" />
               <Stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.5" />
             </SvgLinearGradient>
           </Defs>
@@ -144,7 +144,7 @@ export default function AlunoDetailsScreen() {
               width={Math.random() * 100 + 50}
               height={Math.random() * 100 + 50}
               fill="none"
-              stroke="#3B82F6"
+              stroke="#60A5FA"
               strokeWidth="2"
               transform={`rotate(${Math.random() * 45}, ${Math.random() * screenWidth}, ${Math.random() * screenHeight})`}
             />
@@ -180,7 +180,7 @@ export default function AlunoDetailsScreen() {
             <Text className="text-white text-3xl font-bold mb-2">
               {aluno.nome}
             </Text>
-            <Text className="text-[#3B82F6] text-lg font-semibold mb-3">
+            <Text className="text-[#60A5FA] text-lg font-semibold mb-3">
               {aluno.tipo}
             </Text>
             <View className="flex-row gap-3">
@@ -203,12 +203,12 @@ export default function AlunoDetailsScreen() {
             <Text className="text-white text-lg font-bold mb-4">Estatísticas</Text>
             <View className="flex-row justify-between">
               <View className="flex-1 items-center">
-                <Text className="text-[#3B82F6] text-3xl font-bold">{aluno.stats.treinos}</Text>
+                <Text className="text-[#60A5FA] text-3xl font-bold">{aluno.stats.treinos}</Text>
                 <Text className="text-gray-400 text-xs mt-1">Treinos</Text>
               </View>
               <View style={styles.divider} />
               <View className="flex-1 items-center">
-                <Text className="text-[#3B82F6] text-3xl font-bold">{aluno.stats.frequencia}%</Text>
+                <Text className="text-[#60A5FA] text-3xl font-bold">{aluno.stats.frequencia}%</Text>
                 <Text className="text-gray-400 text-xs mt-1">Frequência</Text>
               </View>
               <View style={styles.divider} />
@@ -255,8 +255,8 @@ export default function AlunoDetailsScreen() {
             <Text className="text-white text-lg font-bold mb-3">Contato</Text>
             
             <TouchableOpacity className="flex-row items-center mb-3">
-              <View className="bg-[#3B82F6]/20 w-10 h-10 rounded-full items-center justify-center mr-3">
-                <Ionicons name="call-outline" size={20} color="#3B82F6" />
+              <View className="bg-[#60A5FA]/20 w-10 h-10 rounded-full items-center justify-center mr-3">
+                <Ionicons name="call-outline" size={20} color="#60A5FA" />
               </View>
               <View className="flex-1">
                 <Text className="text-gray-400 text-xs">Telefone</Text>
@@ -266,8 +266,8 @@ export default function AlunoDetailsScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity className="flex-row items-center">
-              <View className="bg-[#3B82F6]/20 w-10 h-10 rounded-full items-center justify-center mr-3">
-                <Ionicons name="mail-outline" size={20} color="#3B82F6" />
+              <View className="bg-[#60A5FA]/20 w-10 h-10 rounded-full items-center justify-center mr-3">
+                <Ionicons name="mail-outline" size={20} color="#60A5FA" />
               </View>
               <View className="flex-1">
                 <Text className="text-gray-400 text-xs">Email</Text>
@@ -313,12 +313,12 @@ export default function AlunoDetailsScreen() {
                 style={index < aluno.ultimosTreinos.length - 1 && styles.treinoItem}
               >
                 <View className={`w-10 h-10 rounded-full items-center justify-center mr-3 ${
-                  treino.concluido ? 'bg-[#3B82F6]/20' : 'bg-gray-600/20'
+                  treino.concluido ? 'bg-[#60A5FA]/20' : 'bg-gray-600/20'
                 }`}>
                   <Ionicons 
                     name={treino.concluido ? "checkmark-circle" : "close-circle"} 
                     size={24} 
-                    color={treino.concluido ? "#3B82F6" : "#9CA3AF"} 
+                    color={treino.concluido ? "#60A5FA" : "#9CA3AF"} 
                   />
                 </View>
                 <View className="flex-1">
@@ -348,7 +348,7 @@ export default function AlunoDetailsScreen() {
                 <View className="flex-row items-center gap-3">
                   <Text className="text-white text-base font-semibold">{medida.valor}</Text>
                   <Text className={`text-sm font-semibold ${
-                    medida.evolucao.startsWith('+') ? 'text-[#3B82F6]' : 'text-[#93C5FD]'
+                    medida.evolucao.startsWith('+') ? 'text-[#60A5FA]' : 'text-[#93C5FD]'
                   }`}>
                     {medida.evolucao}
                   </Text>
@@ -359,7 +359,7 @@ export default function AlunoDetailsScreen() {
 
           {/* Botões de Ação */}
           <View className="flex-row gap-3 mb-6">
-            <TouchableOpacity className="flex-1 bg-[#3B82F6] rounded-2xl py-4 items-center flex-row justify-center gap-2">
+            <TouchableOpacity className="flex-1 bg-[#60A5FA] rounded-2xl py-4 items-center flex-row justify-center gap-2">
               <Ionicons name="create-outline" size={20} color="white" />
               <Text className="text-white text-base font-bold">Editar</Text>
             </TouchableOpacity>

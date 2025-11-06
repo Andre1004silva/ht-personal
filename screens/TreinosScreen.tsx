@@ -1,5 +1,6 @@
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Image, RefreshControl, Dimensions, ImageBackground } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Image, RefreshControl, Dimensions } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { Video, ResizeMode } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
@@ -80,9 +81,9 @@ export default function TreinosScreen() {
 
     return (
         <View className="flex-1 bg-[#0B1120]">
-            {/* Background Image */}
-            <ImageBackground
-                source={require('../assets/images/background.png')}
+            {/* Background Video */}
+            <Video
+                source={require('../assets/background_720p.mp4')}
                 style={{
                     position: 'absolute',
                     top: 0,
@@ -92,27 +93,29 @@ export default function TreinosScreen() {
                     width: '100%',
                     height: '100%',
                 }}
-                resizeMode="cover"
-            >
-                {/* Blur Overlay */}
-                <BlurView
-                    intensity={50}
-                    tint="dark"
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                    }}
-                />
-            </ImageBackground>
+                resizeMode={ResizeMode.COVER}
+                isLooping
+                shouldPlay
+                isMuted
+            />
+            {/* Blur Overlay */}
+            <BlurView
+                intensity={50}
+                tint="dark"
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                }}
+            />
             
             {/* Category Tabs */}
             <View className="flex-row px-4 gap-2" style={{ paddingTop: 140 }}>
                 <TouchableOpacity
                     onPress={() => setActiveCategory('workouts')}
-                    className={`px-5 py-2 rounded-full ${activeCategory === 'workouts' ? 'bg-[#3B82F6]' : 'bg-[#141c30]'}`}
+                    className={`px-5 py-2 rounded-full ${activeCategory === 'workouts' ? 'bg-[#60A5FA]' : 'bg-[#141c30]'}`}
                 >
                     <Text className="font-semibold text-white">
                         Treinos
@@ -121,7 +124,7 @@ export default function TreinosScreen() {
 
                 <TouchableOpacity
                     onPress={() => setActiveCategory('fitness')}
-                    className={`px-5 py-2 rounded-full ${activeCategory === 'fitness' ? 'bg-[#3B82F6]' : 'bg-[#141c30]'}`}
+                    className={`px-5 py-2 rounded-full ${activeCategory === 'fitness' ? 'bg-[#60A5FA]' : 'bg-[#141c30]'}`}
                 >
                     <Text className="font-semibold text-white">
                         Condicionamento
@@ -130,7 +133,7 @@ export default function TreinosScreen() {
 
                 <TouchableOpacity
                     onPress={() => setActiveCategory('plans')}
-                    className={`px-5 py-2 rounded-full ${activeCategory === 'plans' ? 'bg-[#3B82F6]' : 'bg-[#141c30]'}`}
+                    className={`px-5 py-2 rounded-full ${activeCategory === 'plans' ? 'bg-[#60A5FA]' : 'bg-[#141c30]'}`}
                 >
                     <Text className="font-semibold text-white">
                         Planos
@@ -139,7 +142,7 @@ export default function TreinosScreen() {
 
                 <TouchableOpacity
                     onPress={() => setActiveCategory('training')}
-                    className={`px-5 py-2 rounded-full ${activeCategory === 'training' ? 'bg-[#3B82F6]' : 'bg-[#141c30]'}`}
+                    className={`px-5 py-2 rounded-full ${activeCategory === 'training' ? 'bg-[#60A5FA]' : 'bg-[#141c30]'}`}
                 >
                     <Text className="font-semibold text-white">
                         Treinamento
@@ -150,17 +153,17 @@ export default function TreinosScreen() {
             {/* Action Bar */}
             <View className="flex-row items-center justify-between px-4 py-4">
                 <TouchableOpacity className="flex-row items-center gap-2 bg-[#141c30] px-4 py-2 rounded-lg">
-                    <Ionicons name="filter" size={20} color="#3B82F6" />
+                    <Ionicons name="filter" size={20} color="#60A5FA" />
                     <Text className="text-white font-medium">Filtros</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity className="flex-row items-center gap-2 bg-[#141c30] px-4 py-2 rounded-lg">
-                    <Ionicons name="swap-vertical" size={20} color="#3B82F6" />
+                    <Ionicons name="swap-vertical" size={20} color="#60A5FA" />
                     <Text className="text-white font-medium">Ordenar</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity className="flex-row items-center gap-2 bg-[#141c30] px-4 py-2 rounded-lg">
-                    <Ionicons name="search" size={20} color="#3B82F6" />
+                    <Ionicons name="search" size={20} color="#60A5FA" />
                     <Text className="text-white font-medium">Buscar</Text>
                 </TouchableOpacity>
             </View>
@@ -169,7 +172,7 @@ export default function TreinosScreen() {
             <View className="px-4 py-4">
                 <LiquidGlassCard>
                     <TouchableOpacity className="flex-row items-center justify-center gap-2">
-                        <Ionicons name="add-circle-outline" size={24} color="#3B82F6" />
+                        <Ionicons name="add-circle-outline" size={24} color="#60A5FA" />
                         <Text className="text-white font-bold text-base">Criar Novo Treino</Text>
                     </TouchableOpacity>
                 </LiquidGlassCard>
@@ -183,8 +186,8 @@ export default function TreinosScreen() {
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={onRefresh}
-                        tintColor="#3B82F6"
-                        colors={['#3B82F6', '#93C5FD']}
+                        tintColor="#60A5FA"
+                        colors={['#60A5FA', '#93C5FD']}
                         progressBackgroundColor="#141c30"
                         progressViewOffset={120}
                     />
@@ -209,7 +212,7 @@ export default function TreinosScreen() {
 
                                 {/* Ícone Salvar */}
                                 <TouchableOpacity className="absolute top-3 right-3 bg-black/40 w-8 h-8 rounded-lg items-center justify-center">
-                                    <Ionicons name="bookmark" size={16} color="#3B82F6" />
+                                    <Ionicons name="bookmark" size={16} color="#60A5FA" />
                                 </TouchableOpacity>
 
                                 {/* Camada preta translúcida cobrindo metade inferior */}

@@ -58,7 +58,7 @@ export default function BottomNavigation({ activeTab, onTabChange }: BottomNavig
       {/* Container interno com padding para criar efeito de borda */}
       <View style={{ padding: 1.5 }}>
         <BlurView 
-          intensity={30} 
+          intensity={50} 
           tint="dark"
           className="rounded-t-[40px] overflow-hidden"
           style={{
@@ -104,11 +104,11 @@ export default function BottomNavigation({ activeTab, onTabChange }: BottomNavig
                   <Ionicons 
                     name={tab.icon} 
                     size={28} 
-                    color={activeTab === tab.id ? '#3B82F6' : '#9CA3AF'} 
+                    color={activeTab === tab.id ? '#60A5FA' : '#FFF'} 
                   />
                   <Text
                     className={`text-xs mt-1 ${
-                      activeTab === tab.id ? 'text-[#3B82F6] font-semibold' : 'text-gray-400'
+                      activeTab === tab.id ? 'text-[#60A5FA] font-semibold' : 'text-gray-400'
                     }`}
                   >
                     {tab.label}

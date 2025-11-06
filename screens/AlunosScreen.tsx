@@ -1,5 +1,6 @@
-import { View, Text, TouchableOpacity, ScrollView, Image, RefreshControl, StyleSheet, Dimensions, ImageBackground } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, RefreshControl, StyleSheet, Dimensions } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { Video, ResizeMode } from 'expo-av';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -76,9 +77,9 @@ export default function AlunosScreen() {
 
   return (
     <View className="flex-1 bg-[#0B1120]">
-      {/* Background Image */}
-      <ImageBackground
-        source={require('../assets/images/background.png')}
+      {/* Background Video */}
+      <Video
+        source={require('../assets/background_720p.mp4')}
         style={{
           position: 'absolute',
           top: 0,
@@ -88,21 +89,23 @@ export default function AlunosScreen() {
           width: '100%',
           height: '100%',
         }}
-        resizeMode="cover"
-      >
-        {/* Blur Overlay */}
-        <BlurView
-          intensity={50}
-          tint="dark"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-          }}
-        />
-      </ImageBackground>
+        resizeMode={ResizeMode.COVER}
+        isLooping
+        shouldPlay
+        isMuted
+      />
+      {/* Blur Overlay */}
+      <BlurView
+        intensity={50}
+        tint="dark"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+      />
       
       <ScrollView 
       className="flex-1 px-2" 
@@ -111,8 +114,8 @@ export default function AlunosScreen() {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor="#3B82F6"
-          colors={['#3B82F6', '#93C5FD']}
+          tintColor="#60A5FA"
+          colors={['#60A5FA', '#93C5FD']}
           progressBackgroundColor="#141c30"
           progressViewOffset={120}
         />
@@ -137,7 +140,7 @@ export default function AlunosScreen() {
             <View className="flex-1">
               <Text className="text-white text-lg font-bold mb-1">{aluno.nome}</Text>
               <Text className="text-gray-300 text-sm mb-1">{aluno.tipo}</Text>
-              <Text className="text-[#3B82F6] text-sm font-semibold">{aluno.experiencia}</Text>
+              <Text className="text-[#60A5FA] text-sm font-semibold">{aluno.experiencia}</Text>
             </View>
 
             {/* Ícone de seta */}

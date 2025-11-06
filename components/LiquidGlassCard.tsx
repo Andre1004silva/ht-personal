@@ -46,7 +46,7 @@ export default function LiquidGlassCard({ children, style }: LiquidGlassCardProp
       {/* Container interno com padding para criar efeito de borda */}
       <View style={{ padding: 1.5 }}>
         <BlurView 
-          intensity={30} 
+          intensity={50} 
           tint="dark"
           style={{
             borderRadius: 24,

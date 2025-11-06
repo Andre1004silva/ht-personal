@@ -1,5 +1,6 @@
-import { View, Text, ScrollView, TouchableOpacity, Image, RefreshControl, Dimensions, ImageBackground } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, RefreshControl, Dimensions } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { Video, ResizeMode } from 'expo-av';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useSharedValue } from 'react-native-reanimated';
@@ -26,9 +27,9 @@ export default function PerfilScreen() {
 
   return (
     <View className="flex-1 bg-[#0B1120]">
-      {/* Background Image */}
-      <ImageBackground
-        source={require('../assets/images/background.png')}
+      {/* Background Video */}
+      <Video
+        source={require('../assets/background_720p.mp4')}
         style={{
           position: 'absolute',
           top: 0,
@@ -38,21 +39,23 @@ export default function PerfilScreen() {
           width: '100%',
           height: '100%',
         }}
-        resizeMode="cover"
-      >
-        {/* Blur Overlay */}
-        <BlurView
-          intensity={50}
-          tint="dark"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-          }}
-        />
-      </ImageBackground>
+        resizeMode={ResizeMode.COVER}
+        isLooping
+        shouldPlay
+        isMuted
+      />
+      {/* Blur Overlay */}
+      <BlurView
+        intensity={50}
+        tint="dark"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+      />
       
       <ScrollView 
       className="flex-1"
@@ -64,8 +67,8 @@ export default function PerfilScreen() {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor="#3B82F6"
-          colors={['#3B82F6', '#93C5FD']}
+          tintColor="#60A5FA"
+          colors={['#60A5FA', '#93C5FD']}
           progressBackgroundColor="#141c30"
           progressViewOffset={120}
         />
@@ -83,7 +86,7 @@ export default function PerfilScreen() {
               borderRadius: 60,
               marginBottom: 16,
               borderWidth: 4,
-              borderColor: '#3B82F6'
+              borderColor: '#60A5FA'
             }}
           />
           
@@ -91,7 +94,7 @@ export default function PerfilScreen() {
           <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginBottom: 4 }}>
             Samuel Silva
           </Text>
-          <Text style={{ color: '#3B82F6', fontSize: 16, fontWeight: '600', marginBottom: 8 }}>
+          <Text style={{ color: '#60A5FA', fontSize: 16, fontWeight: '600', marginBottom: 8 }}>
             Personal Trainer
           </Text>
           <Text style={{ color: '#9CA3AF', fontSize: 14, textAlign: 'center' }}>
@@ -103,17 +106,17 @@ export default function PerfilScreen() {
         <LiquidGlassCard style={{ marginBottom: 24 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: '#3B82F6', fontSize: 28, fontWeight: 'bold' }}>42</Text>
+              <Text style={{ color: '#60A5FA', fontSize: 28, fontWeight: 'bold' }}>42</Text>
               <Text style={{ color: '#9CA3AF', fontSize: 14, marginTop: 4 }}>Alunos</Text>
             </View>
             <View style={{ width: 1, backgroundColor: 'rgba(156, 163, 175, 0.3)' }} />
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: '#3B82F6', fontSize: 28, fontWeight: 'bold' }}>5</Text>
+              <Text style={{ color: '#60A5FA', fontSize: 28, fontWeight: 'bold' }}>5</Text>
               <Text style={{ color: '#9CA3AF', fontSize: 14, marginTop: 4 }}>Anos</Text>
             </View>
             <View style={{ width: 1, backgroundColor: 'rgba(156, 163, 175, 0.3)' }} />
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: '#3B82F6', fontSize: 28, fontWeight: 'bold' }}>4.8</Text>
+              <Text style={{ color: '#60A5FA', fontSize: 28, fontWeight: 'bold' }}>4.8</Text>
               <Text style={{ color: '#9CA3AF', fontSize: 14, marginTop: 4 }}>Avaliação</Text>
             </View>
           </View>
@@ -131,9 +134,9 @@ export default function PerfilScreen() {
               paddingVertical: 10, 
               borderRadius: 20,
               borderWidth: 1,
-              borderColor: '#3B82F6'
+              borderColor: '#60A5FA'
             }}>
-              <Text style={{ color: '#3B82F6', fontSize: 14, fontWeight: '600' }}>Hipertrofia</Text>
+              <Text style={{ color: '#60A5FA', fontSize: 14, fontWeight: '600' }}>Hipertrofia</Text>
             </View>
             <View style={{ 
               backgroundColor: '#1E3A8A', 
@@ -141,9 +144,9 @@ export default function PerfilScreen() {
               paddingVertical: 10, 
               borderRadius: 20,
               borderWidth: 1,
-              borderColor: '#3B82F6'
+              borderColor: '#60A5FA'
             }}>
-              <Text style={{ color: '#3B82F6', fontSize: 14, fontWeight: '600' }}>Emagrecimento</Text>
+              <Text style={{ color: '#60A5FA', fontSize: 14, fontWeight: '600' }}>Emagrecimento</Text>
             </View>
             <View style={{ 
               backgroundColor: '#1E3A8A', 
@@ -151,9 +154,9 @@ export default function PerfilScreen() {
               paddingVertical: 10, 
               borderRadius: 20,
               borderWidth: 1,
-              borderColor: '#3B82F6'
+              borderColor: '#60A5FA'
             }}>
-              <Text style={{ color: '#3B82F6', fontSize: 14, fontWeight: '600' }}>Funcional</Text>
+              <Text style={{ color: '#60A5FA', fontSize: 14, fontWeight: '600' }}>Funcional</Text>
             </View>
             <View style={{ 
               backgroundColor: '#1E3A8A', 
@@ -161,9 +164,9 @@ export default function PerfilScreen() {
               paddingVertical: 10, 
               borderRadius: 20,
               borderWidth: 1,
-              borderColor: '#3B82F6'
+              borderColor: '#60A5FA'
             }}>
-              <Text style={{ color: '#3B82F6', fontSize: 14, fontWeight: '600' }}>Reabilitação</Text>
+              <Text style={{ color: '#60A5FA', fontSize: 14, fontWeight: '600' }}>Reabilitação</Text>
             </View>
           </View>
         </View>
@@ -194,7 +197,7 @@ export default function PerfilScreen() {
                 justifyContent: 'center',
                 marginRight: 12
               }}>
-                <Ionicons name="person-outline" size={20} color="#3B82F6" />
+                <Ionicons name="person-outline" size={20} color="#60A5FA" />
               </View>
               <Text style={{ color: 'white', fontSize: 16, fontWeight: '500' }}>
                 Editar Perfil
@@ -224,7 +227,7 @@ export default function PerfilScreen() {
                 justifyContent: 'center',
                 marginRight: 12
               }}>
-                <Ionicons name="notifications-outline" size={20} color="#3B82F6" />
+                <Ionicons name="notifications-outline" size={20} color="#60A5FA" />
               </View>
               <Text style={{ color: 'white', fontSize: 16, fontWeight: '500' }}>
                 Notificações
@@ -254,7 +257,7 @@ export default function PerfilScreen() {
                 justifyContent: 'center',
                 marginRight: 12
               }}>
-                <Ionicons name="card-outline" size={20} color="#3B82F6" />
+                <Ionicons name="card-outline" size={20} color="#60A5FA" />
               </View>
               <Text style={{ color: 'white', fontSize: 16, fontWeight: '500' }}>
                 Planos e Assinatura
@@ -284,7 +287,7 @@ export default function PerfilScreen() {
                 justifyContent: 'center',
                 marginRight: 12
               }}>
-                <Ionicons name="help-circle-outline" size={20} color="#3B82F6" />
+                <Ionicons name="help-circle-outline" size={20} color="#60A5FA" />
               </View>
               <Text style={{ color: 'white', fontSize: 16, fontWeight: '500' }}>
                 Ajuda e Suporte
@@ -314,7 +317,7 @@ export default function PerfilScreen() {
                 justifyContent: 'center',
                 marginRight: 12
               }}>
-                <Ionicons name="settings-outline" size={20} color="#3B82F6" />
+                <Ionicons name="settings-outline" size={20} color="#60A5FA" />
               </View>
               <Text style={{ color: 'white', fontSize: 16, fontWeight: '500' }}>
                 Configurações

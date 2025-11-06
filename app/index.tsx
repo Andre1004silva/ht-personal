@@ -88,7 +88,7 @@ export default function Home() {
         {/* Container interno com padding para criar efeito de borda */}
         <View style={{ padding: 1.5 }}>
           <BlurView 
-            intensity={30} 
+            intensity={50} 
             tint="dark"
             className="rounded-b-[40px] overflow-hidden"
             style={{
@@ -134,7 +134,7 @@ export default function Home() {
                   }}
                 />
                 <Text className="text-white text-2xl font-bold ml-2">
-                  High<Text className="font-normal text-[#3B82F6]">Training</Text>
+                  High<Text className="font-normal text-[#60A5FA]">Training</Text>
                 </Text>
               </View>
             </View>

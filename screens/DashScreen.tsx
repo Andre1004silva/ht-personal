@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Dimensions, Image, Animated, RefreshControl, ImageBackground } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions, Image, Animated, RefreshControl } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { ProgressChart } from 'react-native-chart-kit';
@@ -6,6 +6,7 @@ import { useSharedValue } from 'react-native-reanimated';
 import { RefreshSplash } from '@/components/RefreshSplash';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
 import { BlurView } from 'expo-blur';
+import { Video, ResizeMode } from 'expo-av';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -77,9 +78,9 @@ export default function DashScreen() {
 
   return (
     <View className="flex-1 bg-[#0B1120]">
-      {/* Background Image */}
-      <ImageBackground
-        source={require('../assets/images/background.png')}
+      {/* Background Video */}
+      <Video
+        source={require('../assets/background_720p.mp4')}
         style={{
           position: 'absolute',
           top: 0,
@@ -89,21 +90,23 @@ export default function DashScreen() {
           width: '100%',
           height: '100%',
         }}
-        resizeMode="cover"
-      >
-        {/* Blur Overlay */}
-        <BlurView
-          intensity={50}
-          tint="dark"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-          }}
-        />
-      </ImageBackground>
+        resizeMode={ResizeMode.COVER}
+        isLooping
+        shouldPlay
+        isMuted
+      />
+      {/* Blur Overlay */}
+      <BlurView
+        intensity={30}
+        tint="dark"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+      />
 
       
       <ScrollView
@@ -116,8 +119,8 @@ export default function DashScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#3B82F6"
-            colors={['#3B82F6', '#93C5FD']}
+            tintColor="white"
+            colors={['white', '#93C5FD']}
             progressBackgroundColor="#141c30"
             progressViewOffset={120}
           />
@@ -144,7 +147,7 @@ export default function DashScreen() {
           <View style={{
             backgroundColor: '#121b33',
             borderRadius: 16,
-            borderColor: '#3B82F6',
+            borderColor: 'white',
             borderWidth: 2,
             padding: 16,
             flexDirection: 'row',
@@ -197,7 +200,7 @@ export default function DashScreen() {
             <View style={{
               height: '100%',
               width: '71%',
-              backgroundColor: '#3B82F6',
+              backgroundColor: '#60A5FA',
               borderRadius: 6
             }} />
           </View>
@@ -221,7 +224,7 @@ export default function DashScreen() {
             <View style={{ flex: 1 }}>
               <View style={{ marginBottom: 16 }}>
                 <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 4 }}>Passos</Text>
-                <Text style={{ color: '#3B82F6', fontSize: 24, fontWeight: 'bold' }}>
+                <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>
                   8.500
                   <Text style={{ color: '#9CA3AF', fontSize: 16, fontWeight: 'normal' }}>
                     / 12.000
@@ -231,7 +234,7 @@ export default function DashScreen() {
 
               <View style={{ marginBottom: 16 }}>
                 <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 4 }}>Calorias</Text>
-                <Text style={{ color: '#3B82F6', fontSize: 24, fontWeight: 'bold' }}>
+                <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>
                   520
                   <Text style={{ color: '#9CA3AF', fontSize: 16, fontWeight: 'normal' }}>
                     / 800 Cal
@@ -241,7 +244,7 @@ export default function DashScreen() {
 
               <View>
                 <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 4 }}>Água</Text>
-                <Text style={{ color: '#3B82F6', fontSize: 24, fontWeight: 'bold' }}>
+                <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>
                   2,1
                   <Text style={{ color: '#9CA3AF', fontSize: 16, fontWeight: 'normal' }}>
                     / 3,0 L
@@ -262,8 +265,8 @@ export default function DashScreen() {
                   backgroundGradientFrom: 'transparent',
                   backgroundGradientTo: 'transparent',
                   color: (opacity = 1, index = 0) => {
-                    const colors = ['#3B82F6', '#2563EB', '#93C5FD'];
-                    return colors[index as number] || `rgba(59, 130, 246, ${opacity})`;
+                    const colors = ['#60A5FA', '#60A5FA', '#93C5FD'];
+                    return colors[index as number] || `rgba(96, 165, 250, ${opacity})`;
                   },
                 }}
                 hideLegend={true}
@@ -307,7 +310,7 @@ export default function DashScreen() {
               justifyContent: 'center',
               marginRight: 16
             }}>
-              <Ionicons name="walk" size={24} color="#3B82F6" />
+              <Ionicons name="walk" size={24} color="white" />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ color: 'white', fontWeight: '600', fontSize: 16, marginBottom: 4 }}>
@@ -342,7 +345,7 @@ export default function DashScreen() {
               justifyContent: 'center',
               marginRight: 16
             }}>
-              <Ionicons name="fitness" size={24} color="#3B82F6" />
+              <Ionicons name="fitness" size={24} color="white" />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ color: 'white', fontWeight: '600', fontSize: 16, marginBottom: 4 }}>
@@ -376,7 +379,7 @@ export default function DashScreen() {
               justifyContent: 'center',
               marginRight: 16
             }}>
-              <Ionicons name="bicycle" size={24} color="#3B82F6" />
+              <Ionicons name="bicycle" size={24} color="white" />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ color: 'white', fontWeight: '600', fontSize: 16, marginBottom: 4 }}>
