@@ -1,22 +1,16 @@
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Image, RefreshControl, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Image, RefreshControl, Dimensions, ActivityIndicator } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Video, ResizeMode } from 'expo-av';
+import { VideoView, useVideoPlayer } from 'expo-video';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useSharedValue } from 'react-native-reanimated';
 import { RefreshSplash } from '@/components/RefreshSplash';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
+import { trainingsService, Training } from '@/services';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-type Treino = {
-    id: string;
-    titulo: string;
-    duracao: string;
-    dificuldade: 'Fácil' | 'Médio' | 'Difícil';
-    imagem?: any;
-};
 
 export default function TreinosScreen() {
     const router = useRouter();
@@ -25,65 +19,54 @@ export default function TreinosScreen() {
     const splashScale = useSharedValue(1);
     const splashOpacity = useSharedValue(0);
     const [activeCategory, setActiveCategory] = useState<'workouts' | 'fitness' | 'plans' | 'training'>('workouts');
-    const [treinos, setTreinos] = useState<Treino[]>([
-        {
-            id: '1',
-            titulo: 'Treino de Peito em Casa (Sem Equipamento)',
-            duracao: '45 min',
-            dificuldade: 'Difícil',
-            imagem: require('../assets/images/desenvolvimento.jpeg'),
-        },
-        {
-            id: '2',
-            titulo: 'Treino Completo de Pernas em Casa',
-            duracao: '45 min',
-            dificuldade: 'Médio',
-            imagem: require('../assets/images/prancha.jpeg'),
-        },
-        {
-            id: '3',
-            titulo: 'Treino de Força Corpo Inteiro (Sem Pesos)',
-            duracao: '55 min',
-            dificuldade: 'Difícil',
-            imagem: require('../assets/images/costas.jpeg'),
-        },
-        {
-            id: '4',
-            titulo: 'Treino Perfeito de Ombro em Casa',
-            duracao: '15 min',
-            dificuldade: 'Fácil',
-            imagem: require('../assets/images/desenvolvimento.jpeg'),
-        },
-    ]);
+    const [treinos, setTreinos] = useState<Training[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Video player configurado para loop
+    const videoPlayer = useVideoPlayer(require('../assets/background_720p.mp4'), player => {
+        player.loop = true;
+        player.play();
+        player.muted = true;
+    });
+
+    // Imagem padrão para treinos sem imagem
+    const defaultImage = require('../assets/images/desenvolvimento.jpeg');
+
+    // Carrega os treinos da API
+    const loadTreinos = async () => {
+        try {
+            setError(null);
+            const data = await trainingsService.getAll();
+            setTreinos(data);
+        } catch (err) {
+            console.error('Erro ao carregar treinos:', err);
+            setError('Erro ao carregar treinos. Verifique sua conexão.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Carrega os dados ao montar o componente
+    useEffect(() => {
+        loadTreinos();
+    }, []);
 
     const onRefresh = async () => {
         setRefreshing(true);
         setShowRefreshSplash(true);
-        // Simula carregamento de dados (substitua com sua lógica real)
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await loadTreinos();
         setShowRefreshSplash(false);
         await new Promise(resolve => setTimeout(resolve, 300));
         setRefreshing(false);
     };
 
-    const getDificuldadeColor = (dificuldade: string) => {
-        switch (dificuldade) {
-            case 'Fácil':
-                return 'bg-green-500';
-            case 'Médio':
-                return 'bg-yellow-500';
-            case 'Difícil':
-                return 'bg-red-500';
-            default:
-                return 'bg-gray-500';
-        }
-    };
 
     return (
         <View className="flex-1 bg-[#0B1120]">
             {/* Background Video */}
-            <Video
-                source={require('../assets/background_720p.mp4')}
+            <VideoView
+                player={videoPlayer}
                 style={{
                     position: 'absolute',
                     top: 0,
@@ -93,10 +76,8 @@ export default function TreinosScreen() {
                     width: '100%',
                     height: '100%',
                 }}
-                resizeMode={ResizeMode.COVER}
-                isLooping
-                shouldPlay
-                isMuted
+                contentFit="cover"
+                nativeControls={false}
             />
             {/* Blur Overlay */}
             <BlurView
@@ -171,7 +152,10 @@ export default function TreinosScreen() {
             {/* Add New Button */}
             <View className="px-4 py-4">
                 <LiquidGlassCard>
-                    <TouchableOpacity className="flex-row items-center justify-center gap-2">
+                    <TouchableOpacity 
+                        className="flex-row items-center justify-center gap-2"
+                        onPress={() => router.push('/treino-form' as any)}
+                    >
                         <Ionicons name="add-circle-outline" size={24} color="#60A5FA" />
                         <Text className="text-white font-bold text-base">Criar Novo Treino</Text>
                     </TouchableOpacity>
@@ -193,8 +177,40 @@ export default function TreinosScreen() {
                     />
                 }
             >
+                {/* Loading State */}
+                {loading && (
+                    <View className="flex-1 items-center justify-center py-20">
+                        <ActivityIndicator size="large" color="#60A5FA" />
+                        <Text className="text-white mt-4">Carregando treinos...</Text>
+                    </View>
+                )}
+
+                {/* Error State */}
+                {error && !loading && (
+                    <View className="flex-1 items-center justify-center py-20">
+                        <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
+                        <Text className="text-white mt-4 text-center px-8">{error}</Text>
+                        <TouchableOpacity 
+                            className="mt-4 bg-[#60A5FA] px-6 py-3 rounded-lg"
+                            onPress={loadTreinos}
+                        >
+                            <Text className="text-white font-semibold">Tentar novamente</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+
+                {/* Empty State */}
+                {!loading && !error && treinos.length === 0 && (
+                    <View className="flex-1 items-center justify-center py-20">
+                        <Ionicons name="barbell-outline" size={64} color="#9CA3AF" />
+                        <Text className="text-white mt-4 text-center px-8">
+                            Nenhum treino encontrado
+                        </Text>
+                    </View>
+                )}
+
                 <View className="flex-row flex-wrap justify-between pb-6">
-                    {treinos.map((treino) => (
+                    {!loading && !error && treinos.map((treino) => (
                         <TouchableOpacity 
                             key={treino.id} 
                             className="w-[48%] mb-6"
@@ -205,7 +221,7 @@ export default function TreinosScreen() {
                             <View className="rounded-2xl overflow-hidden relative shadow-lg">
                                 {/* Imagem de fundo */}
                                 <Image
-                                    source={treino.imagem}
+                                    source={treino.video_url ? { uri: treino.video_url } : defaultImage}
                                     className="w-full h-60"
                                     resizeMode="cover"
                                 />
@@ -229,23 +245,25 @@ export default function TreinosScreen() {
                                             className="text-white font-semibold text-sm mb-1"
                                             numberOfLines={2}
                                         >
-                                            {treino.titulo}
+                                            {treino.nome || treino.name}
                                         </Text>
 
                                         <View className="flex-row items-center justify-between">
                                             <View className="flex-row items-center gap-1">
                                                 <Ionicons name="play" size={13} color="#ddd" />
                                                 <Text className="text-gray-300 text-xs font-medium">
-                                                    {treino.duracao}
+                                                    {treino.duration || treino.duracao ? `${treino.duration || treino.duracao} min` : 'N/A'}
                                                 </Text>
                                             </View>
 
-                                            <View className="flex-row items-center gap-1">
-                                                <Text className="text-white text-xs font-bold">AAA</Text>
-                                                <Text className="text-gray-300 text-xs">
-                                                    {treino.dificuldade}
-                                                </Text>
-                                            </View>
+                                            {treino.carga && (
+                                                <View className="flex-row items-center gap-1">
+                                                    <Ionicons name="barbell" size={13} color="#60A5FA" />
+                                                    <Text className="text-gray-300 text-xs">
+                                                        {treino.carga}
+                                                    </Text>
+                                                </View>
+                                            )}
                                         </View>
                                     </View>
                                 </View>

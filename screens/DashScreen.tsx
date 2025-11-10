@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Dimensions, Image, Animated, RefreshControl } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions, Image, Animated, RefreshControl, ActivityIndicator } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { ProgressChart } from 'react-native-chart-kit';
@@ -6,7 +6,8 @@ import { useSharedValue } from 'react-native-reanimated';
 import { RefreshSplash } from '@/components/RefreshSplash';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
 import { BlurView } from 'expo-blur';
-import { Video, ResizeMode } from 'expo-av';
+import { VideoView, useVideoPlayer } from 'expo-video';
+import { trainingsService } from '@/services';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -17,6 +18,15 @@ export default function DashScreen() {
   const [showRefreshSplash, setShowRefreshSplash] = useState(false);
   const splashScale = useSharedValue(1);
   const splashOpacity = useSharedValue(0);
+  const [treinos, setTreinos] = useState<any[]>([]);
+  const [loadingTreinos, setLoadingTreinos] = useState(true);
+
+  // Video player configurado para loop
+  const videoPlayer = useVideoPlayer(require('../assets/background_720p.mp4'), player => {
+    player.loop = true;
+    player.play();
+    player.muted = true;
+  });
 
   const showGreetingToast = () => {
     setShowGreeting(true);
@@ -43,14 +53,28 @@ export default function DashScreen() {
 
   useEffect(() => {
     showGreetingToast();
+    loadTreinos();
   }, []);
+
+  const loadTreinos = async () => {
+    try {
+      setLoadingTreinos(true);
+      const data = await trainingsService.getAll();
+      setTreinos(data.slice(0, 3)); // Mostra apenas os 3 primeiros
+    } catch (err) {
+      console.error('Erro ao carregar treinos:', err);
+    } finally {
+      setLoadingTreinos(false);
+    }
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
     setShowRefreshSplash(true);
 
-    // Simula carregamento de dados (substitua com sua lógica real)
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Carrega dados reais
+    await loadTreinos();
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Esconde splash antes de mostrar o toast
     setShowRefreshSplash(false);
@@ -79,8 +103,8 @@ export default function DashScreen() {
   return (
     <View className="flex-1 bg-[#0B1120]">
       {/* Background Video */}
-      <Video
-        source={require('../assets/background_720p.mp4')}
+      <VideoView
+        player={videoPlayer}
         style={{
           position: 'absolute',
           top: 0,
@@ -90,10 +114,8 @@ export default function DashScreen() {
           width: '100%',
           height: '100%',
         }}
-        resizeMode={ResizeMode.COVER}
-        isLooping
-        shouldPlay
-        isMuted
+        contentFit="cover"
+        nativeControls={false}
       />
       {/* Blur Overlay */}
       <BlurView
@@ -289,109 +311,57 @@ export default function DashScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Workout Item 1 */}
-          <TouchableOpacity
-            style={{
-              backgroundColor: 'rgba(37, 99, 235, 0.2)',
-              borderRadius: 16,
-              padding: 16,
-              marginBottom: 12,
-              flexDirection: 'row',
-              alignItems: 'center'
-            }}
-            activeOpacity={0.7}
-          >
-            <View style={{
-              width: 48,
-              height: 48,
-              borderRadius: 24,
-              backgroundColor: 'rgba(59, 130, 246, 0.3)',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: 16
-            }}>
-              <Ionicons name="walk" size={24} color="white" />
+          {loadingTreinos ? (
+            <View style={{ padding: 20, alignItems: 'center' }}>
+              <ActivityIndicator size="large" color="#60A5FA" />
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: 'white', fontWeight: '600', fontSize: 16, marginBottom: 4 }}>
-                Caminhada Matinal
-              </Text>
-              <Text style={{ color: '#9CA3AF', fontSize: 14 }}>3,2 km</Text>
+          ) : treinos.length === 0 ? (
+            <View style={{ padding: 20, alignItems: 'center' }}>
+              <Ionicons name="barbell-outline" size={48} color="#6B7280" />
+              <Text style={{ color: '#9CA3AF', marginTop: 8 }}>Nenhum treino encontrado</Text>
             </View>
-            <View style={{ alignItems: 'flex-end' }}>
-              <Text style={{ color: 'white', fontSize: 14 }}>Hoje</Text>
-              <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
-            </View>
-          </TouchableOpacity>
-
-          {/* Workout Item 2 */}
-          <TouchableOpacity
-            style={{
-              backgroundColor: 'rgba(37, 99, 235, 0.2)',
-              borderRadius: 16,
-              padding: 16,
-              marginBottom: 12,
-              flexDirection: 'row',
-              alignItems: 'center'
-            }}
-            activeOpacity={0.7}
-          >
-            <View style={{
-              width: 48,
-              height: 48,
-              borderRadius: 24,
-              backgroundColor: 'rgba(59, 130, 246, 0.3)',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: 16
-            }}>
-              <Ionicons name="fitness" size={24} color="white" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: 'white', fontWeight: '600', fontSize: 16, marginBottom: 4 }}>
-                Treino de Força
-              </Text>
-              <Text style={{ color: '#9CA3AF', fontSize: 14 }}>45 min</Text>
-            </View>
-            <View style={{ alignItems: 'flex-end' }}>
-              <Text style={{ color: 'white', fontSize: 14 }}>Hoje</Text>
-              <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
-            </View>
-          </TouchableOpacity>
-
-          {/* Workout Item 3 */}
-          <TouchableOpacity
-            style={{
-              backgroundColor: 'rgba(37, 99, 235, 0.2)',
-              borderRadius: 16,
-              padding: 16,
-              flexDirection: 'row',
-              alignItems: 'center'
-            }}
-            activeOpacity={0.7}
-          >
-            <View style={{
-              width: 48,
-              height: 48,
-              borderRadius: 24,
-              backgroundColor: 'rgba(59, 130, 246, 0.3)',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: 16
-            }}>
-              <Ionicons name="bicycle" size={24} color="white" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: 'white', fontWeight: '600', fontSize: 16, marginBottom: 4 }}>
-                Ciclismo
-              </Text>
-              <Text style={{ color: '#9CA3AF', fontSize: 14 }}>12,5 km</Text>
-            </View>
-            <View style={{ alignItems: 'flex-end' }}>
-              <Text style={{ color: 'white', fontSize: 14 }}>Ontem</Text>
-              <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
-            </View>
-          </TouchableOpacity>
+          ) : (
+            treinos.map((treino, index) => (
+              <TouchableOpacity
+                key={treino.id}
+                style={{
+                  backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                  borderRadius: 16,
+                  padding: 16,
+                  marginBottom: index < treinos.length - 1 ? 12 : 0,
+                  flexDirection: 'row',
+                  alignItems: 'center'
+                }}
+                activeOpacity={0.7}
+              >
+                <View style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
+                  backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: 16
+                }}>
+                  <Ionicons name="barbell" size={24} color="white" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: 'white', fontWeight: '600', fontSize: 16, marginBottom: 4 }}>
+                    {treino.name}
+                  </Text>
+                  <Text style={{ color: '#9CA3AF', fontSize: 14 }}>
+                    {treino.duration ? `${treino.duration} min` : treino.repeticoes ? `${treino.repeticoes} reps` : 'Treino'}
+                  </Text>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  {treino.carga && (
+                    <Text style={{ color: '#60A5FA', fontSize: 14, marginBottom: 4 }}>{treino.carga} kg</Text>
+                  )}
+                  <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
+                </View>
+              </TouchableOpacity>
+            ))
+          )}
         </LiquidGlassCard>
       </View>
 
