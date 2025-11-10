@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Image, RefreshControl, Dimensions } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, RefreshControl, Dimensions, Alert } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { useState } from 'react';
@@ -6,6 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSharedValue } from 'react-native-reanimated';
 import { RefreshSplash } from '@/components/RefreshSplash';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
+import { useAuth } from '@/contexts/AuthContext';
+import { router } from 'expo-router';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -83,6 +85,7 @@ export default function PerfilScreen() {
   const [showRefreshSplash, setShowRefreshSplash] = useState(false);
   const splashScale = useSharedValue(1);
   const splashOpacity = useSharedValue(0);
+  const { signOut, user, userType } = useAuth();
 
   // Video player configurado para loop
   const videoPlayer = useVideoPlayer(require('../assets/background_720p.mp4'), player => {
@@ -99,6 +102,27 @@ export default function PerfilScreen() {
     setShowRefreshSplash(false);
     await new Promise(resolve => setTimeout(resolve, 300));
     setRefreshing(false);
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Sair da Conta',
+      'Tem certeza que deseja sair?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Sair',
+          style: 'destructive',
+          onPress: async () => {
+            await signOut();
+            router.replace('/login');
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -503,6 +527,7 @@ export default function PerfilScreen() {
             borderColor: '#EF4444'
           }}
           activeOpacity={0.7}
+          onPress={handleLogout}
         >
           <Ionicons name="log-out-outline" size={20} color="#EF4444" style={{ marginRight: 8 }} />
           <Text style={{ color: '#EF4444', fontSize: 16, fontWeight: '600' }}>

@@ -1,5 +1,5 @@
-import { Stack } from 'expo-router';
-import { View, Text, Image, useWindowDimensions } from 'react-native';
+import { Stack, router } from 'expo-router';
+import { View, Text, Image, useWindowDimensions, ActivityIndicator } from 'react-native';
 import { useState, useEffect } from 'react';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,10 +10,12 @@ import TreinosScreen from '../screens/TreinosScreen';
 import ExerciciosScreen from '../screens/ExerciciosScreen';
 import PerfilScreen from '../screens/PerfilScreen';
 import BottomNavigation from '../components/BottomNavigation';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'dash' | 'alunos' | 'treinos' | 'exercicios' | 'perfil'>('dash');
   const { width } = useWindowDimensions();
+  const { user, loading } = useAuth();
   
   // Define o tamanho proporcional à largura da tela
   const logoSize = width * 0.15; // 20% da largura da tela
@@ -34,6 +36,27 @@ export default function Home() {
       opacity: 0.3 + shimmer.value * 0.2,
     };
   });
+
+  // Verifica autenticação
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [loading, user]);
+
+  // Mostra loading enquanto verifica autenticação
+  if (loading) {
+    return (
+      <View className="flex-1 bg-[#0B1120] items-center justify-center">
+        <ActivityIndicator size="large" color="#60A5FA" />
+      </View>
+    );
+  }
+
+  // Se não estiver autenticado, não renderiza nada (vai redirecionar)
+  if (!user) {
+    return null;
+  }
 
   const renderScreen = () => {
     switch (activeTab) {

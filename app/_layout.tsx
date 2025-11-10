@@ -13,6 +13,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
+import { AuthProvider } from '../contexts/AuthContext';
 
 const { width } = Dimensions.get('window');
 
@@ -74,7 +75,11 @@ export default function Layout() {
     );
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <AuthProvider>
+      <Stack screenOptions={{ headerShown: false }} />
+    </AuthProvider>
+  );
 }
 
 const styles = StyleSheet.create({
