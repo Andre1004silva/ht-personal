@@ -17,7 +17,7 @@ const professionalData = {
   name: 'Samuel Silva',
   profession: 'Personal Trainer',
   cref: '123456-G/SP',
-  profileImage: require('../assets/images/personal.jpeg'),
+  profileImage: require('@/assets/images/personal.jpeg'),
   bio: 'Especialista em transformação corporal com foco em resultados sustentáveis e saúde integral.',
   stats: {
     students: 42,
@@ -88,7 +88,7 @@ export default function PerfilScreen() {
   const { signOut, user, userType } = useAuth();
 
   // Video player configurado para loop
-  const videoPlayer = useVideoPlayer(require('../assets/background_720p.mp4'), player => {
+  const videoPlayer = useVideoPlayer(require('@/assets/background_720p.mp4'), player => {
     player.loop = true;
     player.play();
     player.muted = true;

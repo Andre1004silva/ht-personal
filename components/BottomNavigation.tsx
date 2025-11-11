@@ -5,21 +5,32 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from 'react-native-reanimated';
 import { useEffect } from 'react';
 
-type TabType = 'dash' | 'alunos' | 'treinos' | 'exercicios' | 'perfil';
+type PersonalTabType = 'dash' | 'alunos' | 'treinos' | 'exercicios' | 'perfil';
+type StudentTabType = 'dash' | 'treinos' | 'perfil';
+type TabType = PersonalTabType | StudentTabType;
 
 interface BottomNavigationProps {
   activeTab: TabType;
   onTabChange: (tab: TabType) => void;
+  userType?: 'personal' | 'student';
 }
 
-export default function BottomNavigation({ activeTab, onTabChange }: BottomNavigationProps) {
-  const tabs: { id: TabType; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+export default function BottomNavigation({ activeTab, onTabChange, userType = 'personal' }: BottomNavigationProps) {
+  const personalTabs: { id: PersonalTabType; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
     { id: 'dash', label: 'Início', icon: 'home' },
     { id: 'alunos', label: 'Alunos', icon: 'people' },
     { id: 'treinos', label: 'Treinos', icon: 'barbell' },
     { id: 'exercicios', label: 'Exercícios', icon: 'heart-circle' },
     { id: 'perfil', label: 'Perfil', icon: 'person-circle' },
   ];
+
+  const studentTabs: { id: StudentTabType; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+    { id: 'dash', label: 'Início', icon: 'home' },
+    { id: 'treinos', label: 'Treinos', icon: 'barbell' },
+    { id: 'perfil', label: 'Perfil', icon: 'person-circle' },
+  ];
+
+  const tabs = userType === 'student' ? studentTabs : personalTabs;
   
   // Animação para efeito liquid
   const shimmer = useSharedValue(0);

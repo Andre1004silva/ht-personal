@@ -24,7 +24,7 @@ export default function AlunosScreen() {
   const splashOpacity = useSharedValue(0);
 
   // Video player configurado para loop
-  const videoPlayer = useVideoPlayer(require('../assets/background_720p.mp4'), player => {
+  const videoPlayer = useVideoPlayer(require('@/assets/background_720p.mp4'), player => {
     player.loop = true;
     player.play();
     player.muted = true;

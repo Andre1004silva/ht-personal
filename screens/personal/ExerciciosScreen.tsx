@@ -23,14 +23,14 @@ export default function ExerciciosScreen() {
   const [activeCategory, setActiveCategory] = useState<'todos' | 'peito' | 'costas' | 'pernas' | 'ombros' | 'bracos'>('todos');
 
   // Video player configurado para loop
-  const videoPlayer = useVideoPlayer(require('../assets/background_720p.mp4'), player => {
+  const videoPlayer = useVideoPlayer(require('@/assets/background_720p.mp4'), player => {
     player.loop = true;
     player.play();
     player.muted = true;
   });
 
   // Imagem padrão para exercícios sem imagem
-  const defaultImage = require('../assets/images/desenvolvimento.jpeg');
+  const defaultImage = require('@/assets/images/desenvolvimento.jpeg');
 
   // Carrega os exercícios da API
   const loadExercicios = async () => {

@@ -22,7 +22,7 @@ export default function DashScreen() {
   const [loadingTreinos, setLoadingTreinos] = useState(true);
 
   // Video player configurado para loop
-  const videoPlayer = useVideoPlayer(require('../assets/background_720p.mp4'), player => {
+  const videoPlayer = useVideoPlayer(require('@/assets/background_720p.mp4'), player => {
     player.loop = true;
     player.play();
     player.muted = true;
@@ -181,7 +181,7 @@ export default function DashScreen() {
             elevation: 8,
           }}>
             <Image
-              source={require('../assets/images/personal.jpeg')}
+              source={require('@/assets/images/personal.jpeg')}
               style={{
                 width: 48,
                 height: 48,

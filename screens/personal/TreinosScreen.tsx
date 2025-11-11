@@ -24,14 +24,14 @@ export default function TreinosScreen() {
     const [error, setError] = useState<string | null>(null);
 
     // Video player configurado para loop
-    const videoPlayer = useVideoPlayer(require('../assets/background_720p.mp4'), player => {
+    const videoPlayer = useVideoPlayer(require('@/assets/background_720p.mp4'), player => {
         player.loop = true;
         player.play();
         player.muted = true;
     });
 
     // Imagem padrão para treinos sem imagem
-    const defaultImage = require('../assets/images/desenvolvimento.jpeg');
+    const defaultImage = require('@/assets/images/desenvolvimento.jpeg');
 
     // Carrega os treinos da API
     const loadTreinos = async () => {
