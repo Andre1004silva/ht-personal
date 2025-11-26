@@ -8,10 +8,12 @@ import LiquidGlassCard from '@/components/LiquidGlassCard';
 import { BlurView } from 'expo-blur';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { trainingsService } from '@/services';
+import { useAuth } from '@/contexts/AuthContext';
 
 const screenWidth = Dimensions.get('window').width;
 
 export default function DashScreen() {
+  const { user } = useAuth();
   const [fadeAnim] = useState(new Animated.Value(0));
   const [showGreeting, setShowGreeting] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -53,13 +55,24 @@ export default function DashScreen() {
 
   useEffect(() => {
     showGreetingToast();
-    loadTreinos();
-  }, []);
+    if (user) {
+      loadTreinos();
+    }
+  }, [user]);
 
   const loadTreinos = async () => {
     try {
       setLoadingTreinos(true);
-      const data = await trainingsService.getAll();
+      
+      // Verifica se o usuário está logado
+      if (!user?.id) {
+        console.warn('Usuário não autenticado');
+        setLoadingTreinos(false);
+        return;
+      }
+      
+      // Usa o ID do usuário logado (treinador) como treinador_id
+      const data = await trainingsService.getAll(user.id);
       setTreinos(data.slice(0, 3)); // Mostra apenas os 3 primeiros
     } catch (err) {
       console.error('Erro ao carregar treinos:', err);

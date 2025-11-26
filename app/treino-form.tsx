@@ -5,9 +5,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useState, useEffect } from 'react';
 import { trainingsService, Training } from '@/services';
 import LiquidGlassCard from '../components/LiquidGlassCard';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function TreinoFormScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const params = useLocalSearchParams();
   const isEditing = !!params.id;
 
@@ -51,14 +53,25 @@ export default function TreinoFormScreen() {
       return;
     }
 
+    if (!user?.id) {
+      Alert.alert('Erro', 'Usuário não autenticado. Faça login novamente.');
+      return;
+    }
+
     try {
       setSaving(true);
       
+      // Adiciona o ID do usuário logado (treinador) como treinador_id
+      const dataToSave = {
+        ...formData,
+        treinador_id: user.id,
+      };
+      
       if (isEditing) {
-        await trainingsService.update(Number(params.id), formData);
+        await trainingsService.update(Number(params.id), dataToSave);
         Alert.alert('Sucesso', 'Treino atualizado com sucesso!');
       } else {
-        await trainingsService.create(formData as Omit<Training, 'id' | 'created_at' | 'updated_at'>);
+        await trainingsService.create(dataToSave as Omit<Training, 'id' | 'created_at' | 'updated_at'>);
         Alert.alert('Sucesso', 'Treino criado com sucesso!');
       }
       

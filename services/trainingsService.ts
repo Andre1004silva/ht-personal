@@ -46,10 +46,13 @@ class TrainingsService {
 
   /**
    * Busca todos os treinos
+   * @param treinadorId - ID do treinador (obrigatório pela API)
    */
-  async getAll(): Promise<Training[]> {
+  async getAll(treinadorId: number): Promise<Training[]> {
     try {
-      const response = await api.get<Training[]>('/trainings');
+      const response = await api.get<Training[]>('/trainings', {
+        params: { treinador_id: treinadorId }
+      });
       return response.data.map(t => this.normalizeTraining(t));
     } catch (error) {
       console.error('Erro ao buscar treinos:', error);

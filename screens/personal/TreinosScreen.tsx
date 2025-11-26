@@ -8,12 +8,14 @@ import { useSharedValue } from 'react-native-reanimated';
 import { RefreshSplash } from '@/components/RefreshSplash';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
 import { trainingsService, Training } from '@/services';
+import { useAuth } from '@/contexts/AuthContext';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 
 export default function TreinosScreen() {
     const router = useRouter();
+    const { user } = useAuth();
     const [refreshing, setRefreshing] = useState(false);
     const [showRefreshSplash, setShowRefreshSplash] = useState(false);
     const splashScale = useSharedValue(1);
@@ -37,7 +39,16 @@ export default function TreinosScreen() {
     const loadTreinos = async () => {
         try {
             setError(null);
-            const data = await trainingsService.getAll();
+            
+            // Verifica se o usuário está logado
+            if (!user?.id) {
+                setError('Usuário não autenticado. Faça login novamente.');
+                setLoading(false);
+                return;
+            }
+            
+            // Usa o ID do usuário logado (treinador) como treinador_id
+            const data = await trainingsService.getAll(user.id);
             setTreinos(data);
         } catch (err) {
             console.error('Erro ao carregar treinos:', err);
@@ -47,10 +58,12 @@ export default function TreinosScreen() {
         }
     };
 
-    // Carrega os dados ao montar o componente
+    // Carrega os dados ao montar o componente e quando o user estiver disponível
     useEffect(() => {
-        loadTreinos();
-    }, []);
+        if (user) {
+            loadTreinos();
+        }
+    }, [user]);
 
     const onRefresh = async () => {
         setRefreshing(true);
