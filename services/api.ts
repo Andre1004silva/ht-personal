@@ -24,6 +24,8 @@ api.interceptors.request.use(
     // }
     
     console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`);
+    console.log('[API Request Data]', config.data);
+    console.log('[API Request Headers]', config.headers);
     return config;
   },
   (error: AxiosError) => {

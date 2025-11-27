@@ -5,10 +5,65 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useState, useEffect } from 'react';
 import { clientesService, Cliente } from '@/services';
 import LiquidGlassCard from '../components/LiquidGlassCard';
+import { useAuth } from '@/contexts/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Função para aplicar máscara de telefone
+const applyPhoneMask = (value: string): string => {
+  const cleaned = value.replace(/\D/g, '');
+  if (cleaned.length <= 2) {
+    return cleaned;
+  } else if (cleaned.length <= 7) {
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`;
+  } else if (cleaned.length <= 11) {
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7, 11)}`;
+  }
+  return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7, 11)}`;
+};
+
+// Função para aplicar máscara de data DD/MM/YYYY
+const applyDateMask = (value: string): string => {
+  const cleaned = value.replace(/\D/g, '');
+  if (cleaned.length <= 2) {
+    return cleaned;
+  } else if (cleaned.length <= 4) {
+    return `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+  } else if (cleaned.length <= 8) {
+    return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+  }
+  return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+};
+
+// Função para remover máscara de telefone
+const removePhoneMask = (value: string): string => {
+  return value.replace(/\D/g, '');
+};
+
+// Função para converter data DD/MM/YYYY para YYYY-MM-DD
+const convertDateToBackend = (value: string): string => {
+  if (!value) return '';
+  const cleaned = value.replace(/\D/g, '');
+  if (cleaned.length === 8) {
+    return `${cleaned.slice(4, 8)}-${cleaned.slice(2, 4)}-${cleaned.slice(0, 2)}`;
+  }
+  return value;
+};
+
+// Função para converter data YYYY-MM-DD para DD/MM/YYYY
+const convertDateToFrontend = (value: string): string => {
+  if (!value) return '';
+  if (value.includes('/')) return value;
+  const parts = value.split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return value;
+};
 
 export default function AlunoFormScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { user } = useAuth();
   const isEditing = !!params.id;
 
   const [loading, setLoading] = useState(isEditing);
@@ -36,7 +91,14 @@ export default function AlunoFormScreen() {
     try {
       setLoading(true);
       const data = await clientesService.getById(Number(params.id));
-      setFormData(data);
+      // Aplica máscaras aos dados carregados
+      setFormData({
+        ...data,
+        telefone: data.telefone ? applyPhoneMask(data.telefone) : '',
+        phone_number: data.phone_number ? applyPhoneMask(data.phone_number) : '',
+        data_nascimento: data.data_nascimento ? convertDateToFrontend(data.data_nascimento) : '',
+        date_of_birth: data.date_of_birth ? convertDateToFrontend(data.date_of_birth) : '',
+      });
     } catch (err) {
       Alert.alert('Erro', 'Erro ao carregar dados do cliente');
       router.back();
@@ -62,18 +124,36 @@ export default function AlunoFormScreen() {
       return;
     }
 
+    // Verifica se o usuário está logado
+    if (!user?.id) {
+      Alert.alert('Erro', 'Usuário não autenticado. Faça login novamente.');
+      return;
+    }
+
     try {
       setSaving(true);
       
+      // Remove máscaras antes de enviar para o backend
+      const dataToSave = {
+        ...formData,
+        treinador_id: user.id, // Adiciona o ID do treinador logado
+        telefone: removePhoneMask(formData.telefone || ''),
+        phone_number: removePhoneMask(formData.telefone || ''),
+        data_nascimento: convertDateToBackend(formData.data_nascimento || ''),
+        date_of_birth: convertDateToBackend(formData.data_nascimento || ''),
+      };
+      
       if (isEditing) {
-        await clientesService.update(Number(params.id), formData);
+        await clientesService.update(Number(params.id), dataToSave);
         Alert.alert('Sucesso', 'Cliente atualizado com sucesso!');
       } else {
-        await clientesService.create(formData as Omit<Cliente, 'id' | 'created_at' | 'updated_at'>);
+        await clientesService.create(dataToSave as Omit<Cliente, 'id' | 'created_at' | 'updated_at'>);
         Alert.alert('Sucesso', 'Cliente criado com sucesso!');
       }
       
-      router.back();
+      // Define a tab alunos como ativa e volta para o PersonalStack
+      await AsyncStorage.setItem('@HighTraining:activeTab', 'alunos');
+      router.replace('/');
     } catch (err: any) {
       Alert.alert('Erro', err.message || 'Erro ao salvar cliente');
     } finally {
@@ -133,7 +213,7 @@ export default function AlunoFormScreen() {
                 placeholder="Digite o nome completo"
                 placeholderTextColor="#6B7280"
                 value={formData.nome}
-                onChangeText={(text) => setFormData({ ...formData, nome: text })}
+                onChangeText={(text) => setFormData({ ...formData, nome: text, name: text })}
               />
             </View>
 
@@ -174,8 +254,12 @@ export default function AlunoFormScreen() {
                 placeholder="(11) 99999-9999"
                 placeholderTextColor="#6B7280"
                 keyboardType="phone-pad"
+                maxLength={15}
                 value={formData.telefone}
-                onChangeText={(text) => setFormData({ ...formData, telefone: text })}
+                onChangeText={(text) => {
+                  const masked = applyPhoneMask(text);
+                  setFormData({ ...formData, telefone: masked, phone_number: masked });
+                }}
               />
             </View>
           </LiquidGlassCard>
@@ -188,10 +272,15 @@ export default function AlunoFormScreen() {
               <Text className="text-gray-400 text-sm mb-2">Data de Nascimento</Text>
               <TextInput
                 className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="YYYY-MM-DD"
+                placeholder="DD/MM/AAAA"
                 placeholderTextColor="#6B7280"
+                keyboardType="numeric"
+                maxLength={10}
                 value={formData.data_nascimento || formData.date_of_birth}
-                onChangeText={(text) => setFormData({ ...formData, data_nascimento: text, date_of_birth: text })}
+                onChangeText={(text) => {
+                  const masked = applyDateMask(text);
+                  setFormData({ ...formData, data_nascimento: masked, date_of_birth: masked });
+                }}
               />
             </View>
 
@@ -223,7 +312,7 @@ export default function AlunoFormScreen() {
           <View className="flex-row gap-3 mb-8">
             <TouchableOpacity 
               className="flex-1 bg-[#141c30] rounded-2xl py-4 items-center"
-              onPress={() => router.back()}
+              onPress={() => router.replace('/')}
               disabled={saving}
             >
               <Text className="text-white text-base font-bold">Cancelar</Text>

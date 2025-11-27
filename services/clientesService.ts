@@ -75,10 +75,39 @@ class ClientesService {
    */
   async create(cliente: Omit<Cliente, 'id' | 'created_at' | 'updated_at'>): Promise<Cliente> {
     try {
-      const response = await api.post<Cliente>('/clientes', cliente);
-      return response.data;
-    } catch (error) {
+      // Converte para o formato do backend
+      const payload: any = {
+        name: cliente.name || cliente.nome,
+        email: cliente.email,
+        password: cliente.password,
+      };
+      
+      // Adiciona campos opcionais apenas se tiverem valor
+      const phone = cliente.phone_number || cliente.telefone;
+      if (phone && phone.trim()) {
+        payload.phone_number = phone;
+      }
+      
+      const dateOfBirth = cliente.date_of_birth || cliente.data_nascimento;
+      if (dateOfBirth && dateOfBirth.trim()) {
+        payload.date_of_birth = dateOfBirth;
+      }
+      
+      if (cliente.gender && cliente.gender.trim()) {
+        payload.gender = cliente.gender;
+      }
+      
+      if (cliente.treinador_id) {
+        payload.treinador_id = cliente.treinador_id;
+      }
+      
+      console.log('[ClientesService] Payload enviado:', payload);
+      console.log('[ClientesService] Cliente original:', cliente);
+      const response = await api.post<Cliente>('/clientes', payload);
+      return this.normalizeCliente(response.data);
+    } catch (error: any) {
       console.error('Erro ao criar cliente:', error);
+      console.error('Erro detalhado:', error.response?.data);
       throw error;
     }
   }
@@ -88,8 +117,18 @@ class ClientesService {
    */
   async update(id: number, cliente: Partial<Cliente>): Promise<Cliente> {
     try {
-      const response = await api.put<Cliente>(`/clientes/${id}`, cliente);
-      return response.data;
+      // Converte para o formato do backend
+      const payload: any = {};
+      if (cliente.name || cliente.nome) payload.name = cliente.name || cliente.nome;
+      if (cliente.email !== undefined) payload.email = cliente.email;
+      if (cliente.password !== undefined) payload.password = cliente.password;
+      if (cliente.phone_number || cliente.telefone) payload.phone_number = cliente.phone_number || cliente.telefone;
+      if (cliente.date_of_birth || cliente.data_nascimento) payload.date_of_birth = cliente.date_of_birth || cliente.data_nascimento;
+      if (cliente.gender !== undefined) payload.gender = cliente.gender;
+      if (cliente.treinador_id !== undefined) payload.treinador_id = cliente.treinador_id;
+      
+      const response = await api.put<Cliente>(`/clientes/${id}`, payload);
+      return this.normalizeCliente(response.data);
     } catch (error) {
       console.error(`Erro ao atualizar cliente ${id}:`, error);
       throw error;

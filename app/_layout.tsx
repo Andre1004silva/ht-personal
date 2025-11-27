@@ -14,6 +14,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { AuthProvider } from '../contexts/AuthContext';
+import { NotificationProvider } from '../contexts/NotificationContext';
 
 const { width } = Dimensions.get('window');
 
@@ -77,7 +78,9 @@ export default function Layout() {
 
   return (
     <AuthProvider>
-      <Stack screenOptions={{ headerShown: false }} />
+      <NotificationProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </NotificationProvider>
     </AuthProvider>
   );
 }

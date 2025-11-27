@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from 'react-native-reanimated';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import DashScreen from '../screens/personal/DashScreen';
 import AlunosScreen from '../screens/personal/AlunosScreen';
 import TreinosScreen from '../screens/personal/TreinosScreen';
@@ -23,6 +24,22 @@ export default function PersonalStack() {
       -1,
       false
     );
+    
+    // Verifica se há uma tab específica para ativar
+    const checkActiveTab = async () => {
+      try {
+        const savedTab = await AsyncStorage.getItem('@HighTraining:activeTab');
+        if (savedTab && ['dash', 'alunos', 'treinos', 'exercicios', 'perfil'].includes(savedTab)) {
+          setActiveTab(savedTab as 'dash' | 'alunos' | 'treinos' | 'exercicios' | 'perfil');
+          // Remove o item após usar para não interferir na próxima navegação
+          await AsyncStorage.removeItem('@HighTraining:activeTab');
+        }
+      } catch (error) {
+        console.log('Erro ao verificar tab ativa:', error);
+      }
+    };
+    
+    checkActiveTab();
   }, []);
   
   const animatedShimmerStyle = useAnimatedStyle(() => {
