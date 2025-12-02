@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Image, RefreshControl, Dimensions, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, RefreshControl, Dimensions, Animated, Alert, Modal, TextInput } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,6 +6,7 @@ import { useState, useRef } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 import { RefreshSplash } from '../../components/RefreshSplash';
 import LiquidGlassCard from '../../components/LiquidGlassCard';
+import agendaPointService from '../../services/agendaPointService';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -32,8 +33,20 @@ export default function StudentWorkoutScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showRefreshSplash, setShowRefreshSplash] = useState(false);
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
+  const [registrandoPonto, setRegistrandoPonto] = useState<string | null>(null);
+  const [pontosRegistrados, setPontosRegistrados] = useState<Set<string>>(new Set());
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogForm, setDialogForm] = useState({
+    workoutName: '',
+    duration: '',
+    dayWeek: '',
+    notes: ''
+  });
   const splashScale = useSharedValue(1);
   const splashOpacity = useSharedValue(0);
+
+  // ID do cliente - TODO: pegar do contexto de autenticação
+  const clienteId = 1;
 
   // Video player configurado para loop
   const videoPlayer = useVideoPlayer(require('../../assets/background_720p.mp4'), player => {
@@ -148,6 +161,94 @@ export default function StudentWorkoutScreen() {
     return workout.workoutName.toLowerCase().includes('descanso');
   };
 
+  const registrarPonto = async (workout: WorkoutDay) => {
+    if (isRestDay(workout)) return;
+    
+    try {
+      setRegistrandoPonto(workout.day);
+      
+      await agendaPointService.registrarPonto(clienteId, {
+        workoutName: workout.workoutName,
+        duration: workout.duration,
+        dayName: workout.dayName,
+        notes: `Treino concluído com ${workout.exercises.length} exercícios`
+      });
+      
+      // Adiciona o dia aos pontos registrados
+      setPontosRegistrados(prev => new Set([...prev, workout.day]));
+      
+      Alert.alert(
+        'Ponto Registrado! ✅',
+        `Seu treino de ${workout.dayName} foi registrado com sucesso!`,
+        [{ text: 'OK', style: 'default' }]
+      );
+      
+    } catch (error: any) {
+      console.error('Erro ao registrar ponto:', error);
+      Alert.alert(
+        'Erro ao Registrar',
+        error.response?.data?.message || 'Não foi possível registrar o ponto. Tente novamente.',
+        [{ text: 'OK', style: 'default' }]
+      );
+    } finally {
+      setRegistrandoPonto(null);
+    }
+  };
+
+  const jaRegistrouPonto = (workout: WorkoutDay) => {
+    return pontosRegistrados.has(workout.day);
+  };
+
+  const resetDialogForm = () => {
+    setDialogForm({
+      workoutName: '',
+      duration: '',
+      dayWeek: '',
+      notes: ''
+    });
+  };
+
+  const handleCloseDialog = () => {
+    setShowDialog(false);
+    resetDialogForm();
+  };
+
+  const handleSubmitDialog = async () => {
+    if (!dialogForm.workoutName.trim() || !dialogForm.duration.trim() || !dialogForm.dayWeek.trim()) {
+      Alert.alert('Campos Obrigatórios', 'Por favor, preencha nome do treino, duração e dia da semana.');
+      return;
+    }
+
+    try {
+      setRegistrandoPonto('dialog');
+      
+      await agendaPointService.registrarPonto(clienteId, {
+        workoutName: dialogForm.workoutName,
+        duration: dialogForm.duration,
+        dayName: dialogForm.dayWeek,
+        notes: dialogForm.notes || `Treino personalizado registrado`
+      });
+      
+      Alert.alert(
+        'Treino Registrado! ✅',
+        `Seu treino "${dialogForm.workoutName}" foi registrado com sucesso!`,
+        [{ text: 'OK', style: 'default' }]
+      );
+      
+      handleCloseDialog();
+      
+    } catch (error: any) {
+      console.error('Erro ao registrar treino personalizado:', error);
+      Alert.alert(
+        'Erro ao Registrar',
+        error.response?.data?.message || 'Não foi possível registrar o treino. Tente novamente.',
+        [{ text: 'OK', style: 'default' }]
+      );
+    } finally {
+      setRegistrandoPonto(null);
+    }
+  };
+
   return (
     <View className="flex-1 bg-[#0B1120]">
       {/* Background Video */}
@@ -180,12 +281,35 @@ export default function StudentWorkoutScreen() {
 
       {/* Header */}
       <View style={{ paddingTop: 120, paddingHorizontal: 24, paddingBottom: 16 }}>
-        <Text style={{ color: 'white', fontSize: 28, fontWeight: 'bold', marginBottom: 4 }}>
-          Meus Treinos
-        </Text>
-        <Text style={{ color: '#9CA3AF', fontSize: 16 }}>
-          Plano semanal de treinos
-        </Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: 'white', fontSize: 28, fontWeight: 'bold', marginBottom: 4 }}>
+              Meus Treinos
+            </Text>
+            <Text style={{ color: '#9CA3AF', fontSize: 16 }}>
+              Plano semanal de treinos
+            </Text>
+          </View>
+          
+          {/* Botão Adicionar Treino */}
+          <TouchableOpacity
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              backgroundColor: 'rgba(59, 130, 246, 0.3)',
+              borderWidth: 2,
+              borderColor: '#60A5FA',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: 4,
+            }}
+            activeOpacity={0.7}
+            onPress={() => setShowDialog(true)}
+          >
+            <Ionicons name="add" size={24} color="#60A5FA" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Treinos da Semana */}
@@ -342,24 +466,47 @@ export default function StudentWorkoutScreen() {
                       </View>
                     ))}
 
-                    {/* Botão Iniciar Treino */}
+                    {/* Botão Registrar Ponto */}
                     {!workout.completed && (
                       <TouchableOpacity
                         style={{
-                          backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                          backgroundColor: jaRegistrouPonto(workout) 
+                            ? 'rgba(34, 197, 94, 0.3)' 
+                            : 'rgba(59, 130, 246, 0.3)',
                           borderRadius: 12,
                           padding: 14,
                           flexDirection: 'row',
                           alignItems: 'center',
                           justifyContent: 'center',
                           marginTop: 12,
+                          opacity: registrandoPonto === workout.day ? 0.6 : 1,
                         }}
                         activeOpacity={0.7}
+                        onPress={() => registrarPonto(workout)}
+                        disabled={registrandoPonto === workout.day || jaRegistrouPonto(workout)}
                       >
-                        <Ionicons name="play-circle" size={24} color="white" />
-                        <Text style={{ color: 'white', fontSize: 16, fontWeight: '600', marginLeft: 8 }}>
-                          Iniciar Treino
-                        </Text>
+                        {registrandoPonto === workout.day ? (
+                          <>
+                            <Ionicons name="hourglass" size={24} color="white" />
+                            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600', marginLeft: 8 }}>
+                              Registrando...
+                            </Text>
+                          </>
+                        ) : jaRegistrouPonto(workout) ? (
+                          <>
+                            <Ionicons name="checkmark-circle" size={24} color="#22C55E" />
+                            <Text style={{ color: '#22C55E', fontSize: 16, fontWeight: '600', marginLeft: 8 }}>
+                              Ponto Registrado
+                            </Text>
+                          </>
+                        ) : (
+                          <>
+                            <Ionicons name="fitness" size={24} color="white" />
+                            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600', marginLeft: 8 }}>
+                              Registrar Ponto
+                            </Text>
+                          </>
+                        )}
                       </TouchableOpacity>
                     )}
                   </View>
@@ -370,11 +517,195 @@ export default function StudentWorkoutScreen() {
         ))}
       </ScrollView>
 
-      <RefreshSplash 
-        visible={showRefreshSplash} 
-        scale={splashScale} 
-        opacity={splashOpacity} 
-      />
-    </View>
-  );
-}
+      {/* Dialog de Registro de Treino */}
+      <Modal
+          visible={showDialog}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={handleCloseDialog}
+        >
+          <View style={{
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 20,
+          }}>
+            <BlurView
+              intensity={20}
+              tint="dark"
+              style={{
+                width: '100%',
+                maxWidth: 400,
+                borderRadius: 20,
+                overflow: 'hidden',
+              }}
+            >
+              <View style={{
+                backgroundColor: 'rgba(20, 28, 48, 0.95)',
+                padding: 24,
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor: 'rgba(96, 165, 250, 0.3)',
+              }}>
+                {/* Header do Dialog */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                  <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>
+                    Registrar Treino
+                  </Text>
+                  <TouchableOpacity onPress={handleCloseDialog}>
+                    <Ionicons name="close" size={24} color="#9CA3AF" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Formulário */}
+                <View style={{ gap: 16 }}>
+                  {/* Nome do Treino */}
+                  <View>
+                    <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 8 }}>
+                      Nome do Treino *
+                    </Text>
+                    <TextInput
+                      style={{
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 1,
+                        borderColor: 'rgba(96, 165, 250, 0.3)',
+                        borderRadius: 12,
+                        padding: 12,
+                        color: 'white',
+                        fontSize: 16,
+                      }}
+                      placeholder="Ex: Treino A - Peito e Tríceps"
+                      placeholderTextColor="#6B7280"
+                      value={dialogForm.workoutName}
+                      onChangeText={(text) => setDialogForm(prev => ({ ...prev, workoutName: text }))}
+                    />
+                  </View>
+
+                  {/* Duração */}
+                  <View>
+                    <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 8 }}>
+                      Duração *
+                    </Text>
+                    <TextInput
+                      style={{
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 1,
+                        borderColor: 'rgba(96, 165, 250, 0.3)',
+                        borderRadius: 12,
+                        padding: 12,
+                        color: 'white',
+                        fontSize: 16,
+                      }}
+                      placeholder="Ex: 45 min"
+                      placeholderTextColor="#6B7280"
+                      value={dialogForm.duration}
+                      onChangeText={(text) => setDialogForm(prev => ({ ...prev, duration: text }))}
+                    />
+                  </View>
+
+                  {/* Dia da Semana */}
+                  <View>
+                    <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 8 }}>
+                      Dia da Semana *
+                    </Text>
+                    <TextInput
+                      style={{
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 1,
+                        borderColor: 'rgba(96, 165, 250, 0.3)',
+                        borderRadius: 12,
+                        padding: 12,
+                        color: 'white',
+                        fontSize: 16,
+                      }}
+                      placeholder="Ex: Segunda-feira"
+                      placeholderTextColor="#6B7280"
+                      value={dialogForm.dayWeek}
+                      onChangeText={(text) => setDialogForm(prev => ({ ...prev, dayWeek: text }))}
+                    />
+                  </View>
+
+                  {/* Observações */}
+                  <View>
+                    <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 8 }}>
+                      Observações
+                    </Text>
+                    <TextInput
+                      style={{
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 1,
+                        borderColor: 'rgba(96, 165, 250, 0.3)',
+                        borderRadius: 12,
+                        padding: 12,
+                        color: 'white',
+                        fontSize: 16,
+                        minHeight: 80,
+                        textAlignVertical: 'top',
+                      }}
+                      placeholder="Observações sobre o treino (opcional)"
+                      placeholderTextColor="#6B7280"
+                      value={dialogForm.notes}
+                      onChangeText={(text) => setDialogForm(prev => ({ ...prev, notes: text }))}
+                      multiline
+                      numberOfLines={3}
+                    />
+                  </View>
+                </View>
+
+                {/* Botões */}
+                <View style={{ flexDirection: 'row', gap: 12, marginTop: 24 }}>
+                  <TouchableOpacity
+                    style={{
+                      flex: 1,
+                      backgroundColor: 'rgba(156, 163, 175, 0.2)',
+                      borderRadius: 12,
+                      padding: 14,
+                      alignItems: 'center',
+                    }}
+                    onPress={handleCloseDialog}
+                  >
+                    <Text style={{ color: '#9CA3AF', fontSize: 16, fontWeight: '600' }}>
+                      Cancelar
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={{
+                      flex: 1,
+                      backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                      borderRadius: 12,
+                      padding: 14,
+                      alignItems: 'center',
+                      opacity: registrandoPonto === 'dialog' ? 0.6 : 1,
+                    }}
+                    onPress={handleSubmitDialog}
+                    disabled={registrandoPonto === 'dialog'}
+                  >
+                    {registrandoPonto === 'dialog' ? (
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Ionicons name="hourglass" size={16} color="white" />
+                        <Text style={{ color: 'white', fontSize: 16, fontWeight: '600', marginLeft: 8 }}>
+                          Registrando...
+                        </Text>
+                      </View>
+                    ) : (
+                      <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>
+                        Registrar
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </BlurView>
+          </View>
+        </Modal>
+
+        <RefreshSplash 
+          visible={showRefreshSplash} 
+          scale={splashScale} 
+          opacity={splashOpacity} 
+        />
+      </View>
+    );
+  }

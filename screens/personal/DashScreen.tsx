@@ -7,7 +7,7 @@ import { RefreshSplash } from '@/components/RefreshSplash';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
 import { BlurView } from 'expo-blur';
 import { VideoView, useVideoPlayer } from 'expo-video';
-import { trainingsService } from '@/services';
+import { trainingsService, treinadorPhotosService } from '@/services';
 import { useAuth } from '@/contexts/AuthContext';
 
 const screenWidth = Dimensions.get('window').width;
@@ -22,6 +22,8 @@ export default function DashScreen() {
   const splashOpacity = useSharedValue(0);
   const [treinos, setTreinos] = useState<any[]>([]);
   const [loadingTreinos, setLoadingTreinos] = useState(true);
+  const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
 
   // Video player configurado para loop
   const videoPlayer = useVideoPlayer(require('@/assets/background_720p.mp4'), player => {
@@ -29,6 +31,19 @@ export default function DashScreen() {
     player.play();
     player.muted = true;
   });
+
+  // Carrega foto de perfil do treinador
+  const loadProfilePhoto = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const photoUrl = treinadorPhotosService.getProfilePhotoUrl(user.id);
+      setProfileImageUri(photoUrl);
+    } catch (error) {
+      console.log('Nenhuma foto de perfil encontrada para o treinador');
+      setProfileImageUri(null);
+    }
+  };
 
   const showGreetingToast = () => {
     setShowGreeting(true);
@@ -54,13 +69,39 @@ export default function DashScreen() {
   };
 
   useEffect(() => {
+    if (user?.id) {
+      loadTrainerData();
+      loadProfilePhoto();
+      loadDashboardStats();
+    }
+    
+    // Animação de entrada do greeting
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+
+    // Esconder greeting após 3 segundos
+    const timer = setTimeout(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => setShowGreeting(false));
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [user?.id]);
+
+  useEffect(() => {
     showGreetingToast();
     if (user) {
-      loadTreinos();
+      loadTrainerData();
     }
   }, [user]);
 
-  const loadTreinos = async () => {
+  const loadTrainerData = async () => {
     try {
       setLoadingTreinos(true);
       
@@ -81,13 +122,35 @@ export default function DashScreen() {
     }
   };
 
+  const loadDashboardStats = async () => {
+    if (!user?.id) return;
+    
+    try {
+      // Aqui você pode implementar uma chamada para buscar estatísticas do dashboard
+      // Por enquanto, vamos usar dados de fallback
+      setDashboardStats({
+        steps: 8500,
+        stepsGoal: 12000,
+        calories: 650,
+        caloriesGoal: 1000,
+        water: 1.4,
+        waterGoal: 2.0
+      });
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas do dashboard:', error);
+    }
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
     setShowRefreshSplash(true);
 
     // Carrega dados reais
-    await loadTreinos();
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await Promise.all([
+      loadTrainerData(),
+      loadProfilePhoto(),
+      loadDashboardStats()
+    ]);
 
     // Esconde splash antes de mostrar o toast
     setShowRefreshSplash(false);
@@ -194,7 +257,7 @@ export default function DashScreen() {
             elevation: 8,
           }}>
             <Image
-              source={require('@/assets/images/personal.jpeg')}
+              source={profileImageUri ? { uri: profileImageUri } : require('@/assets/images/personal.jpeg')}
               style={{
                 width: 48,
                 height: 48,
@@ -202,7 +265,7 @@ export default function DashScreen() {
                 marginRight: 12
               }}
             />
-            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>Boa tarde, Samuel!</Text>
+            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>Boa tarde, {user?.name || 'Samuel'}!</Text>
           </View>
         </Animated.View>
       )}
@@ -218,12 +281,14 @@ export default function DashScreen() {
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 12 }}>
             <Text style={{ color: 'white', fontSize: 36, fontWeight: 'bold' }}>
-              8.500
+              {dashboardStats?.steps?.toLocaleString() || '0'}
               <Text style={{ color: '#9CA3AF', fontSize: 20, fontWeight: 'normal' }}>
-                / 12.000
+                / {dashboardStats?.stepsGoal?.toLocaleString() || '0'}
               </Text>
             </Text>
-            <Text style={{ color: '#9CA3AF', fontSize: 16 }}>71%</Text>
+            <Text style={{ color: '#9CA3AF', fontSize: 16 }}>
+              {dashboardStats ? Math.round((dashboardStats.steps / dashboardStats.stepsGoal) * 100) : 0}%
+            </Text>
           </View>
           {/* Progress Bar */}
           <View style={{
@@ -234,7 +299,7 @@ export default function DashScreen() {
           }}>
             <View style={{
               height: '100%',
-              width: '71%',
+              width: `${dashboardStats ? Math.round((dashboardStats.steps / dashboardStats.stepsGoal) * 100) : 0}%`,
               backgroundColor: '#60A5FA',
               borderRadius: 6
             }} />
@@ -260,7 +325,7 @@ export default function DashScreen() {
               <View style={{ marginBottom: 16 }}>
                 <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 4 }}>Passos</Text>
                 <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>
-                  8.500
+                  {dashboardStats?.steps?.toLocaleString() || '0'}
                   <Text style={{ color: '#9CA3AF', fontSize: 16, fontWeight: 'normal' }}>
                     / 12.000
                   </Text>

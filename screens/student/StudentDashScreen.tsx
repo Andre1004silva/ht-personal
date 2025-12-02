@@ -6,16 +6,20 @@ import { RefreshSplash } from '../../components/RefreshSplash';
 import LiquidGlassCard from '../../components/LiquidGlassCard';
 import { BlurView } from 'expo-blur';
 import { VideoView, useVideoPlayer } from 'expo-video';
+import { treinadorPhotosService } from '../../services';
+import { useAuth } from '../../contexts/AuthContext';
 
 const screenWidth = Dimensions.get('window').width;
 
 export default function StudentDashScreen() {
+  const { user } = useAuth();
   const [fadeAnim] = useState(new Animated.Value(0));
   const [showGreeting, setShowGreeting] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showRefreshSplash, setShowRefreshSplash] = useState(false);
   const splashScale = useSharedValue(1);
   const splashOpacity = useSharedValue(0);
+  const [trainerImageUri, setTrainerImageUri] = useState<string | null>(null);
 
   // Video player configurado para loop
   const videoPlayer = useVideoPlayer(require('../../assets/background_720p.mp4'), player => {
@@ -23,6 +27,21 @@ export default function StudentDashScreen() {
     player.play();
     player.muted = true;
   });
+
+  // Carrega foto do personal trainer do aluno
+  const loadTrainerPhoto = async () => {
+    // Por enquanto, vamos usar um ID fixo do treinador (você pode ajustar conforme sua lógica)
+    // Em um cenário real, você obteria o treinador_id do perfil do cliente
+    const treinadorId = user?.treinador_id || 1; // Assumindo que existe um campo treinador_id no user
+    
+    try {
+      const photoUrl = treinadorPhotosService.getProfilePhotoUrl(treinadorId);
+      setTrainerImageUri(photoUrl);
+    } catch (error) {
+      console.log('Nenhuma foto de perfil encontrada para o personal trainer');
+      setTrainerImageUri(null);
+    }
+  };
 
   const showGreetingToast = () => {
     setShowGreeting(true);
@@ -46,6 +65,28 @@ export default function StudentDashScreen() {
       });
     }, 1800);
   };
+
+  useEffect(() => {
+    loadTrainerPhoto();
+    
+    // Animação de entrada do greeting
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+
+    // Esconder greeting após 3 segundos
+    const timer = setTimeout(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => setShowGreeting(false));
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [user?.id]);
 
   useEffect(() => {
     showGreetingToast();
@@ -173,7 +214,7 @@ export default function StudentDashScreen() {
             elevation: 8,
           }}>
             <Image
-              source={require('../../assets/images/personal.jpeg')}
+              source={trainerImageUri ? { uri: trainerImageUri } : require('../../assets/images/personal.jpeg')}
               style={{
                 width: 48,
                 height: 48,
@@ -181,7 +222,7 @@ export default function StudentDashScreen() {
                 marginRight: 12
               }}
             />
-            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>Bom treino, João!</Text>
+            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>Bom treino, {user?.name || 'João'}!</Text>
           </View>
         </Animated.View>
       )}

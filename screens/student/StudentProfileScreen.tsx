@@ -1,55 +1,30 @@
-import { View, Text, ScrollView, TouchableOpacity, Image, RefreshControl, Dimensions, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, RefreshControl, Dimensions, Alert, ActivityIndicator } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { VideoView, useVideoPlayer } from 'expo-video';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useSharedValue } from 'react-native-reanimated';
+import * as ImagePicker from 'expo-image-picker';
 import { RefreshSplash } from '../../components/RefreshSplash';
 import LiquidGlassCard from '../../components/LiquidGlassCard';
 import { useAuth } from '../../contexts/AuthContext';
 import { router } from 'expo-router';
+import { clientePhotosService, treinadorPhotosService, clientesService } from '../../services';
 
 const { width: screenWidth } = Dimensions.get('window');
-
-// Dados mockados do aluno
-const studentData = {
-  id: '1',
-  name: 'João Pedro Santos',
-  email: 'joao.santos@email.com',
-  phone: '+55 11 98765-1234',
-  profileImage: require('../../assets/images/personal.jpeg'),
-  memberSince: 'Março 2024',
-  plan: 'Premium Mensal',
-  nextPayment: '15/12/2024',
-  personalTrainer: {
-    name: 'Samuel Silva',
-    cref: '123456-G/SP',
-    image: require('../../assets/images/personal.jpeg'),
-  },
-  stats: {
-    workoutsCompleted: 45,
-    currentStreak: 5,
-    totalDays: 90,
-    avgPerWeek: 3.5,
-  },
-  goals: [
-    { id: '1', name: 'Ganhar Massa Muscular', icon: 'barbell', progress: 65 },
-    { id: '2', name: 'Perder Gordura', icon: 'flame', progress: 40 },
-    { id: '3', name: 'Melhorar Condicionamento', icon: 'fitness', progress: 75 },
-  ],
-  measurements: {
-    weight: { current: 75.5, initial: 78.0, goal: 72.0 },
-    bodyFat: { current: 18.5, initial: 22.0, goal: 15.0 },
-    muscle: { current: 61.5, initial: 58.0, goal: 65.0 },
-  },
-};
 
 export default function StudentProfileScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showRefreshSplash, setShowRefreshSplash] = useState(false);
+  const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
+  const [loadingPhoto, setLoadingPhoto] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [trainerImageUri, setTrainerImageUri] = useState<string | null>(null);
+  const [studentData, setStudentData] = useState<any>(null);
+  const [loadingStudentData, setLoadingStudentData] = useState(true);
   const splashScale = useSharedValue(1);
   const splashOpacity = useSharedValue(0);
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
 
   // Video player configurado para loop
   const videoPlayer = useVideoPlayer(require('../../assets/background_720p.mp4'), player => {
@@ -58,10 +33,158 @@ export default function StudentProfileScreen() {
     player.muted = true;
   });
 
+  // Carrega dados do aluno
+  useEffect(() => {
+    if (user?.id) {
+      loadStudentData();
+      loadProfilePhoto();
+      loadTrainerPhoto();
+    }
+  }, [user?.id]);
+
+  const loadStudentData = async () => {
+    if (!user?.id) return;
+    
+    try {
+      setLoadingStudentData(true);
+      const data = await clientesService.getById(user.id);
+      setStudentData(data);
+    } catch (error) {
+      console.error('Erro ao carregar dados do aluno:', error);
+      // Dados de fallback
+      setStudentData({
+        name: user?.name || 'Aluno',
+        email: user?.email || '',
+        memberSince: 'Março 2024',
+        plan: 'Premium Mensal',
+        stats: {
+          workoutsCompleted: 0,
+          currentStreak: 0,
+          totalDays: 0,
+          avgPerWeek: 0,
+        },
+        goals: [],
+        measurements: {
+          weight: { current: 0, initial: 0, goal: 0 },
+          bodyFat: { current: 0, initial: 0, goal: 0 },
+          muscle: { current: 0, initial: 0, goal: 0 },
+        },
+        personalTrainer: {
+          name: 'Personal Trainer',
+          cref: 'N/A',
+        }
+      });
+    } finally {
+      setLoadingStudentData(false);
+    }
+  };
+
+  const loadProfilePhoto = async () => {
+    if (!user?.id) return;
+    
+    try {
+      setLoadingPhoto(true);
+      const photoUrl = clientePhotosService.getProfilePhotoUrl(user.id);
+      setProfileImageUri(photoUrl);
+    } catch (error) {
+      console.log('Nenhuma foto de perfil encontrada');
+      setProfileImageUri(null);
+    } finally {
+      setLoadingPhoto(false);
+    }
+  };
+
+  const loadTrainerPhoto = async () => {
+    // Por enquanto, vamos usar um ID fixo do treinador (você pode ajustar conforme sua lógica)
+    // Em um cenário real, você obteria o treinador_id do perfil do cliente
+    const treinadorId = user?.treinador_id || 1; // Assumindo que existe um campo treinador_id no user
+    
+    try {
+      const photoUrl = treinadorPhotosService.getProfilePhotoUrl(treinadorId);
+      setTrainerImageUri(photoUrl);
+    } catch (error) {
+      console.log('Nenhuma foto de perfil encontrada para o personal trainer');
+      setTrainerImageUri(null);
+    }
+  };
+
+  const handleSelectImage = async () => {
+    try {
+      // Solicita permissão para acessar a galeria
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permissão necessária',
+          'Precisamos de permissão para acessar suas fotos.'
+        );
+        return;
+      }
+
+      // Abre o seletor de imagens
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+        base64: false,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        await handleUploadPhoto(asset.uri);
+      }
+    } catch (error) {
+      console.error('Erro ao selecionar imagem:', error);
+      Alert.alert('Erro', 'Não foi possível selecionar a imagem.');
+    }
+  };
+
+  const handleUploadPhoto = async (uri: string) => {
+    if (!user?.id) {
+      Alert.alert('Erro', 'Usuário não encontrado.');
+      return;
+    }
+
+    try {
+      setUploadingPhoto(true);
+      
+      // Cria FormData compatível com React Native Web
+      const formData = new FormData();
+      
+      // Para React Native Web, precisamos converter a URI em Blob
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      
+      // Append do arquivo como blob
+      formData.append('photo', blob, 'profile.jpg');
+
+      // Faz upload da foto usando o serviço diretamente
+      await clientePhotosService.uploadProfilePhoto(user.id, formData);
+      
+      // Atualiza a imagem na tela
+      setProfileImageUri(uri);
+      
+      Alert.alert('Sucesso', 'Foto de perfil atualizada com sucesso!');
+    } catch (error: any) {
+      console.error('Erro ao fazer upload:', error);
+      Alert.alert('Erro', error.message || 'Não foi possível atualizar a foto de perfil.');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
     setShowRefreshSplash(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Recarrega dados reais
+    await Promise.all([
+      loadStudentData(),
+      loadProfilePhoto(),
+      loadTrainerPhoto()
+    ]);
+    
     setShowRefreshSplash(false);
     await new Promise(resolve => setTimeout(resolve, 300));
     setRefreshing(false);
@@ -166,16 +289,31 @@ export default function StudentProfileScreen() {
           <View style={{ alignItems: 'center', marginBottom: 24 }}>
             {/* Foto de Perfil */}
             <View style={{ position: 'relative', marginBottom: 16 }}>
-              <Image
-                source={studentData.profileImage}
-                style={{ 
-                  width: 120, 
-                  height: 120, 
+              {loadingPhoto ? (
+                <View style={{
+                  width: 120,
+                  height: 120,
                   borderRadius: 60,
+                  backgroundColor: 'rgba(96, 165, 250, 0.2)',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   borderWidth: 4,
                   borderColor: '#60A5FA'
-                }}
-              />
+                }}>
+                  <ActivityIndicator size="large" color="#60A5FA" />
+                </View>
+              ) : (
+                <Image
+                  source={profileImageUri ? { uri: profileImageUri } : require('../../assets/images/personal.jpeg')}
+                  style={{ 
+                    width: 120, 
+                    height: 120, 
+                    borderRadius: 60,
+                    borderWidth: 4,
+                    borderColor: '#60A5FA'
+                  }}
+                />
+              )}
               <TouchableOpacity
                 style={{
                   position: 'absolute',
@@ -191,17 +329,23 @@ export default function StudentProfileScreen() {
                   borderColor: '#0B1120',
                 }}
                 activeOpacity={0.7}
+                onPress={handleSelectImage}
+                disabled={uploadingPhoto || loadingPhoto}
               >
-                <Ionicons name="camera" size={18} color="white" />
+                {uploadingPhoto ? (
+                  <ActivityIndicator size={16} color="white" />
+                ) : (
+                  <Ionicons name="camera" size={18} color="white" />
+                )}
               </TouchableOpacity>
             </View>
             
             {/* Nome */}
             <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold', marginBottom: 4 }}>
-              {studentData.name}
+              {studentData?.name || user?.name || 'Carregando...'}
             </Text>
             <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 8 }}>
-              Membro desde {studentData.memberSince}
+              Membro desde {studentData?.memberSince || 'Não informado'}
             </Text>
             
             {/* Badge do Plano */}
@@ -214,7 +358,7 @@ export default function StudentProfileScreen() {
               borderColor: '#60A5FA',
             }}>
               <Text style={{ color: '#60A5FA', fontSize: 14, fontWeight: '600' }}>
-                {studentData.plan}
+                {studentData?.plan || 'Plano não informado'}
               </Text>
             </View>
           </View>
@@ -224,7 +368,7 @@ export default function StudentProfileScreen() {
             <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
               <View style={{ alignItems: 'center' }}>
                 <Text style={{ color: '#60A5FA', fontSize: 28, fontWeight: 'bold' }}>
-                  {studentData.stats.workoutsCompleted}
+                  {studentData?.stats?.workoutsCompleted || '0'}
                 </Text>
                 <Text style={{ color: '#9CA3AF', fontSize: 12, marginTop: 4 }}>Treinos</Text>
               </View>
@@ -233,7 +377,7 @@ export default function StudentProfileScreen() {
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Ionicons name="flame" size={24} color="#F59E0B" />
                   <Text style={{ color: '#F59E0B', fontSize: 28, fontWeight: 'bold', marginLeft: 4 }}>
-                    {studentData.stats.currentStreak}
+                    {studentData?.stats?.currentStreak || '0'}
                   </Text>
                 </View>
                 <Text style={{ color: '#9CA3AF', fontSize: 12, marginTop: 4 }}>Sequência</Text>
@@ -241,7 +385,7 @@ export default function StudentProfileScreen() {
               <View style={{ width: 1, backgroundColor: 'rgba(156, 163, 175, 0.3)' }} />
               <View style={{ alignItems: 'center' }}>
                 <Text style={{ color: '#60A5FA', fontSize: 28, fontWeight: 'bold' }}>
-                  {studentData.stats.avgPerWeek}
+                  {studentData?.stats?.avgPerWeek || '0'}
                 </Text>
                 <Text style={{ color: '#9CA3AF', fontSize: 12, marginTop: 4 }}>Por Semana</Text>
               </View>
@@ -259,7 +403,7 @@ export default function StudentProfileScreen() {
                 activeOpacity={0.7}
               >
                 <Image
-                  source={studentData.personalTrainer.image}
+                  source={trainerImageUri ? { uri: trainerImageUri } : require('../../assets/images/personal.jpeg')}
                   style={{ 
                     width: 56, 
                     height: 56, 
@@ -271,10 +415,10 @@ export default function StudentProfileScreen() {
                 />
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: 'white', fontSize: 16, fontWeight: '600', marginBottom: 2 }}>
-                    {studentData.personalTrainer.name}
+                    {studentData?.personalTrainer?.name || 'Personal Trainer'}
                   </Text>
                   <Text style={{ color: '#9CA3AF', fontSize: 14 }}>
-                    CREF: {studentData.personalTrainer.cref}
+                    CREF: {studentData?.personalTrainer?.cref || 'N/A'}
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
@@ -287,7 +431,7 @@ export default function StudentProfileScreen() {
             <Text style={{ color: 'white', fontSize: 18, fontWeight: '600', marginBottom: 12 }}>
               Meus Objetivos
             </Text>
-            {studentData.goals.map((goal) => (
+            {(studentData?.goals || []).map((goal: any) => (
               <LiquidGlassCard key={goal.id} style={{ marginBottom: 12 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                   <View style={{ 
@@ -341,23 +485,23 @@ export default function StudentProfileScreen() {
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Ionicons name="arrow-down" size={16} color="#22C55E" />
                   <Text style={{ color: '#22C55E', fontSize: 14, fontWeight: '600', marginLeft: 4 }}>
-                    -{(studentData.measurements.weight.initial - studentData.measurements.weight.current).toFixed(1)} kg
+                    -{((studentData?.measurements?.weight?.initial || 0) - (studentData?.measurements?.weight?.current || 0)).toFixed(1)} kg
                   </Text>
                 </View>
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
                 <View>
                   <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>
-                    {studentData.measurements.weight.current} kg
+                    {studentData?.measurements?.weight?.current || '0'} kg
                   </Text>
                   <Text style={{ color: '#9CA3AF', fontSize: 12 }}>Atual</Text>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
                   <Text style={{ color: '#60A5FA', fontSize: 16, fontWeight: '600' }}>
-                    Meta: {studentData.measurements.weight.goal} kg
+                    Meta: {studentData?.measurements?.weight?.goal || '0'} kg
                   </Text>
                   <Text style={{ color: '#9CA3AF', fontSize: 12 }}>
-                    Inicial: {studentData.measurements.weight.initial} kg
+                    Inicial: {studentData?.measurements?.weight?.initial || '0'} kg
                   </Text>
                 </View>
               </View>
@@ -370,23 +514,23 @@ export default function StudentProfileScreen() {
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Ionicons name="arrow-down" size={16} color="#22C55E" />
                   <Text style={{ color: '#22C55E', fontSize: 14, fontWeight: '600', marginLeft: 4 }}>
-                    -{(studentData.measurements.bodyFat.initial - studentData.measurements.bodyFat.current).toFixed(1)}%
+                    -{((studentData?.measurements?.bodyFat?.initial || 0) - (studentData?.measurements?.bodyFat?.current || 0)).toFixed(1)}%
                   </Text>
                 </View>
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
                 <View>
                   <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>
-                    {studentData.measurements.bodyFat.current}%
+                    {studentData?.measurements?.bodyFat?.current || '0'}%
                   </Text>
                   <Text style={{ color: '#9CA3AF', fontSize: 12 }}>Atual</Text>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
                   <Text style={{ color: '#60A5FA', fontSize: 16, fontWeight: '600' }}>
-                    Meta: {studentData.measurements.bodyFat.goal}%
+                    Meta: {studentData?.measurements?.bodyFat?.goal || '0'}%
                   </Text>
                   <Text style={{ color: '#9CA3AF', fontSize: 12 }}>
-                    Inicial: {studentData.measurements.bodyFat.initial}%
+                    Inicial: {studentData?.measurements?.bodyFat?.initial || '0'}%
                   </Text>
                 </View>
               </View>
@@ -399,23 +543,23 @@ export default function StudentProfileScreen() {
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Ionicons name="arrow-up" size={16} color="#22C55E" />
                   <Text style={{ color: '#22C55E', fontSize: 14, fontWeight: '600', marginLeft: 4 }}>
-                    +{(studentData.measurements.muscle.current - studentData.measurements.muscle.initial).toFixed(1)} kg
+                    +{((studentData?.measurements?.muscle?.current || 0) - (studentData?.measurements?.muscle?.initial || 0)).toFixed(1)} kg
                   </Text>
                 </View>
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
                 <View>
                   <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>
-                    {studentData.measurements.muscle.current} kg
+                    {studentData?.measurements?.muscle?.current || '0'} kg
                   </Text>
                   <Text style={{ color: '#9CA3AF', fontSize: 12 }}>Atual</Text>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
                   <Text style={{ color: '#60A5FA', fontSize: 16, fontWeight: '600' }}>
-                    Meta: {studentData.measurements.muscle.goal} kg
+                    Meta: {studentData?.measurements?.muscle?.goal || '0'} kg
                   </Text>
                   <Text style={{ color: '#9CA3AF', fontSize: 12 }}>
-                    Inicial: {studentData.measurements.muscle.initial} kg
+                    Inicial: {studentData?.measurements?.muscle?.initial || '0'} kg
                   </Text>
                 </View>
               </View>
