@@ -52,6 +52,57 @@ export default function TreinoDetailsScreen() {
     ],
   };
 
+  const styles = StyleSheet.create({
+  headerContainer: {
+    position: 'relative',
+    height: 320,
+    marginBottom: 20,
+  },
+  headerImage: {
+    width: '100%',
+    height: '100%',
+  },
+  gradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 200,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerInfo: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    right: 20,
+  },
+  trainerPhoto: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  reviewerPhoto: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  exerciseImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+  },
+});
+
   return (
     <View className="flex-1 bg-[#0B1120]">
       {/* Background Design - Linhas Diagonais e Orbs Dinâmicos */}
@@ -209,37 +260,10 @@ export default function TreinoDetailsScreen() {
             </View>
           </LiquidGlassCard>
 
-          {/* Sound & Music */}
-          <LiquidGlassCard style={{ marginBottom: 16 }}>
-            <TouchableOpacity className="flex-row items-center justify-between">
-              <Text className="text-white text-base font-semibold">Sound & Music</Text>
-              <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
-            </TouchableOpacity>
-          </LiquidGlassCard>
-
           {/* Guide */}
           <LiquidGlassCard style={{ marginBottom: 16 }}>
             <TouchableOpacity className="flex-row items-center justify-between">
               <Text className="text-white text-base font-semibold">Guide</Text>
-              <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
-            </TouchableOpacity>
-          </LiquidGlassCard>
-
-          {/* Trainer */}
-          <LiquidGlassCard style={{ marginBottom: 16 }}>
-            <Text className="text-white text-lg font-bold mb-3">Trainer</Text>
-            <TouchableOpacity className="flex-row items-center">
-              <Image
-                source={{ uri: treino.trainer.foto }}
-                style={styles.trainerPhoto}
-              />
-              <View className="flex-1 ml-3">
-                <Text className="text-white text-base font-bold">{treino.trainer.nome}</Text>
-                <Text className="text-gray-400 text-xs">{treino.trainer.cargo}</Text>
-                <Text className="text-[#60A5FA] text-xs font-semibold mt-1">
-                  {treino.trainer.experiencia}
-                </Text>
-              </View>
               <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
             </TouchableOpacity>
           </LiquidGlassCard>
@@ -340,54 +364,3 @@ export default function TreinoDetailsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerContainer: {
-    position: 'relative',
-    height: 320,
-    marginBottom: 20,
-  },
-  headerImage: {
-    width: '100%',
-    height: '100%',
-  },
-  gradient: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 200,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerInfo: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
-  },
-  trainerPhoto: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-  },
-  reviewerPhoto: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  exerciseImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
-  },
-});

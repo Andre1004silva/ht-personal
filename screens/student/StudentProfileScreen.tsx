@@ -9,7 +9,7 @@ import { RefreshSplash } from '../../components/RefreshSplash';
 import LiquidGlassCard from '../../components/LiquidGlassCard';
 import { useAuth } from '../../contexts/AuthContext';
 import { router } from 'expo-router';
-import { clientePhotosService, treinadorPhotosService, clientesService } from '../../services';
+import { clientePhotosService, treinadorPhotosService, clientesService, clienteEstatisticService } from '../../services';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -22,6 +22,8 @@ export default function StudentProfileScreen() {
   const [trainerImageUri, setTrainerImageUri] = useState<string | null>(null);
   const [studentData, setStudentData] = useState<any>(null);
   const [loadingStudentData, setLoadingStudentData] = useState(true);
+  const [latestStats, setLatestStats] = useState<any>(null);
+  const [allStats, setAllStats] = useState<any[]>([]);
   const splashScale = useSharedValue(1);
   const splashOpacity = useSharedValue(0);
   const { user, signOut } = useAuth();
@@ -39,6 +41,7 @@ export default function StudentProfileScreen() {
       loadStudentData();
       loadProfilePhoto();
       loadTrainerPhoto();
+      loadStudentStats();
     }
   }, [user?.id]);
 
@@ -77,6 +80,59 @@ export default function StudentProfileScreen() {
     } finally {
       setLoadingStudentData(false);
     }
+  };
+
+  const loadStudentStats = async () => {
+    if (!user?.id) return;
+    
+    try {
+      // Busca última estatística
+      const latest = await clienteEstatisticService.getLatest(user.id);
+      setLatestStats(latest);
+      
+      // Busca todas estatísticas para calcular progresso
+      const all = await clienteEstatisticService.getAll({ cliente_id: user.id });
+      setAllStats(all);
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas do aluno:', error);
+      setLatestStats(null);
+      setAllStats([]);
+    }
+  };
+
+  const getMeasurementData = () => {
+    if (!allStats || allStats.length === 0) {
+      return {
+        weight: { current: 0, initial: 0, goal: 0 },
+        bodyFat: { current: 0, initial: 0, goal: 0 },
+        muscle: { current: 0, initial: 0, goal: 0 },
+      };
+    }
+
+    const sortedStats = [...allStats].sort((a, b) => 
+      new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+    );
+
+    const initial = sortedStats[0];
+    const current = latestStats || sortedStats[sortedStats.length - 1];
+
+    return {
+      weight: {
+        current: parseFloat(current.weight || '0'),
+        initial: parseFloat(initial.weight || '0'),
+        goal: 75, // Meta exemplo - pode vir de outra fonte
+      },
+      bodyFat: {
+        current: parseFloat(current.muscle_mass_percentage || '0'),
+        initial: parseFloat(initial.muscle_mass_percentage || '0'),
+        goal: 15, // Meta exemplo
+      },
+      muscle: {
+        current: parseFloat(current.weight || '0') * (parseFloat(current.muscle_mass_percentage || '0') / 100),
+        initial: parseFloat(initial.weight || '0') * (parseFloat(initial.muscle_mass_percentage || '0') / 100),
+        goal: 25, // Meta exemplo
+      },
+    };
   };
 
   const loadProfilePhoto = async () => {
@@ -182,7 +238,8 @@ export default function StudentProfileScreen() {
     await Promise.all([
       loadStudentData(),
       loadProfilePhoto(),
-      loadTrainerPhoto()
+      loadTrainerPhoto(),
+      loadStudentStats()
     ]);
     
     setShowRefreshSplash(false);
@@ -478,92 +535,109 @@ export default function StudentProfileScreen() {
               Evolução de Medidas
             </Text>
             
-            {/* Peso */}
-            <LiquidGlassCard style={{ marginBottom: 12 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <Text style={{ color: '#9CA3AF', fontSize: 14 }}>Peso</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Ionicons name="arrow-down" size={16} color="#22C55E" />
-                  <Text style={{ color: '#22C55E', fontSize: 14, fontWeight: '600', marginLeft: 4 }}>
-                    -{((studentData?.measurements?.weight?.initial || 0) - (studentData?.measurements?.weight?.current || 0)).toFixed(1)} kg
-                  </Text>
-                </View>
-              </View>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-                <View>
-                  <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>
-                    {studentData?.measurements?.weight?.current || '0'} kg
-                  </Text>
-                  <Text style={{ color: '#9CA3AF', fontSize: 12 }}>Atual</Text>
-                </View>
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={{ color: '#60A5FA', fontSize: 16, fontWeight: '600' }}>
-                    Meta: {studentData?.measurements?.weight?.goal || '0'} kg
-                  </Text>
-                  <Text style={{ color: '#9CA3AF', fontSize: 12 }}>
-                    Inicial: {studentData?.measurements?.weight?.initial || '0'} kg
-                  </Text>
-                </View>
-              </View>
-            </LiquidGlassCard>
+            {(() => {
+              const measurements = getMeasurementData();
+              const weightDiff = measurements.weight.initial - measurements.weight.current;
+              const bodyFatDiff = measurements.bodyFat.initial - measurements.bodyFat.current;
+              const muscleDiff = measurements.muscle.current - measurements.muscle.initial;
 
-            {/* Gordura Corporal */}
-            <LiquidGlassCard style={{ marginBottom: 12 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <Text style={{ color: '#9CA3AF', fontSize: 14 }}>Gordura Corporal</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Ionicons name="arrow-down" size={16} color="#22C55E" />
-                  <Text style={{ color: '#22C55E', fontSize: 14, fontWeight: '600', marginLeft: 4 }}>
-                    -{((studentData?.measurements?.bodyFat?.initial || 0) - (studentData?.measurements?.bodyFat?.current || 0)).toFixed(1)}%
-                  </Text>
-                </View>
-              </View>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-                <View>
-                  <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>
-                    {studentData?.measurements?.bodyFat?.current || '0'}%
-                  </Text>
-                  <Text style={{ color: '#9CA3AF', fontSize: 12 }}>Atual</Text>
-                </View>
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={{ color: '#60A5FA', fontSize: 16, fontWeight: '600' }}>
-                    Meta: {studentData?.measurements?.bodyFat?.goal || '0'}%
-                  </Text>
-                  <Text style={{ color: '#9CA3AF', fontSize: 12 }}>
-                    Inicial: {studentData?.measurements?.bodyFat?.initial || '0'}%
-                  </Text>
-                </View>
-              </View>
-            </LiquidGlassCard>
+              return (
+                <>
+                  {/* Peso */}
+                  <LiquidGlassCard style={{ marginBottom: 12 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <Text style={{ color: '#9CA3AF', fontSize: 14 }}>Peso</Text>
+                      {weightDiff !== 0 && (
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                          <Ionicons name={weightDiff > 0 ? "arrow-down" : "arrow-up"} size={16} color={weightDiff > 0 ? "#22C55E" : "#EF4444"} />
+                          <Text style={{ color: weightDiff > 0 ? "#22C55E" : "#EF4444", fontSize: 14, fontWeight: '600', marginLeft: 4 }}>
+                            {weightDiff > 0 ? '-' : '+'}{Math.abs(weightDiff).toFixed(1)} kg
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <View>
+                        <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>
+                          {measurements.weight.current.toFixed(1)} kg
+                        </Text>
+                        <Text style={{ color: '#9CA3AF', fontSize: 12 }}>Atual</Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end' }}>
+                        <Text style={{ color: '#60A5FA', fontSize: 16, fontWeight: '600' }}>
+                          Meta: {measurements.weight.goal.toFixed(1)} kg
+                        </Text>
+                        <Text style={{ color: '#9CA3AF', fontSize: 12 }}>
+                          Inicial: {measurements.weight.initial.toFixed(1)} kg
+                        </Text>
+                      </View>
+                    </View>
+                  </LiquidGlassCard>
 
-            {/* Massa Muscular */}
-            <LiquidGlassCard>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <Text style={{ color: '#9CA3AF', fontSize: 14 }}>Massa Muscular</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Ionicons name="arrow-up" size={16} color="#22C55E" />
-                  <Text style={{ color: '#22C55E', fontSize: 14, fontWeight: '600', marginLeft: 4 }}>
-                    +{((studentData?.measurements?.muscle?.current || 0) - (studentData?.measurements?.muscle?.initial || 0)).toFixed(1)} kg
-                  </Text>
-                </View>
-              </View>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-                <View>
-                  <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>
-                    {studentData?.measurements?.muscle?.current || '0'} kg
-                  </Text>
-                  <Text style={{ color: '#9CA3AF', fontSize: 12 }}>Atual</Text>
-                </View>
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={{ color: '#60A5FA', fontSize: 16, fontWeight: '600' }}>
-                    Meta: {studentData?.measurements?.muscle?.goal || '0'} kg
-                  </Text>
-                  <Text style={{ color: '#9CA3AF', fontSize: 12 }}>
-                    Inicial: {studentData?.measurements?.muscle?.initial || '0'} kg
-                  </Text>
-                </View>
-              </View>
-            </LiquidGlassCard>
+                  {/* Gordura Corporal */}
+                  <LiquidGlassCard style={{ marginBottom: 12 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <Text style={{ color: '#9CA3AF', fontSize: 14 }}>% Gordura</Text>
+                      {bodyFatDiff !== 0 && (
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                          <Ionicons name={bodyFatDiff > 0 ? "arrow-down" : "arrow-up"} size={16} color={bodyFatDiff > 0 ? "#22C55E" : "#EF4444"} />
+                          <Text style={{ color: bodyFatDiff > 0 ? "#22C55E" : "#EF4444", fontSize: 14, fontWeight: '600', marginLeft: 4 }}>
+                            {bodyFatDiff > 0 ? '-' : '+'}{Math.abs(bodyFatDiff).toFixed(1)}%
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <View>
+                        <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>
+                          {measurements.bodyFat.current.toFixed(1)}%
+                        </Text>
+                        <Text style={{ color: '#9CA3AF', fontSize: 12 }}>Atual</Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end' }}>
+                        <Text style={{ color: '#60A5FA', fontSize: 16, fontWeight: '600' }}>
+                          Meta: {measurements.bodyFat.goal.toFixed(1)}%
+                        </Text>
+                        <Text style={{ color: '#9CA3AF', fontSize: 12 }}>
+                          Inicial: {measurements.bodyFat.initial.toFixed(1)}%
+                        </Text>
+                      </View>
+                    </View>
+                  </LiquidGlassCard>
+
+                  {/* Massa Muscular */}
+                  <LiquidGlassCard>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <Text style={{ color: '#9CA3AF', fontSize: 14 }}>Massa Muscular</Text>
+                      {muscleDiff !== 0 && (
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                          <Ionicons name={muscleDiff > 0 ? "arrow-up" : "arrow-down"} size={16} color={muscleDiff > 0 ? "#22C55E" : "#EF4444"} />
+                          <Text style={{ color: muscleDiff > 0 ? "#22C55E" : "#EF4444", fontSize: 14, fontWeight: '600', marginLeft: 4 }}>
+                            {muscleDiff > 0 ? '+' : '-'}{Math.abs(muscleDiff).toFixed(1)} kg
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <View>
+                        <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>
+                          {measurements.muscle.current.toFixed(1)} kg
+                        </Text>
+                        <Text style={{ color: '#9CA3AF', fontSize: 12 }}>Atual</Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end' }}>
+                        <Text style={{ color: '#60A5FA', fontSize: 16, fontWeight: '600' }}>
+                          Meta: {measurements.muscle.goal.toFixed(1)} kg
+                        </Text>
+                        <Text style={{ color: '#9CA3AF', fontSize: 12 }}>
+                          Inicial: {measurements.muscle.initial.toFixed(1)} kg
+                        </Text>
+                      </View>
+                    </View>
+                  </LiquidGlassCard>
+                </>
+              );
+            })()}
           </View>
 
           {/* Configurações */}
@@ -629,7 +703,7 @@ export default function StudentProfileScreen() {
                       Plano e Pagamento
                     </Text>
                     <Text style={{ color: '#9CA3AF', fontSize: 12 }}>
-                      Próximo: {studentData.nextPayment}
+                      Próximo: {studentData?.nextPayment || 'Não informado'}
                     </Text>
                   </View>
                 </View>

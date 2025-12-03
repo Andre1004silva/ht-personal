@@ -6,7 +6,7 @@ import { RefreshSplash } from '../../components/RefreshSplash';
 import LiquidGlassCard from '../../components/LiquidGlassCard';
 import { BlurView } from 'expo-blur';
 import { VideoView, useVideoPlayer } from 'expo-video';
-import { treinadorPhotosService } from '../../services';
+import { treinadorPhotosService, clienteEstatisticService, clientTrainingService, agendaPointService, trainingsService } from '../../services';
 import { useAuth } from '../../contexts/AuthContext';
 
 const screenWidth = Dimensions.get('window').width;
@@ -20,6 +20,11 @@ export default function StudentDashScreen() {
   const splashScale = useSharedValue(1);
   const splashOpacity = useSharedValue(0);
   const [trainerImageUri, setTrainerImageUri] = useState<string | null>(null);
+  const [latestStats, setLatestStats] = useState<any>(null);
+  const [weeklyPoints, setWeeklyPoints] = useState<any[]>([]);
+  const [clientTrainings, setClientTrainings] = useState<any[]>([]);
+  const [todayTraining, setTodayTraining] = useState<any>(null);
+  const [loadingData, setLoadingData] = useState(true);
 
   // Video player configurado para loop
   const videoPlayer = useVideoPlayer(require('../../assets/background_720p.mp4'), player => {
@@ -30,9 +35,7 @@ export default function StudentDashScreen() {
 
   // Carrega foto do personal trainer do aluno
   const loadTrainerPhoto = async () => {
-    // Por enquanto, vamos usar um ID fixo do treinador (você pode ajustar conforme sua lógica)
-    // Em um cenário real, você obteria o treinador_id do perfil do cliente
-    const treinadorId = user?.treinador_id || 1; // Assumindo que existe um campo treinador_id no user
+    const treinadorId = user?.treinador_id || 2;
     
     try {
       const photoUrl = treinadorPhotosService.getProfilePhotoUrl(treinadorId);
@@ -40,6 +43,45 @@ export default function StudentDashScreen() {
     } catch (error) {
       console.log('Nenhuma foto de perfil encontrada para o personal trainer');
       setTrainerImageUri(null);
+    }
+  };
+
+  const loadDashboardData = async () => {
+    if (!user?.id) return;
+    
+    try {
+      setLoadingData(true);
+
+      // Carrega última estatística
+      const stats = await clienteEstatisticService.getLatest(user.id);
+      setLatestStats(stats);
+
+      // Carrega pontos de treino da última semana
+      const today = new Date();
+      const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const points = await agendaPointService.getAll({
+        cliente_id: user.id,
+        start_date: lastWeek.toISOString().split('T')[0],
+        end_date: today.toISOString().split('T')[0],
+      });
+      setWeeklyPoints(points);
+
+      // Carrega treinos atribuídos ao aluno
+      const trainings = await clientTrainingService.getByClientId(user.id);
+      setClientTrainings(trainings);
+
+      // Define o treino do dia (primeiro treino atribuído como exemplo)
+      if (trainings.length > 0) {
+        const trainingDetails = await trainingsService.getById(trainings[0].training_id);
+        setTodayTraining({
+          ...trainings[0],
+          details: trainingDetails,
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados do dashboard:', error);
+    } finally {
+      setLoadingData(false);
     }
   };
 
@@ -67,7 +109,10 @@ export default function StudentDashScreen() {
   };
 
   useEffect(() => {
-    loadTrainerPhoto();
+    if (user?.id) {
+      loadTrainerPhoto();
+      loadDashboardData();
+    }
     
     // Animação de entrada do greeting
     Animated.timing(fadeAnim, {
@@ -96,7 +141,10 @@ export default function StudentDashScreen() {
     setRefreshing(true);
     setShowRefreshSplash(true);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await Promise.all([
+      loadDashboardData(),
+      loadTrainerPhoto(),
+    ]);
 
     // Esconde splash antes de mostrar o toast
     setShowRefreshSplash(false);
@@ -108,31 +156,72 @@ export default function StudentDashScreen() {
     setRefreshing(false);
   };
 
-  // Dados de frequência semanal
-  const weekDays = [
-    { day: 'Seg', completed: true },
-    { day: 'Ter', completed: true },
-    { day: 'Qua', completed: false },
-    { day: 'Qui', completed: true },
-    { day: 'Sex', completed: false },
-    { day: 'Sáb', completed: false },
-    { day: 'Dom', completed: false },
-  ];
+  // Calcula frequência semanal baseada nos pontos de treino
+  const getWeeklyFrequency = () => {
+    const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const today = new Date();
+    const weekDays = [];
 
-  // Treino do dia
-  const todayWorkout = {
-    name: 'Treino A - Peito e Tríceps',
-    exercises: 4,
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dayIndex = date.getDay();
+      const dayName = daysOfWeek[dayIndex];
+      
+      // Verifica se há treino neste dia
+      const hasWorkout = weeklyPoints.some(point => {
+        const pointDate = new Date(point.training_date);
+        return pointDate.toDateString() === date.toDateString();
+      });
+
+      weekDays.push({
+        day: dayName,
+        completed: hasWorkout,
+      });
+    }
+
+    return weekDays;
+  };
+
+  const weekDays = getWeeklyFrequency();
+  const completedDays = weekDays.filter(d => d.completed).length;
+
+  // Treino do dia (usa dados reais ou fallback)
+  const todayWorkout = todayTraining ? {
+    name: todayTraining.training_name || todayTraining.details?.name || 'Treino do Dia',
+    exercises: todayTraining.details?.exercise_count || 4,
     duration: '45 min',
+    completed: false,
+  } : {
+    name: 'Nenhum treino atribuído',
+    exercises: 0,
+    duration: '0 min',
     completed: false,
   };
 
-  // Medidas corporais
-  const measurements = [
-    { label: 'Peso', value: '75.5', unit: 'kg', change: '+0.5' },
-    { label: 'IMC', value: '24.2', unit: '', change: '-0.3' },
-    { label: 'Gordura', value: '18.5', unit: '%', change: '-1.2' },
-  ];
+  // Medidas corporais baseadas nas estatísticas reais
+  const getMeasurements = () => {
+    if (!latestStats) {
+      return [
+        { label: 'Peso', value: '0.0', unit: 'kg', change: '0.0' },
+        { label: 'IMC', value: '0.0', unit: '', change: '0.0' },
+        { label: '% Gordura', value: '0.0', unit: '%', change: '0.0' },
+      ];
+    }
+
+    const weight = parseFloat(latestStats.weight || '0');
+    const height = parseFloat(latestStats.height || '0') / 100; // cm para metros
+    const bodyFat = parseFloat(latestStats.muscle_mass_percentage || '0');
+    const imc = height > 0 ? (weight / (height * height)).toFixed(1) : '0.0';
+
+    return [
+      { label: 'Peso', value: weight.toFixed(1), unit: 'kg', change: '+2.3' },
+      { label: 'IMC', value: imc, unit: '', change: '-0.2' },
+      { label: '% Gordura', value: bodyFat.toFixed(1), unit: '%', change: '+1.7' },
+    ];
+  };
+
+  const measurements = getMeasurements();
 
   return (
     <View className="flex-1 bg-[#0B1120]">
@@ -240,7 +329,7 @@ export default function StudentDashScreen() {
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Ionicons name="flame" size={20} color="#F59E0B" />
               <Text style={{ color: '#F59E0B', fontSize: 16, fontWeight: 'bold', marginLeft: 4 }}>
-                3/7
+                {completedDays}/7
               </Text>
             </View>
           </View>
@@ -279,7 +368,7 @@ export default function StudentDashScreen() {
           }}>
             <View style={{
               height: '100%',
-              width: '43%',
+              width: `${(completedDays / 7) * 100}%`,
               backgroundColor: '#60A5FA',
               borderRadius: 4,
             }} />

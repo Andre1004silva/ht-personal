@@ -22,7 +22,7 @@ const getApiUrl = () => {
   }
   
   // iOS Simulator, Expo Go e dispositivos físicos usam o IP da máquina
-  return 'http://192.168.1.13:3232';
+  return 'http://192.168.1.7:3232';
 };
 
 export const ENV = {
@@ -30,7 +30,7 @@ export const ENV = {
   API_URL: getApiUrl(),
   
   // Timeout para requisições (em ms)
-  API_TIMEOUT: 10000,
+  API_TIMEOUT: 30000,
   
   // Versão da API
   API_VERSION: 'v1',

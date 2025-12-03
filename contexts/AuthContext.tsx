@@ -92,6 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signIn(email: string, password: string, userTypeParam: 'personal' | 'aluno') {
     try {
+      console.log('Tentando login em:', API_URL);
       const response = await api.post('/sessions/login', {
         email,
         password,
@@ -108,6 +109,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await AsyncStorage.setItem('@HighTraining:user', JSON.stringify(data.user));
       await AsyncStorage.setItem('@HighTraining:userType', data.userType);
     } catch (error: any) {
+      console.error('Erro no login:', error);
+      
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        throw new Error('Servidor não respondeu. Verifique se o backend está rodando e se você está na mesma rede Wi-Fi.');
+      }
+      
+      if (error.code === 'ECONNREFUSED' || error.message?.includes('Network Error')) {
+        throw new Error('Não foi possível conectar ao servidor. Verifique o IP da API nas configurações.');
+      }
+      
       const message = error.response?.data?.message || error.message || 'Erro ao fazer login';
       throw new Error(message);
     }

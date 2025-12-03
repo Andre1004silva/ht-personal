@@ -6,7 +6,9 @@ import { useState, useRef } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 import { RefreshSplash } from '../../components/RefreshSplash';
 import LiquidGlassCard from '../../components/LiquidGlassCard';
-import agendaPointService from '../../services/agendaPointService';
+import { agendaPointService, clientTrainingService, trainingsService, exercisesService } from '../../services';
+import { useAuth } from '../../contexts/AuthContext';
+import { useEffect } from 'react';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -30,6 +32,7 @@ interface WorkoutDay {
 }
 
 export default function StudentWorkoutScreen() {
+  const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [showRefreshSplash, setShowRefreshSplash] = useState(false);
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
@@ -44,9 +47,9 @@ export default function StudentWorkoutScreen() {
   });
   const splashScale = useSharedValue(1);
   const splashOpacity = useSharedValue(0);
-
-  // ID do cliente - TODO: pegar do contexto de autenticação
-  const clienteId = 1;
+  const [clientTrainings, setClientTrainings] = useState<any[]>([]);
+  const [weekWorkouts, setWeekWorkouts] = useState<WorkoutDay[]>([]);
+  const [loadingWorkouts, setLoadingWorkouts] = useState(true);
 
   // Video player configurado para loop
   const videoPlayer = useVideoPlayer(require('../../assets/background_720p.mp4'), player => {
@@ -55,99 +58,74 @@ export default function StudentWorkoutScreen() {
     player.muted = true;
   });
 
-  // Dados dos treinos da semana
-  const weekWorkouts: WorkoutDay[] = [
-    {
-      day: 'Seg',
-      dayName: 'Segunda-feira',
-      workoutName: 'Treino A - Peito e Tríceps',
-      duration: '45 min',
-      completed: true,
-      exercises: [
-        { id: '1', name: 'Supino Reto', sets: 4, reps: '8-12', weight: '80kg', rest: '90s', completed: true },
-        { id: '2', name: 'Supino Inclinado', sets: 4, reps: '8-12', weight: '70kg', rest: '90s', completed: true },
-        { id: '3', name: 'Crucifixo', sets: 3, reps: '12-15', weight: '16kg', rest: '60s', completed: true },
-        { id: '4', name: 'Tríceps Testa', sets: 3, reps: '10-12', weight: '30kg', rest: '60s', completed: false },
-        { id: '5', name: 'Tríceps Corda', sets: 3, reps: '12-15', rest: '60s', completed: false },
-      ],
-    },
-    {
-      day: 'Ter',
-      dayName: 'Terça-feira',
-      workoutName: 'Treino B - Costas e Bíceps',
-      duration: '50 min',
-      completed: true,
-      exercises: [
-        { id: '6', name: 'Barra Fixa', sets: 4, reps: '8-10', rest: '90s', completed: true },
-        { id: '7', name: 'Remada Curvada', sets: 4, reps: '8-12', weight: '70kg', rest: '90s', completed: true },
-        { id: '8', name: 'Pulley Frente', sets: 3, reps: '12-15', weight: '50kg', rest: '60s', completed: true },
-        { id: '9', name: 'Rosca Direta', sets: 3, reps: '10-12', weight: '30kg', rest: '60s', completed: true },
-        { id: '10', name: 'Rosca Martelo', sets: 3, reps: '12-15', weight: '14kg', rest: '60s', completed: true },
-      ],
-    },
-    {
-      day: 'Qua',
-      dayName: 'Quarta-feira',
-      workoutName: 'Descanso',
-      duration: '0 min',
-      completed: false,
-      exercises: [],
-    },
-    {
-      day: 'Qui',
-      dayName: 'Quinta-feira',
-      workoutName: 'Treino C - Pernas',
-      duration: '60 min',
-      completed: true,
-      exercises: [
-        { id: '11', name: 'Agachamento Livre', sets: 4, reps: '8-12', weight: '100kg', rest: '120s', completed: true },
-        { id: '12', name: 'Leg Press 45°', sets: 4, reps: '12-15', weight: '180kg', rest: '90s', completed: true },
-        { id: '13', name: 'Cadeira Extensora', sets: 3, reps: '12-15', weight: '60kg', rest: '60s', completed: true },
-        { id: '14', name: 'Mesa Flexora', sets: 3, reps: '12-15', weight: '50kg', rest: '60s', completed: false },
-        { id: '15', name: 'Panturrilha', sets: 4, reps: '15-20', weight: '80kg', rest: '45s', completed: false },
-      ],
-    },
-    {
-      day: 'Sex',
-      dayName: 'Sexta-feira',
-      workoutName: 'Treino D - Ombros e Abdômen',
-      duration: '45 min',
-      completed: false,
-      exercises: [
-        { id: '16', name: 'Desenvolvimento', sets: 4, reps: '8-12', weight: '50kg', rest: '90s' },
-        { id: '17', name: 'Elevação Lateral', sets: 3, reps: '12-15', weight: '10kg', rest: '60s' },
-        { id: '18', name: 'Elevação Frontal', sets: 3, reps: '12-15', weight: '10kg', rest: '60s' },
-        { id: '19', name: 'Abdominal Remador', sets: 3, reps: '15-20', rest: '45s' },
-        { id: '20', name: 'Prancha', sets: 3, reps: '60s', rest: '60s' },
-      ],
-    },
-    {
-      day: 'Sáb',
-      dayName: 'Sábado',
-      workoutName: 'Treino E - Full Body',
-      duration: '40 min',
-      completed: false,
-      exercises: [
-        { id: '21', name: 'Supino', sets: 3, reps: '10-12', weight: '70kg', rest: '90s' },
-        { id: '22', name: 'Remada', sets: 3, reps: '10-12', weight: '60kg', rest: '90s' },
-        { id: '23', name: 'Agachamento', sets: 3, reps: '10-12', weight: '80kg', rest: '90s' },
-        { id: '24', name: 'Desenvolvimento', sets: 3, reps: '10-12', weight: '40kg', rest: '60s' },
-      ],
-    },
-    {
-      day: 'Dom',
-      dayName: 'Domingo',
-      workoutName: 'Descanso',
-      duration: '0 min',
-      completed: false,
-      exercises: [],
-    },
-  ];
+  // Carrega treinos do aluno
+  const loadWorkouts = async () => {
+    if (!user?.id) return;
+
+    try {
+      setLoadingWorkouts(true);
+
+      // Busca treinos atribuídos
+      const trainings = await clientTrainingService.getByClientId(user.id);
+      setClientTrainings(trainings);
+
+      // Organiza treinos por dia da semana
+      const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+      const dayNames = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
+      
+      const workoutsByDay: WorkoutDay[] = [];
+
+      for (let i = 0; i < days.length; i++) {
+        const training = trainings[i % trainings.length]; // Distribui treinos pelos dias
+        
+        if (training && i < trainings.length * 2) { // Limita repetições
+          try {
+            const trainingDetails = await trainingsService.getById(training.training_id);
+            
+            workoutsByDay.push({
+              day: days[i],
+              dayName: dayNames[i],
+              workoutName: training.training_name || trainingDetails.name || 'Treino',
+              duration: '45 min',
+              exercises: [],
+              completed: false,
+            });
+          } catch (error) {
+            console.log('Erro ao carregar detalhes do treino:', error);
+          }
+        } else {
+          // Dia de descanso
+          workoutsByDay.push({
+            day: days[i],
+            dayName: dayNames[i],
+            workoutName: 'Descanso',
+            duration: '0 min',
+            exercises: [],
+            completed: false,
+          });
+        }
+      }
+
+      setWeekWorkouts(workoutsByDay);
+    } catch (error) {
+      console.error('Erro ao carregar treinos:', error);
+      // Dados de fallback caso falhe
+      setWeekWorkouts([]);
+    } finally {
+      setLoadingWorkouts(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.id) {
+      loadWorkouts();
+    }
+  }, [user?.id]);
 
   const onRefresh = async () => {
     setRefreshing(true);
     setShowRefreshSplash(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await loadWorkouts();
     setShowRefreshSplash(false);
     await new Promise(resolve => setTimeout(resolve, 300));
     setRefreshing(false);
@@ -167,7 +145,7 @@ export default function StudentWorkoutScreen() {
     try {
       setRegistrandoPonto(workout.day);
       
-      await agendaPointService.registrarPonto(clienteId, {
+      await agendaPointService.registrarPonto(user?.id || 1, {
         workoutName: workout.workoutName,
         duration: workout.duration,
         dayName: workout.dayName,
@@ -222,7 +200,7 @@ export default function StudentWorkoutScreen() {
     try {
       setRegistrandoPonto('dialog');
       
-      await agendaPointService.registrarPonto(clienteId, {
+      await agendaPointService.registrarPonto(user?.id || 1, {
         workoutName: dialogForm.workoutName,
         duration: dialogForm.duration,
         dayName: dialogForm.dayWeek,

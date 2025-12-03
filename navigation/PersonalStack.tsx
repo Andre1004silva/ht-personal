@@ -104,6 +104,8 @@ export default function PersonalStack() {
             className="rounded-b-[40px] overflow-hidden"
             style={{
               backgroundColor: 'rgba(20, 28, 48, 0.05)',
+              borderBottomLeftRadius: 40,
+              borderBottomRightRadius: 40,
             }}
           >
             {/* Gradiente líquido animado */}
@@ -124,17 +126,17 @@ export default function PersonalStack() {
             <LinearGradient
               colors={['rgba(255, 255, 255, 0.05)', 'transparent']}
               start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
+              end={{ x: 0, y: 0.5 }}
               style={{
                 position: 'absolute',
                 top: 0,
                 left: 0,
                 right: 0,
-                height: '50%',
+                height: '40%',
               }}
             />
             
-            <View className="pt-[36px] pb-[18px] px-6">
+            <View style={{ paddingTop: 40, paddingBottom: 12, paddingHorizontal: 16 }}>
               <View className="flex-row items-center justify-center">
                 <Image 
                   source={require('../assets/logo.png')} 

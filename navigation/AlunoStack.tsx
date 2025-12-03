@@ -22,7 +22,7 @@ export default function AlunoStack() {
   const [activeTab, setActiveTab] = useState<StudentTabType>('dash');
   const { width } = useWindowDimensions();
   
-  const logoSize = width * 0.15;
+  const logoSize = width * 0.18;
   const shimmer = useSharedValue(0);
   
   useEffect(() => {
@@ -79,7 +79,8 @@ export default function AlunoStack() {
             left: 0,
             right: 0,
             bottom: 0,
-            borderRadius: 40,
+            borderBottomLeftRadius: 40,
+            borderBottomRightRadius: 40,
           }}
         />
         
@@ -91,6 +92,8 @@ export default function AlunoStack() {
             className="rounded-b-[40px] overflow-hidden"
             style={{
               backgroundColor: 'rgba(20, 28, 48, 0.05)',
+              borderBottomLeftRadius: 40,
+              borderBottomRightRadius: 40,
             }}
           >
             {/* Gradiente líquido animado */}
@@ -117,11 +120,11 @@ export default function AlunoStack() {
                 top: 0,
                 left: 0,
                 right: 0,
-                height: '50%',
+                height: '40%',
               }}
             />
             
-            <View className="pt-[36px] pb-[18px] px-6">
+            <View style={{ paddingTop: 40, paddingBottom: 6, paddingHorizontal: 16 }}>        
               <View className="flex-row items-center justify-center">
                 <Image 
                   source={require('../assets/logo.png')} 
