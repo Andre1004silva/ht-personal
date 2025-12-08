@@ -10,6 +10,7 @@ import { ChevronRight } from 'lucide-react-native';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
 import Svg, { Circle, Path, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { clientesService, Cliente } from '@/services';
+import { useAuth } from '@/contexts/AuthContext';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -28,20 +29,27 @@ const formatPhone = (phone: string | undefined): string => {
 // Função para formatar data DD/MM/YYYY
 const formatDate = (date: string | undefined): string => {
   if (!date) return '';
-  // Se já estiver no formato DD/MM/YYYY, retorna como está
-  if (date.includes('/')) return date;
-  
-  // Se estiver no formato YYYY-MM-DD, converte para DD/MM/YYYY
-  const parts = date.split('-');
+
+  // Se já estiver no formato DD/MM/YYYY, retorna sem mudar
+  if (date.includes('/') && date.split('/')[0].length === 2) {
+    return date;
+  }
+
+  // Trata datas ISO tipo: "2000-02-11T02:00:00.000Z"
+  const onlyDate = date.split('T')[0]; // pega só "2000-02-11"
+
+  const parts = onlyDate.split('-'); // ["2000","02","11"]
+
   if (parts.length === 3) {
     return `${parts[2]}/${parts[1]}/${parts[0]}`;
   }
-  
-  return date;
+
+  return date; // fallback caso não reconheça o formato
 };
 
 export default function AlunosScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [showRefreshSplash, setShowRefreshSplash] = useState(false);
   const [alunos, setAlunos] = useState<Cliente[]>([]);
@@ -57,11 +65,12 @@ export default function AlunosScreen() {
     player.muted = true;
   });
 
-  // Carrega os clientes da API
+  // Carrega os clientes da API filtrados por treinador_id
   const loadClientes = async () => {
     try {
       setError(null);
-      const data = await clientesService.getAll();
+      // Filtra por treinador_id do usuário logado
+      const data = await clientesService.getAll({ treinador_id: user?.id });
       setAlunos(data);
     } catch (err) {
       console.error('Erro ao carregar clientes:', err);
@@ -191,32 +200,32 @@ export default function AlunosScreen() {
                 className="bg-[#60A5FA] items-center justify-center"
               >
                 <Text className="text-white text-2xl font-bold">
-                  {aluno.nome?.charAt(0).toUpperCase() || '?'}
+                  {aluno.name?.charAt(0).toUpperCase() || '?'}
                 </Text>
               </View>
             </View>
 
             {/* Informações do aluno */}
             <View className="flex-1">
-              <Text className="text-white text-lg font-bold mb-1">{aluno.nome}</Text>
+              <Text className="text-white text-lg font-bold mb-1">{aluno.name}</Text>
               <Text className="text-gray-300 text-sm mb-1">{aluno.email || 'Sem email'}</Text>
               <View className="flex-row items-center gap-2 mb-1">
                 <Ionicons name="call-outline" size={14} color="#60A5FA" />
                 <Text className="text-[#60A5FA] text-sm font-semibold">
-                  {formatPhone(aluno.telefone || aluno.phone_number)}
+                  {formatPhone(aluno.phone_number)}
                 </Text>
               </View>
-              {(aluno.data_nascimento || aluno.date_of_birth) && (
+              {aluno.date_of_birth && (
                 <View className="flex-row items-center gap-2">
                   <Ionicons name="calendar-outline" size={14} color="#9CA3AF" />
                   <Text className="text-gray-400 text-sm">
-                    {formatDate(aluno.data_nascimento || aluno.date_of_birth)}
+                    {formatDate(aluno.date_of_birth)}
                   </Text>
                 </View>
               )}
             </View>
 
-            {/* Ícone de seta */}
+            {/* Ícone de seta */} 
             <ChevronRight color="#93C5FD" size={24} />
           </TouchableOpacity>
         </LiquidGlassCard>

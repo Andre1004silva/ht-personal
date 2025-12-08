@@ -83,6 +83,15 @@ export default function ExerciciosScreen() {
         return nome.includes(activeCategory);
       });
 
+  const styles = StyleSheet.create({
+        exerciseImage: {
+        width: 120,
+        height: '100%',
+        minHeight: 140,
+        borderRadius: 12,
+       },
+});
+
   return (
     <View className="flex-1 bg-[#0B1120]">
       {/* Background Video */}
@@ -317,11 +326,3 @@ export default function ExerciciosScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  exerciseImage: {
-    width: 120,
-    height: '100%',
-    minHeight: 140,
-  },
-});

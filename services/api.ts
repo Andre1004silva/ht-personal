@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ENV } from '@/config/env';
 
 // Cria instância do axios com configurações base
@@ -12,16 +13,32 @@ const api: AxiosInstance = axios.create({
 
 // Interceptor para requisições (adicionar token, logs, etc)
 api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  async (config: InternalAxiosRequestConfig) => {
     // Adiciona admin_id no header (obrigatório para a API)
-    // TODO: Substituir por autenticação real quando implementar login
-    config.headers['admin_id'] = '1';
+    try {
+      const storedUser = await AsyncStorage.getItem('@HighTraining:user');
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        // Usa admin_id do usuário (treinadores e clientes têm admin_id)
+        config.headers['admin_id'] = user.admin_id?.toString() || '1';
+      } else {
+        // Fallback para ID 1 se não houver usuário logado
+        config.headers['admin_id'] = '1';
+      }
+    } catch (error) {
+      console.error('Erro ao buscar user do storage:', error);
+      config.headers['admin_id'] = '1';
+    }
     
-    // Aqui você pode adicionar token de autenticação
-    // const token = await AsyncStorage.getItem('token');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    // Adiciona token de autenticação se existir
+    try {
+      const token = await AsyncStorage.getItem('@HighTraining:token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.error('Erro ao buscar token do storage:', error);
+    }
     
     console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`);
     console.log('[API Request Data]', config.data);

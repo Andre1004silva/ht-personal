@@ -416,37 +416,7 @@ export default function PerfilScreen() {
             </LiquidGlassCard>
           )}
         </View>
-
-        {/* Localização */}
-        <View style={{ marginBottom: 24 }}>
-          <Text style={{ color: 'white', fontSize: 18, fontWeight: '600', marginBottom: 12 }}>
-            Localização
-          </Text>
-          <LiquidGlassCard>
-            <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-              <View style={{ 
-                width: 40, 
-                height: 40, 
-                borderRadius: 20, 
-                backgroundColor: 'rgba(59, 130, 246, 0.3)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginRight: 12
-              }}>
-                <Ionicons name="location-outline" size={20} color="#60A5FA" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: 'white', fontSize: 15, fontWeight: '600', marginBottom: 4 }}>
-                  {trainerData?.local_trabalho || 'Academia'}
-                </Text>
-                <Text style={{ color: '#9CA3AF', fontSize: 14 }}>
-                  {trainerData?.endereco || 'Endereço não informado'}
-                </Text>
-              </View>
-            </View>
-          </LiquidGlassCard>
-        </View>
-
+        
         {/* Horários de Atendimento */}
         <View style={{ marginBottom: 24 }}>
           <Text style={{ color: 'white', fontSize: 18, fontWeight: '600', marginBottom: 12 }}>

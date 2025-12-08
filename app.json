@@ -33,6 +33,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "statusBarStyle": "light",
     "splash": {
       "image": "./assets/logo.png",
       "resizeMode": "contain",
@@ -45,7 +46,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.devgabri3l.personalfront",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIStatusBarStyle": "UIStatusBarStyleLightContent"
       }
     },
     "android": {
@@ -53,7 +55,9 @@
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.devgabri3l.personalfront"
+      "package": "com.devgabri3l.personalfront",
+      "statusBarColor": "#0B1120",
+      "statusBarStyle": "light"
     },
     "extra": {
       "router": {},

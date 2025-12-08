@@ -2,7 +2,7 @@ import '../global.css';
 
 import { Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { View, Image, StyleSheet, Dimensions } from 'react-native';
+import { View, Image, StyleSheet, Dimensions, StatusBar } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { 
@@ -59,29 +59,35 @@ export default function Layout() {
 
   if (!appIsReady) {
     return (
-      <LinearGradient
-        colors={['#0B1120', '#1a2847', '#0B1120']}
-        style={styles.splashContainer}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
-        <Animated.View style={[styles.logoContainer, animatedStyle]}>
-          <Image 
-            source={require('../assets/logo.png')} 
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </Animated.View>
-      </LinearGradient>
+      <>
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+        <LinearGradient
+          colors={['#0B1120', '#1a2847', '#0B1120']}
+          style={styles.splashContainer}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <Animated.View style={[styles.logoContainer, animatedStyle]}>
+            <Image 
+              source={require('../assets/logo.png')} 
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </Animated.View>
+        </LinearGradient>
+      </>
     );
   }
 
   return (
-    <AuthProvider>
-      <NotificationProvider>
-        <Stack screenOptions={{ headerShown: false }} />
-      </NotificationProvider>
-    </AuthProvider>
+    <>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <AuthProvider>
+        <NotificationProvider>
+          <Stack screenOptions={{ headerShown: false }} />
+        </NotificationProvider>
+      </AuthProvider>
+    </>
   );
 }
 

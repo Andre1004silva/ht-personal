@@ -41,22 +41,49 @@ const removePhoneMask = (value: string): string => {
 
 // Função para converter data DD/MM/YYYY para YYYY-MM-DD
 const convertDateToBackend = (value: string): string => {
-  if (!value) return '';
+  if (!value || !value.trim()) return '';
+  
+  // Remove tudo que não é número
   const cleaned = value.replace(/\D/g, '');
+  
+  // Se tiver exatamente 8 dígitos (DDMMYYYY)
   if (cleaned.length === 8) {
-    return `${cleaned.slice(4, 8)}-${cleaned.slice(2, 4)}-${cleaned.slice(0, 2)}`;
+    const day = cleaned.slice(0, 2);
+    const month = cleaned.slice(2, 4);
+    const year = cleaned.slice(4, 8);
+    return `${year}-${month}-${day}`;
   }
-  return value;
+  
+  // Se já estiver no formato YYYY-MM-DD, retorna como está
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+  
+  // Se não conseguir converter, retorna vazio para evitar erro
+  console.warn('[convertDateToBackend] Formato de data inválido:', value);
+  return '';
 };
 
-// Função para converter data YYYY-MM-DD para DD/MM/YYYY
+// Função para converter data YYYY-MM-DD ou ISO para DD/MM/YYYY
 const convertDateToFrontend = (value: string): string => {
-  if (!value) return '';
-  if (value.includes('/')) return value;
+  if (!value || !value.trim()) return '';
+  
+  // Se já estiver no formato DD/MM/YYYY, retorna como está
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+    return value;
+  }
+  
+  // Se for formato ISO completo (2025-11-10T19:06:37.696Z), extrai apenas a data
+  if (value.includes('T')) {
+    value = value.split('T')[0];
+  }
+  
+  // Converte YYYY-MM-DD para DD/MM/YYYY
   const parts = value.split('-');
   if (parts.length === 3) {
     return `${parts[2]}/${parts[1]}/${parts[0]}`;
   }
+  
   return value;
 };
 
@@ -69,17 +96,19 @@ export default function AlunoFormScreen() {
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<Partial<Cliente>>({
-    nome: '',
     name: '',
     email: '',
     password: '',
-    telefone: '',
     phone_number: '',
-    data_nascimento: '',
     date_of_birth: '',
+    age: undefined,
     gender: '',
     treinador_id: undefined,
   });
+
+  // Estados locais para máscaras (apenas para exibição)
+  const [phoneDisplay, setPhoneDisplay] = useState('');
+  const [dateDisplay, setDateDisplay] = useState('');
 
   useEffect(() => {
     if (isEditing) {
@@ -91,14 +120,16 @@ export default function AlunoFormScreen() {
     try {
       setLoading(true);
       const data = await clientesService.getById(Number(params.id));
-      // Aplica máscaras aos dados carregados
-      setFormData({
-        ...data,
-        telefone: data.telefone ? applyPhoneMask(data.telefone) : '',
-        phone_number: data.phone_number ? applyPhoneMask(data.phone_number) : '',
-        data_nascimento: data.data_nascimento ? convertDateToFrontend(data.data_nascimento) : '',
-        date_of_birth: data.date_of_birth ? convertDateToFrontend(data.date_of_birth) : '',
-      });
+      
+      // Remove date_of_birth e phone_number do formData pois usamos estados separados para display
+      const { date_of_birth, phone_number, ...restData } = data;
+      
+      // Carrega dados (sem date_of_birth e phone_number que são gerenciados separadamente)
+      setFormData(restData);
+      
+      // Aplica máscaras para exibição
+      setPhoneDisplay(phone_number ? applyPhoneMask(phone_number) : '');
+      setDateDisplay(date_of_birth ? convertDateToFrontend(date_of_birth) : '');
     } catch (err) {
       Alert.alert('Erro', 'Erro ao carregar dados do cliente');
       router.back();
@@ -109,7 +140,7 @@ export default function AlunoFormScreen() {
 
   const handleSave = async () => {
     // Validação básica
-    if (!formData.nome?.trim() && !formData.name?.trim()) {
+    if (!formData.name?.trim()) {
       Alert.alert('Atenção', 'O nome é obrigatório');
       return;
     }
@@ -133,15 +164,25 @@ export default function AlunoFormScreen() {
     try {
       setSaving(true);
       
+      // DEBUG: Verificar dados do usuário
+      console.log('[DEBUG] User completo:', JSON.stringify(user, null, 2));
+      console.log('[DEBUG] User.id:', user.id);
+      console.log('[DEBUG] User.admin_id:', user.admin_id);
+      
+      // DEBUG: Verificar conversão de data
+      console.log('[DEBUG] dateDisplay ANTES da conversão:', dateDisplay);
+      const convertedDate = convertDateToBackend(dateDisplay);
+      console.log('[DEBUG] date_of_birth DEPOIS da conversão:', convertedDate);
+      
       // Remove máscaras antes de enviar para o backend
-      const dataToSave = {
+      const dataToSave: Partial<Cliente> = {
         ...formData,
-        treinador_id: user.id, // Adiciona o ID do treinador logado
-        telefone: removePhoneMask(formData.telefone || ''),
-        phone_number: removePhoneMask(formData.telefone || ''),
-        data_nascimento: convertDateToBackend(formData.data_nascimento || ''),
-        date_of_birth: convertDateToBackend(formData.data_nascimento || ''),
+        treinador_id: user.id, // ID do treinador logado (vem do localStorage via useAuth)
+        phone_number: removePhoneMask(phoneDisplay),
+        date_of_birth: convertedDate,
       };
+      
+      console.log('[DEBUG] Data a enviar:', JSON.stringify(dataToSave, null, 2));
       
       if (isEditing) {
         await clientesService.update(Number(params.id), dataToSave);
@@ -212,8 +253,8 @@ export default function AlunoFormScreen() {
                 className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
                 placeholder="Digite o nome completo"
                 placeholderTextColor="#6B7280"
-                value={formData.nome}
-                onChangeText={(text) => setFormData({ ...formData, nome: text, name: text })}
+                value={formData.name}
+                onChangeText={(text) => setFormData({ ...formData, name: text })}
               />
             </View>
 
@@ -255,10 +296,10 @@ export default function AlunoFormScreen() {
                 placeholderTextColor="#6B7280"
                 keyboardType="phone-pad"
                 maxLength={15}
-                value={formData.telefone}
+                value={phoneDisplay}
                 onChangeText={(text) => {
                   const masked = applyPhoneMask(text);
-                  setFormData({ ...formData, telefone: masked, phone_number: masked });
+                  setPhoneDisplay(masked);
                 }}
               />
             </View>
@@ -276,10 +317,27 @@ export default function AlunoFormScreen() {
                 placeholderTextColor="#6B7280"
                 keyboardType="numeric"
                 maxLength={10}
-                value={formData.data_nascimento || formData.date_of_birth}
+                value={dateDisplay}
                 onChangeText={(text) => {
                   const masked = applyDateMask(text);
-                  setFormData({ ...formData, data_nascimento: masked, date_of_birth: masked });
+                  setDateDisplay(masked);
+                }}
+              />
+            </View>
+
+            {/* Idade */}
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Idade</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Digite a idade"
+                placeholderTextColor="#6B7280"
+                keyboardType="numeric"
+                maxLength={3}
+                value={formData.age?.toString() || ''}
+                onChangeText={(text) => {
+                  const numValue = text.replace(/\D/g, '');
+                  setFormData({ ...formData, age: numValue ? Number(numValue) : undefined });
                 }}
               />
             </View>

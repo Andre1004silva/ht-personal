@@ -475,7 +475,7 @@ export default function StudentProfileScreen() {
                     {studentData?.personalTrainer?.name || 'Personal Trainer'}
                   </Text>
                   <Text style={{ color: '#9CA3AF', fontSize: 14 }}>
-                    CREF: {studentData?.personalTrainer?.cref || 'N/A'}
+                    CREF: {studentData?.personalTrainer?.cref || 'Não informado'}
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
@@ -706,36 +706,6 @@ export default function StudentProfileScreen() {
                       Próximo: {studentData?.nextPayment || 'Não informado'}
                     </Text>
                   </View>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
-              </TouchableOpacity>
-            </LiquidGlassCard>
-
-            {/* Notificações */}
-            <LiquidGlassCard style={{ marginBottom: 12 }}>
-              <TouchableOpacity 
-                style={{ 
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-                activeOpacity={0.7}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View style={{ 
-                    width: 40, 
-                    height: 40, 
-                    borderRadius: 20, 
-                    backgroundColor: 'rgba(59, 130, 246, 0.3)',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: 12
-                  }}>
-                    <Ionicons name="notifications-outline" size={20} color="#60A5FA" />
-                  </View>
-                  <Text style={{ color: 'white', fontSize: 16, fontWeight: '500' }}>
-                    Notificações
-                  </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
               </TouchableOpacity>
