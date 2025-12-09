@@ -42,7 +42,7 @@ class ClientTrainingService {
       if (filters?.training_id) params.append('training_id', filters.training_id.toString());
       if (filters?.treinador_id) params.append('treinador_id', filters.treinador_id.toString());
 
-      const url = params.toString() ? `/client-training?${params.toString()}` : '/client-training';
+      const url = params.toString() ? `/routine-trainings?${params.toString()}` : '/routine-trainings';
       const response = await api.get<ClientTraining[]>(url);
       return response.data;
     } catch (error) {
@@ -63,7 +63,7 @@ class ClientTrainingService {
    */
   async getById(id: number): Promise<ClientTraining> {
     try {
-      const response = await api.get<ClientTraining>(`/client-training/${id}`);
+      const response = await api.get<ClientTraining>(`/routine-trainings/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Erro ao buscar atribuição ${id}:`, error);
@@ -77,7 +77,7 @@ class ClientTrainingService {
   async create(payload: CreateClientTrainingPayload): Promise<ClientTraining> {
     try {
       console.log('[ClientTrainingService] Criando atribuição:', payload);
-      const response = await api.post<ClientTraining>('/client-training', payload);
+      const response = await api.post<ClientTraining>('/routine-trainings', payload as any);
       console.log('[ClientTrainingService] Atribuição criada com sucesso:', response.data);
       return response.data;
     } catch (error: any) {
@@ -93,7 +93,7 @@ class ClientTrainingService {
   async update(id: number, payload: UpdateClientTrainingPayload): Promise<{ message: string; clientTraining: ClientTraining }> {
     try {
       console.log('[ClientTrainingService] Atualizando atribuição:', id, payload);
-      const response = await api.put<{ message: string; clientTraining: ClientTraining }>(`/client-training/${id}`, payload);
+      const response = await api.put<{ message: string; clientTraining: ClientTraining }>(`/routine-trainings/${id}`, payload as any);
       console.log('[ClientTrainingService] Atribuição atualizada com sucesso:', response.data);
       return response.data;
     } catch (error: any) {
@@ -108,7 +108,7 @@ class ClientTrainingService {
    */
   async delete(id: number): Promise<{ message: string }> {
     try {
-      const response = await api.delete<{ message: string }>(`/client-training/${id}`);
+      const response = await api.delete<{ message: string }>(`/routine-trainings/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Erro ao deletar atribuição ${id}:`, error);

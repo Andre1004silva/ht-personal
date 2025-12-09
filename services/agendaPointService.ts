@@ -3,18 +3,18 @@ import api from './api';
 export interface AgendaPoint {
   id?: number;
   admin_id?: number;
-  cliente_id: number;
+  student_id: number;
   training_date: string;
   duration_times?: string;
   notes?: string;
   day_week?: string;
   created_at?: string;
   updated_at?: string;
-  cliente_name?: string;
+  student_name?: string;
 }
 
 export interface CreateAgendaPointPayload {
-  cliente_id: number;
+  student_id: number;
   training_date: string;
   duration_times?: string;
   notes?: string;
@@ -35,7 +35,7 @@ class AgendaPointService {
   async create(payload: CreateAgendaPointPayload): Promise<AgendaPoint> {
     try {
       console.log('[AgendaPointService] Criando ponto de agenda:', payload);
-      const response = await api.post<AgendaPoint>('/agenda-point', payload);
+      const response = await api.post<AgendaPoint>('/schedule-appointments', payload);
       console.log('[AgendaPointService] Ponto criado com sucesso:', response.data);
       return response.data;
     } catch (error: any) {
@@ -49,17 +49,17 @@ class AgendaPointService {
    * Busca todos os pontos de agenda
    */
   async getAll(filters?: {
-    cliente_id?: number;
+    student_id?: number;
     start_date?: string;
     end_date?: string;
   }): Promise<AgendaPoint[]> {
     try {
       const params = new URLSearchParams();
-      if (filters?.cliente_id) params.append('cliente_id', filters.cliente_id.toString());
+      if (filters?.student_id) params.append('student_id', filters.student_id.toString());
       if (filters?.start_date) params.append('start_date', filters.start_date);
       if (filters?.end_date) params.append('end_date', filters.end_date);
 
-      const url = params.toString() ? `/agenda-point?${params.toString()}` : '/agenda-point';
+      const url = params.toString() ? `/schedule-appointments?${params.toString()}` : '/schedule-appointments';
       const response = await api.get<AgendaPoint[]>(url);
       return response.data;
     } catch (error) {
@@ -73,7 +73,7 @@ class AgendaPointService {
    */
   async getById(id: number): Promise<AgendaPoint> {
     try {
-      const response = await api.get<AgendaPoint>(`/agenda-point/${id}`);
+      const response = await api.get<AgendaPoint>(`/schedule-appointments/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Erro ao buscar ponto ${id}:`, error);
@@ -86,7 +86,7 @@ class AgendaPointService {
    */
   async getByDate(date: string): Promise<AgendaPoint[]> {
     try {
-      const response = await api.get<AgendaPoint[]>(`/agenda-point/date/${date}`);
+      const response = await api.get<AgendaPoint[]>(`/schedule-appointments/date/${date}`);
       return response.data;
     } catch (error) {
       console.error(`Erro ao buscar pontos da data ${date}:`, error);
@@ -100,7 +100,7 @@ class AgendaPointService {
   async update(id: number, payload: UpdateAgendaPointPayload): Promise<{ message: string; agendaPoint: AgendaPoint }> {
     try {
       console.log('[AgendaPointService] Atualizando ponto:', id, payload);
-      const response = await api.put<{ message: string; agendaPoint: AgendaPoint }>(`/agenda-point/${id}`, payload);
+      const response = await api.put<{ message: string; agendaPoint: AgendaPoint }>(`/schedule-appointments/${id}`, payload);
       console.log('[AgendaPointService] Ponto atualizado com sucesso:', response.data);
       return response.data;
     } catch (error: any) {
@@ -115,7 +115,7 @@ class AgendaPointService {
    */
   async delete(id: number): Promise<{ message: string }> {
     try {
-      const response = await api.delete<{ message: string }>(`/agenda-point/${id}`);
+      const response = await api.delete<{ message: string }>(`/schedule-appointments/${id}`);
       return response.data;
     } catch (error) {
       console.error(`Erro ao deletar ponto ${id}:`, error);
@@ -126,7 +126,7 @@ class AgendaPointService {
   /**
    * Registra ponto de treino para o dia atual
    */
-  async registrarPonto(clienteId: number, workoutInfo: {
+  async registrarPonto(studentId: number, workoutInfo: {
     workoutName: string;
     duration: string;
     dayName: string;
@@ -136,7 +136,7 @@ class AgendaPointService {
     const trainingDate = now.toISOString();
     
     const payload: CreateAgendaPointPayload = {
-      cliente_id: clienteId,
+      student_id: studentId,
       training_date: trainingDate,
       duration_times: workoutInfo.duration,
       day_week: workoutInfo.dayName,

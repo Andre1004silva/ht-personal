@@ -82,7 +82,7 @@ class ExercisesService {
         series: exercise.series,
         carga: exercise.carga,
         notes: exercise.notes || exercise.descricao,
-        treinador_id: exercise.treinador_id,
+        trainer_id: exercise.treinador_id,
       };
       const response = await api.post<Exercise>('/exercises', payload);
       return this.normalizeExercise(response.data);
@@ -104,7 +104,7 @@ class ExercisesService {
       if (exercise.series !== undefined) payload.series = exercise.series;
       if (exercise.carga !== undefined) payload.carga = exercise.carga;
       if (exercise.notes || exercise.descricao) payload.notes = exercise.notes || exercise.descricao;
-      if (exercise.treinador_id !== undefined) payload.treinador_id = exercise.treinador_id;
+      if (exercise.treinador_id !== undefined) payload.trainer_id = exercise.treinador_id;
       
       const response = await api.put<Exercise>(`/exercises/${id}`, payload);
       return this.normalizeExercise(response.data);

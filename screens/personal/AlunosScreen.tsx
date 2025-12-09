@@ -126,7 +126,7 @@ export default function AlunosScreen() {
 
       {/* Botão Adicionar Cliente */}
       <TouchableOpacity
-        className="absolute bottom-24 right-6 w-16 h-16 bg-[#60A5FA] rounded-full items-center justify-center z-10"
+        className="absolute bottom-32 right-6 w-16 h-16 bg-[#60A5FA] rounded-full items-center justify-center z-10"
         style={{
           shadowColor: '#60A5FA',
           shadowOffset: { width: 0, height: 4 },
@@ -243,7 +243,7 @@ export default function AlunosScreen() {
 const styles = StyleSheet.create({
   scrollContent: {
     paddingTop: 140,
-    paddingBottom: 100,
+    paddingBottom: 140,
     paddingVertical: 16,
   },
   avatar: {

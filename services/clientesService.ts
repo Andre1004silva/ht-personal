@@ -39,10 +39,10 @@ class ClientesService {
   async getAll(filters?: { treinador_id?: number; term?: string }): Promise<Cliente[]> {
     try {
       const params = new URLSearchParams();
-      if (filters?.treinador_id) params.append('treinador_id', filters.treinador_id.toString());
+      if (filters?.treinador_id) params.append('trainer_id', filters.treinador_id.toString());
       if (filters?.term) params.append('term', filters.term);
 
-      const url = params.toString() ? `/clientes?${params.toString()}` : '/clientes';
+      const url = params.toString() ? `/students?${params.toString()}` : '/students';
       const response = await api.get<Cliente[]>(url);
       return response.data.map(c => this.normalizeCliente(c));
     } catch (error) {
@@ -56,7 +56,7 @@ class ClientesService {
    */
   async getById(id: number): Promise<Cliente> {
     try {
-      const response = await api.get<Cliente>(`/clientes/${id}`);
+      const response = await api.get<Cliente>(`/students/${id}`);
       return this.normalizeCliente(response.data);
     } catch (error) {
       console.error(`Erro ao buscar cliente ${id}:`, error);
@@ -98,7 +98,7 @@ class ClientesService {
       }
       
       console.log('[ClientesService] Payload enviado:', payload);
-      const response = await api.post<Cliente>('/clientes', payload);
+      const response = await api.post<Cliente>('/students', payload);
       return this.normalizeCliente(response.data);
     } catch (error: any) {
       console.error('Erro ao criar cliente:', error);
@@ -124,7 +124,7 @@ class ClientesService {
       if (cliente.gender !== undefined) payload.gender = cliente.gender;
       if (cliente.treinador_id !== undefined) payload.treinador_id = cliente.treinador_id;
       
-      const response = await api.put<any>(`/clientes/${id}`, payload);
+      const response = await api.put<any>(`/students/${id}`, payload);
       // Backend retorna { message, cliente }
       const clienteData = response.data.cliente || response.data;
       return this.normalizeCliente(clienteData);
@@ -139,7 +139,7 @@ class ClientesService {
    */
   async delete(id: number): Promise<void> {
     try {
-      await api.delete(`/clientes/${id}`);
+      await api.delete(`/students/${id}`);
     } catch (error) {
       console.error(`Erro ao deletar cliente ${id}:`, error);
       throw error;

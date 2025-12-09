@@ -51,7 +51,7 @@ class TrainingsService {
   async getAll(treinadorId: number): Promise<Training[]> {
     try {
       const response = await api.get<Training[]>('/trainings', {
-        params: { treinador_id: treinadorId }
+        params: { trainer_id: treinadorId }
       });
       return response.data.map(t => this.normalizeTraining(t));
     } catch (error) {
@@ -86,7 +86,7 @@ class TrainingsService {
         video_url: training.video_url,
         carga: training.carga,
         notes: training.notes || training.descricao || training.observacoes,
-        treinador_id: training.treinador_id,
+        trainer_id: training.treinador_id,
       };
       const response = await api.post<Training>('/trainings', payload);
       return this.normalizeTraining(response.data);
@@ -109,7 +109,7 @@ class TrainingsService {
       if (training.video_url !== undefined) payload.video_url = training.video_url;
       if (training.carga !== undefined) payload.carga = training.carga;
       if (training.notes || training.descricao || training.observacoes) payload.notes = training.notes || training.descricao || training.observacoes;
-      if (training.treinador_id !== undefined) payload.treinador_id = training.treinador_id;
+      if (training.treinador_id !== undefined) payload.trainer_id = training.treinador_id;
       
       const response = await api.put<Training>(`/trainings/${id}`, payload);
       return this.normalizeTraining(response.data);

@@ -175,9 +175,10 @@ class NotificationService {
     try {
       const { api } = await import('../contexts/AuthContext');
       
+      const mappedType = this.userType === 'personal' ? 'trainer' : 'student';
       await api.post('/notifications/register-token', {
         userId: this.userId,
-        userType: this.userType,
+        userType: mappedType,
         pushToken: this.pushToken
       });
 

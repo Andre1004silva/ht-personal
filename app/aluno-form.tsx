@@ -1,4 +1,5 @@
 import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -109,6 +110,31 @@ export default function AlunoFormScreen() {
   // Estados locais para máscaras (apenas para exibição)
   const [phoneDisplay, setPhoneDisplay] = useState('');
   const [dateDisplay, setDateDisplay] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const formatToDDMMYYYY = (date: Date) => {
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = String(date.getFullYear());
+    return `${d}/${m}/${y}`;
+  };
+
+  const computeAge = (date: Date) => {
+    const today = new Date();
+    let age = today.getFullYear() - date.getFullYear();
+    const m = today.getMonth() - date.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < date.getDate())) age--;
+    return age;
+  };
+
+  const handleDateSelected = (_event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (!selectedDate) return;
+    const display = formatToDDMMYYYY(selectedDate);
+    setDateDisplay(display);
+    const age = computeAge(selectedDate);
+    setFormData(prev => ({ ...prev, age }));
+  };
 
   useEffect(() => {
     if (isEditing) {
@@ -146,7 +172,7 @@ export default function AlunoFormScreen() {
     }
 
     if (!isEditing && !formData.password?.trim()) {
-      Alert.alert('Atenção', 'A senha é obrigatória para criar um novo cliente');
+      Alert.alert('Atenção', 'A senha é obrigatória para criar um novo aluno');
       return;
     }
 
@@ -234,7 +260,7 @@ export default function AlunoFormScreen() {
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
         <Text className="text-white text-2xl font-bold flex-1">
-          {isEditing ? 'Editar Cliente' : 'Novo Cliente'}
+          {isEditing ? 'Editar Aluno' : 'Novo Aluno'}
         </Text>
       </View>
 
@@ -244,13 +270,13 @@ export default function AlunoFormScreen() {
       >
         <ScrollView className="flex-1 px-5">
           <LiquidGlassCard style={{ marginBottom: 16 }}>
-            <Text className="text-white text-lg font-bold mb-4">Informações Básicas</Text>
+            <Text className="text-white text-3xl font-bold mb-4">Informações Básicas</Text>
             
             {/* Nome */}
             <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Nome *</Text>
+              <Text className="text-gray-400 text-xl mb-2">Nome *</Text>
               <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                className="bg-[#0B1120] text-white text-xl px-5 py-4 rounded-xl"
                 placeholder="Digite o nome completo"
                 placeholderTextColor="#6B7280"
                 value={formData.name}
@@ -260,9 +286,9 @@ export default function AlunoFormScreen() {
 
             {/* Email */}
             <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Email *</Text>
+              <Text className="text-gray-400 text-xl mb-2">Email *</Text>
               <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                className="bg-[#0B1120] text-white text-xl px-5 py-4 rounded-xl"
                 placeholder="email@exemplo.com"
                 placeholderTextColor="#6B7280"
                 keyboardType="email-address"
@@ -275,9 +301,9 @@ export default function AlunoFormScreen() {
             {/* Senha (apenas ao criar) */}
             {!isEditing && (
               <View className="mb-4">
-                <Text className="text-gray-400 text-sm mb-2">Senha *</Text>
+                <Text className="text-gray-400 text-xl mb-2">Senha *</Text>
                 <TextInput
-                  className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                  className="bg-[#0B1120] text-white text-xl   px-5 py-4 rounded-xl"
                   placeholder="Digite a senha"
                   placeholderTextColor="#6B7280"
                   secureTextEntry
@@ -289,9 +315,9 @@ export default function AlunoFormScreen() {
 
             {/* Telefone */}
             <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Telefone</Text>
+              <Text className="text-gray-400 text-xl mb-2">Telefone</Text>
               <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                className="bg-[#0B1120] text-white text-xl px-5 py-4 rounded-xl"
                 placeholder="(11) 99999-9999"
                 placeholderTextColor="#6B7280"
                 keyboardType="phone-pad"
@@ -306,50 +332,78 @@ export default function AlunoFormScreen() {
           </LiquidGlassCard>
 
           <LiquidGlassCard style={{ marginBottom: 16 }}>
-            <Text className="text-white text-lg font-bold mb-4">Informações Adicionais</Text>
+            <Text className="text-white text-3xl font-bold mb-4">Informações Adicionais</Text>
             
             {/* Data de Nascimento */}
             <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Data de Nascimento</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="DD/MM/AAAA"
-                placeholderTextColor="#6B7280"
-                keyboardType="numeric"
-                maxLength={10}
-                value={dateDisplay}
-                onChangeText={(text) => {
-                  const masked = applyDateMask(text);
-                  setDateDisplay(masked);
-                }}
-              />
+              <Text className="text-gray-400 text-xl mb-2">Data de Nascimento</Text>
+              {Platform.OS === 'web' ? (
+                <TextInput
+                  className="bg-[#0B1120] text-white text-xl px-5 py-4 rounded-xl"
+                  placeholder="DD/MM/AAAA"
+                  placeholderTextColor="#6B7280"
+                  keyboardType="numeric"
+                  maxLength={10}
+                  value={dateDisplay}
+                  onChangeText={(text) => {
+                    const masked = applyDateMask(text);
+                    setDateDisplay(masked);
+                    const backend = convertDateToBackend(masked);
+                    if (backend) {
+                      const [y, m, d] = backend.split('-').map(Number);
+                      const dateObj = new Date(y, m - 1, d);
+                      const age = computeAge(dateObj);
+                      setFormData(prev => ({ ...prev, age }));
+                    } else {
+                      setFormData(prev => ({ ...prev, age: undefined }));
+                    }
+                  }}
+                />
+              ) : (
+                <View>
+                  <TouchableOpacity
+                    className="bg-[#0B1120] px-5 py-4 rounded-xl flex-row items-center justify-between"
+                    onPress={() => setShowDatePicker(true)}
+                    activeOpacity={0.8}
+                  >
+                    <Text className="text-white text-xl">{dateDisplay || 'Selecionar data'}</Text>
+                    <Ionicons name="calendar-outline" size={20} color="#60A5FA" />
+                  </TouchableOpacity>
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={dateDisplay && convertDateToBackend(dateDisplay) ? (() => { const [y,m,d]=convertDateToBackend(dateDisplay).split('-').map(Number); return new Date(y, m-1, d); })() : new Date()}
+                      mode="date"
+                      display="spinner"
+                      themeVariant="dark"
+                      locale="pt-BR"
+                      textColor="#FFFFFF"
+                      onChange={handleDateSelected}
+                    />
+                  )}
+                </View>
+              )}
             </View>
 
-            {/* Idade */}
+            {/* Idade (calculada automaticamente a partir da data) */}
             <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Idade</Text>
+              <Text className="text-gray-400 text-xl mb-2">Idade</Text>
               <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Digite a idade"
-                placeholderTextColor="#6B7280"
-                keyboardType="numeric"
-                maxLength={3}
+                className="bg-[#0B1120] text-white text-xl px-5 py-4 rounded-xl"
                 value={formData.age?.toString() || ''}
-                onChangeText={(text) => {
-                  const numValue = text.replace(/\D/g, '');
-                  setFormData({ ...formData, age: numValue ? Number(numValue) : undefined });
-                }}
+                editable={false}
+                placeholder="Calculada automaticamente"
+                placeholderTextColor="#6B7280"
               />
             </View>
 
             {/* Gênero */}
             <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Gênero</Text>
+              <Text className="text-gray-400 text-xl mb-2">Gênero</Text>
               <View className="flex-row gap-3">
                 {['Masculino', 'Feminino', 'Outro'].map((genero) => (
                   <TouchableOpacity
                     key={genero}
-                    className={`flex-1 py-3 rounded-lg items-center ${
+                    className={`flex-1 py-3 rounded-lg text-xl items-center ${
                       formData.gender === genero ? 'bg-[#60A5FA]' : 'bg-[#0B1120]'
                     }`}
                     onPress={() => setFormData({ ...formData, gender: genero })}

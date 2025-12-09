@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator, Alert, TextInput } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator, Alert, TextInput, Modal } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -91,6 +91,8 @@ export default function AlunoDetailsScreen() {
   const [editandoMedidaId, setEditandoMedidaId] = useState<number | null>(null);
   const [loadingMedidas, setLoadingMedidas] = useState(false);
   const [mostrarFormMedidas, setMostrarFormMedidas] = useState(false);
+  const [selectedMedida, setSelectedMedida] = useState<ClienteEstatistic | null>(null);
+  const [showMedidaDetails, setShowMedidaDetails] = useState(false);
 
   // Carrega os dados do cliente e medidas
   useEffect(() => {
@@ -143,7 +145,7 @@ export default function AlunoDetailsScreen() {
   const loadMedidas = async () => {
     try {
       setLoadingMedidas(true);
-      const data = await clienteEstatisticService.getAll({ cliente_id: Number(params.id) });
+      const data = await clienteEstatisticService.getAll({ student_id: Number(params.id) });
       setListaMedidas(data);
     } catch (err) {
       console.error('Erro ao carregar medidas:', err);
@@ -164,7 +166,7 @@ export default function AlunoDetailsScreen() {
       Object.keys(medidas).forEach((key) => {
         const value = medidas[key as keyof typeof medidas];
         if (value && value.trim() !== '') {
-          payload[key] = key === 'notes' ? value : parseFloat(value);
+          payload[key] = key === 'notes' ? value : parseFloat(value.replace(',', '.'));
         }
       });
 
@@ -267,7 +269,7 @@ export default function AlunoDetailsScreen() {
     return (
       <View className="flex-1 bg-[#0B1120] items-center justify-center">
         <ActivityIndicator size="large" color="#60A5FA" />
-        <Text className="text-white mt-4">Carregando...</Text>
+        <Text className="text-white text-lg mt-4">Carregando...</Text>
       </View>
     );
   }
@@ -276,18 +278,18 @@ export default function AlunoDetailsScreen() {
     return (
       <View className="flex-1 bg-[#0B1120] items-center justify-center px-8">
         <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
-        <Text className="text-white mt-4 text-center">{error || 'Cliente não encontrado'}</Text>
+        <Text className="text-white text-lg mt-4 text-center">{error || 'Cliente não encontrado'}</Text>
         <TouchableOpacity 
           className="mt-4 bg-[#60A5FA] px-6 py-3 rounded-lg"
           onPress={loadCliente}
         >
-          <Text className="text-white font-semibold">Tentar novamente</Text>
+          <Text className="text-white text-lg font-semibold">Tentar novamente</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           className="mt-2"
           onPress={() => router.back()}
         >
-          <Text className="text-[#93C5FD]">Voltar</Text>
+          <Text className="text-[#93C5FD] text-lg">Voltar</Text>
         </TouchableOpacity>
       </View>
     );
@@ -297,6 +299,7 @@ export default function AlunoDetailsScreen() {
   const defaultAvatar = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(aluno.name || 'Cliente') + '&size=400&background=60A5FA&color=fff';
 
   return (
+    <>
     <View className="flex-1 bg-[#0B1120]">
       {/* Background Design - Mesh Gradient e Partículas */}
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden' }}>
@@ -421,12 +424,7 @@ export default function AlunoDetailsScreen() {
                   <Text className="text-white text-sm font-semibold">{aluno.treinador_name}</Text>
                 </View>
               )}
-              {aluno.phone_number && (
-                <View className="bg-white/20 px-3 py-1.5 rounded-full flex-row items-center gap-1">
-                  <Ionicons name="call-outline" size={16} color="white" />
-                  <Text className="text-white text-sm font-semibold">Contato</Text>
-                </View>
-              )}
+            
             </View>
           </View>
         </View>
@@ -435,33 +433,33 @@ export default function AlunoDetailsScreen() {
         <View className="px-5 pb-6">
           {/* Informações Pessoais */}
           <LiquidGlassCard style={{ marginBottom: 16 }}>
-            <Text className="text-white text-lg font-bold mb-3">Informações do Aluno</Text>
+            <Text className="text-white text-2xl font-bold mb-3">Informações do Aluno</Text>
             
             {aluno.gender && (
               <View className="mb-3">
-                <Text className="text-gray-400 text-xs mb-1">Gênero</Text>
-                <Text className="text-white text-base">{aluno.gender}</Text>
+                <Text className="text-gray-400 text-lg mb-1">Gênero</Text>
+                <Text className="text-white text-lg">{aluno.gender}</Text>
               </View>
             )}
 
             {aluno.age && (
               <View className="mb-3">
-                <Text className="text-gray-400 text-xs mb-1">Idade</Text>
-                <Text className="text-white text-base">{aluno.age || 'N/A'}</Text>
+                <Text className="text-gray-400 text-lg mb-1">Idade</Text>
+                <Text className="text-white text-lg">{aluno.age || 'N/A'}</Text>
               </View>
             )}
 
             {aluno.date_of_birth && (
               <View className="mb-3">
-                <Text className="text-gray-400 text-xs mb-1">Data de Nascimento</Text>
-                <Text className="text-white text-base">{new Date(aluno.date_of_birth).toLocaleDateString('pt-BR')}</Text>
+                <Text className="text-gray-400 text-lg mb-1">Data de Nascimento</Text>
+                <Text className="text-white text-lg">{new Date(aluno.date_of_birth).toLocaleDateString('pt-BR')}</Text>
               </View>
             )}
 
             {aluno.treinador_name && (
               <View>
-                <Text className="text-gray-400 text-xs mb-1">Treinador</Text>
-                <Text className="text-white text-base">{aluno.treinador_name}</Text>
+                <Text className="text-gray-400 text-lg mb-1">Treinador</Text>
+                <Text className="text-white text-lg">{aluno.treinador_name}</Text>
               </View>
             )}
           </LiquidGlassCard>
@@ -469,14 +467,13 @@ export default function AlunoDetailsScreen() {
           {/* Medidas - Histórico e Formulário */}
           <LiquidGlassCard style={{ marginBottom: 16 }}>
             <View className="flex-row justify-between items-center mb-3">
-              <Text className="text-white text-lg font-bold">Medidas Corporais</Text>
+              <Text className="text-white text-2xl font-bold">Medidas Corporais</Text>
               {!mostrarFormMedidas && (
                 <TouchableOpacity 
                   onPress={() => setMostrarFormMedidas(true)}
-                  className="bg-[#60A5FA] px-4 py-2 rounded-lg flex-row items-center gap-2"
+                  className="bg-[#60A5FA] p-3 rounded-full flex-row items-center gap-2"
                 >
-                  <Ionicons name="add" size={18} color="white" />
-                  <Text className="text-white text-sm font-semibold">Nova Medida</Text>
+                  <Ionicons name="add" size={28} color="white" />
                 </TouchableOpacity>
               )}
             </View>
@@ -485,7 +482,7 @@ export default function AlunoDetailsScreen() {
             {loadingMedidas && (
               <View className="py-4">
                 <ActivityIndicator size="small" color="#60A5FA" />
-                <Text className="text-white text-center mt-2 text-sm">Carregando medidas...</Text>
+                <Text className="text-white text-center mt-2 text-base">Carregando medidas...</Text>
               </View>
             )}
 
@@ -499,22 +496,26 @@ export default function AlunoDetailsScreen() {
                     className="py-3"
                   >
                     <View className="flex-row justify-between items-start mb-2">
-                      <View className="flex-1">
-                        <Text className="text-white text-base font-semibold">
+                      <TouchableOpacity
+                        className="flex-1"
+                        activeOpacity={0.7}
+                        onPress={() => { setSelectedMedida(medida); setShowMedidaDetails(true); }}
+                      >
+                        <Text className="text-white text-lg font-semibold">
                           {new Date(medida.created_at || '').toLocaleDateString('pt-BR')}
                         </Text>
                         <View className="flex-row flex-wrap gap-2 mt-2">
                           {medida.weight && (
-                            <Text className="text-gray-400 text-xs">Peso: {medida.weight}kg</Text>
+                            <Text className="text-gray-400 text-base">Peso: {medida.weight}kg</Text>
                           )}
                           {medida.height && (
-                            <Text className="text-gray-400 text-xs">Altura: {medida.height}cm</Text>
+                            <Text className="text-gray-400 text-base">Altura: {medida.height}cm</Text>
                           )}
                           {medida.muscle_mass_percentage && (
-                            <Text className="text-gray-400 text-xs">MM: {medida.muscle_mass_percentage}%</Text>
+                            <Text className="text-gray-400 text-base">MM: {medida.muscle_mass_percentage}%</Text>
                           )}
                         </View>
-                      </View>
+                      </TouchableOpacity>
                       <View className="flex-row gap-2">
                         <TouchableOpacity 
                           onPress={() => handleEditMedida(medida)}
@@ -531,7 +532,7 @@ export default function AlunoDetailsScreen() {
                       </View>
                     </View>
                     {medida.notes && (
-                      <Text className="text-gray-400 text-xs mt-1" numberOfLines={2}>{medida.notes}</Text>
+                      <Text className="text-gray-400 text-base mt-1" numberOfLines={2}>{medida.notes}</Text>
                     )}
                   </View>
                 ))}
@@ -542,8 +543,8 @@ export default function AlunoDetailsScreen() {
             {!loadingMedidas && listaMedidas.length === 0 && !mostrarFormMedidas && (
               <View className="py-6 items-center">
                 <Ionicons name="fitness-outline" size={48} color="#6B7280" />
-                <Text className="text-gray-400 text-center mt-3">Nenhuma medida registrada ainda</Text>
-                <Text className="text-gray-500 text-center text-xs mt-1">Clique em "Nova Medida" para começar</Text>
+                <Text className="text-gray-400 text-lg text-center mt-3">Nenhuma medida registrada ainda</Text>
+                <Text className="text-gray-500 text-base text-center mt-1">Clique em "Nova Medida" para começar</Text>
               </View>
             )}
 
@@ -551,22 +552,22 @@ export default function AlunoDetailsScreen() {
             {mostrarFormMedidas && (
               <View>
                 <View className="flex-row justify-between items-center mb-3">
-                  <Text className="text-white text-base font-semibold">
+                  <Text className="text-white text-xl font-bold">
                     {editandoMedidaId ? 'Editar Medida' : 'Nova Medida'}
                   </Text>
                   <TouchableOpacity onPress={resetFormMedidas}>
-                    <Text className="text-[#60A5FA] text-sm">Cancelar</Text>
+                    <Text className="text-[#60A5FA] text-base">Cancelar</Text>
                   </TouchableOpacity>
                 </View>
-                <Text className="text-gray-400 text-xs mb-4">Todos os campos são opcionais. Preencha apenas o que for relevante.</Text>
+                <Text className="text-gray-400 text-base mb-4">Todos os campos são opcionais. Preencha apenas o que for relevante.</Text>
             
             {/* Dados Gerais */}
-            <Text className="text-[#60A5FA] text-sm font-semibold mb-3">Dados Gerais</Text>
+            <Text className="text-[#60A5FA] text-xl font-bold mb-3">Dados Gerais</Text>
             
             <View className="mb-3">
-              <Text className="text-gray-400 text-xs mb-1">Peso (kg)</Text>
+              <Text className="text-gray-400 text-lg mb-1">Peso (kg)</Text>
               <TextInput
-                className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                 placeholder="Ex: 75.5"
                 placeholderTextColor="#6B7280"
                 keyboardType="decimal-pad"
@@ -576,9 +577,9 @@ export default function AlunoDetailsScreen() {
             </View>
 
             <View className="mb-3">
-              <Text className="text-gray-400 text-xs mb-1">Altura (cm)</Text>
+              <Text className="text-gray-400 text-lg mb-1">Altura (cm)</Text>
               <TextInput
-                className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                 placeholder="Ex: 175"
                 placeholderTextColor="#6B7280"
                 keyboardType="decimal-pad"
@@ -588,9 +589,9 @@ export default function AlunoDetailsScreen() {
             </View>
 
             <View className="mb-4">
-              <Text className="text-gray-400 text-xs mb-1">% Massa Muscular</Text>
+              <Text className="text-gray-400 text-lg mb-1">% Massa Muscular</Text>
               <TextInput
-                className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                 placeholder="Ex: 35.5"
                 placeholderTextColor="#6B7280"
                 keyboardType="decimal-pad"
@@ -600,12 +601,12 @@ export default function AlunoDetailsScreen() {
             </View>
 
             {/* Medidas Corporais - Parte Superior */}
-            <Text className="text-[#60A5FA] text-sm font-semibold mb-3">Parte Superior (cm)</Text>
+            <Text className="text-[#60A5FA] text-xl font-bold mb-3">Parte Superior (cm)</Text>
             
             <View className="mb-3">
-              <Text className="text-gray-400 text-xs mb-1">Ombro</Text>
+              <Text className="text-gray-400 text-lg mb-1">Ombro</Text>
               <TextInput
-                className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                 placeholder="Ex: 45"
                 placeholderTextColor="#6B7280"
                 keyboardType="decimal-pad"
@@ -615,9 +616,9 @@ export default function AlunoDetailsScreen() {
             </View>
 
             <View className="mb-3">
-              <Text className="text-gray-400 text-xs mb-1">Tórax</Text>
+              <Text className="text-gray-400 text-lg mb-1">Tórax</Text>
               <TextInput
-                className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                 placeholder="Ex: 95"
                 placeholderTextColor="#6B7280"
                 keyboardType="decimal-pad"
@@ -628,9 +629,9 @@ export default function AlunoDetailsScreen() {
 
             <View className="flex-row gap-3 mb-3">
               <View className="flex-1">
-                <Text className="text-gray-400 text-xs mb-1">Braço Esquerdo</Text>
+                <Text className="text-gray-400 text-lg mb-1">Braço Esquerdo</Text>
                 <TextInput
-                  className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                  className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                   placeholder="Ex: 35"
                   placeholderTextColor="#6B7280"
                   keyboardType="decimal-pad"
@@ -639,9 +640,9 @@ export default function AlunoDetailsScreen() {
                 />
               </View>
               <View className="flex-1">
-                <Text className="text-gray-400 text-xs mb-1">Braço Direito</Text>
+                <Text className="text-gray-400 text-lg mb-1">Braço Direito</Text>
                 <TextInput
-                  className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                  className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                   placeholder="Ex: 35"
                   placeholderTextColor="#6B7280"
                   keyboardType="decimal-pad"
@@ -653,9 +654,9 @@ export default function AlunoDetailsScreen() {
 
             <View className="flex-row gap-3 mb-3">
               <View className="flex-1">
-                <Text className="text-gray-400 text-xs mb-1">Antebraço Esquerdo</Text>
+                <Text className="text-gray-400 text-lg mb-1">Antebraço Esquerdo</Text>
                 <TextInput
-                  className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                  className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                   placeholder="Ex: 28"
                   placeholderTextColor="#6B7280"
                   keyboardType="decimal-pad"
@@ -664,9 +665,9 @@ export default function AlunoDetailsScreen() {
                 />
               </View>
               <View className="flex-1">
-                <Text className="text-gray-400 text-xs mb-1">Antebraço Direito</Text>
+                <Text className="text-gray-400 text-lg mb-1">Antebraço Direito</Text>
                 <TextInput
-                  className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                  className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                   placeholder="Ex: 28"
                   placeholderTextColor="#6B7280"
                   keyboardType="decimal-pad"
@@ -677,9 +678,9 @@ export default function AlunoDetailsScreen() {
             </View>
 
             <View className="mb-4">
-              <Text className="text-gray-400 text-xs mb-1">Punho</Text>
+              <Text className="text-gray-400 text-lg mb-1">Punho</Text>
               <TextInput
-                className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                 placeholder="Ex: 18"
                 placeholderTextColor="#6B7280"
                 keyboardType="decimal-pad"
@@ -689,12 +690,12 @@ export default function AlunoDetailsScreen() {
             </View>
 
             {/* Medidas Corporais - Tronco */}
-            <Text className="text-[#60A5FA] text-sm font-semibold mb-3">Tronco (cm)</Text>
+            <Text className="text-[#60A5FA] text-xl font-bold mb-3">Tronco (cm)</Text>
             
             <View className="mb-3">
-              <Text className="text-gray-400 text-xs mb-1">Cintura</Text>
+              <Text className="text-gray-400 text-lg mb-1">Cintura</Text>
               <TextInput
-                className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                 placeholder="Ex: 80"
                 placeholderTextColor="#6B7280"
                 keyboardType="decimal-pad"
@@ -704,9 +705,9 @@ export default function AlunoDetailsScreen() {
             </View>
 
             <View className="mb-3">
-              <Text className="text-gray-400 text-xs mb-1">Abdômen</Text>
+              <Text className="text-gray-400 text-lg mb-1">Abdômen</Text>
               <TextInput
-                className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                 placeholder="Ex: 85"
                 placeholderTextColor="#6B7280"
                 keyboardType="decimal-pad"
@@ -716,9 +717,9 @@ export default function AlunoDetailsScreen() {
             </View>
 
             <View className="mb-4">
-              <Text className="text-gray-400 text-xs mb-1">Quadril</Text>
+              <Text className="text-gray-400 text-lg mb-1">Quadril</Text>
               <TextInput
-                className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                 placeholder="Ex: 95"
                 placeholderTextColor="#6B7280"
                 keyboardType="decimal-pad"
@@ -728,13 +729,13 @@ export default function AlunoDetailsScreen() {
             </View>
 
             {/* Medidas Corporais - Parte Inferior */}
-            <Text className="text-[#60A5FA] text-sm font-semibold mb-3">Parte Inferior (cm)</Text>
+            <Text className="text-[#60A5FA] text-xl font-bold mb-3">Parte Inferior (cm)</Text>
             
             <View className="flex-row gap-3 mb-3">
               <View className="flex-1">
-                <Text className="text-gray-400 text-xs mb-1">Coxa Esquerda</Text>
+                <Text className="text-gray-400 text-lg mb-1">Coxa Esquerda</Text>
                 <TextInput
-                  className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                  className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                   placeholder="Ex: 55"
                   placeholderTextColor="#6B7280"
                   keyboardType="decimal-pad"
@@ -743,9 +744,9 @@ export default function AlunoDetailsScreen() {
                 />
               </View>
               <View className="flex-1">
-                <Text className="text-gray-400 text-xs mb-1">Coxa Direita</Text>
+                <Text className="text-gray-400 text-lg mb-1">Coxa Direita</Text>
                 <TextInput
-                  className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                  className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                   placeholder="Ex: 55"
                   placeholderTextColor="#6B7280"
                   keyboardType="decimal-pad"
@@ -757,9 +758,9 @@ export default function AlunoDetailsScreen() {
 
             <View className="flex-row gap-3 mb-4">
               <View className="flex-1">
-                <Text className="text-gray-400 text-xs mb-1">Panturrilha Esquerda</Text>
+                <Text className="text-gray-400 text-lg mb-1">Panturrilha Esquerda</Text>
                 <TextInput
-                  className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                  className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                   placeholder="Ex: 38"
                   placeholderTextColor="#6B7280"
                   keyboardType="decimal-pad"
@@ -768,9 +769,9 @@ export default function AlunoDetailsScreen() {
                 />
               </View>
               <View className="flex-1">
-                <Text className="text-gray-400 text-xs mb-1">Panturrilha Direita</Text>
+                <Text className="text-gray-400 text-lg mb-1">Panturrilha Direita</Text>
                 <TextInput
-                  className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                  className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                   placeholder="Ex: 38"
                   placeholderTextColor="#6B7280"
                   keyboardType="decimal-pad"
@@ -781,12 +782,12 @@ export default function AlunoDetailsScreen() {
             </View>
 
             {/* Observações */}
-            <Text className="text-[#60A5FA] text-sm font-semibold mb-3">Observações</Text>
+            <Text className="text-[#60A5FA] text-xl font-bold mb-3">Observações</Text>
             
             <View className="mb-4">
-              <Text className="text-gray-400 text-xs mb-1">Notas</Text>
+              <Text className="text-gray-400 text-lg mb-1">Notas</Text>
               <TextInput
-                className="bg-white/10 text-white px-4 py-3 rounded-lg"
+                className="bg-white/10 text-white text-lg px-5 py-4 rounded-xl"
                 placeholder="Adicione observações sobre as medidas..."
                 placeholderTextColor="#6B7280"
                 multiline
@@ -802,7 +803,7 @@ export default function AlunoDetailsScreen() {
               className="bg-[#60A5FA] rounded-xl py-4 items-center"
               onPress={handleSaveMedida}
             >
-              <Text className="text-white text-base font-bold">{editandoMedidaId ? 'Atualizar Medida' : 'Salvar Medidas'}</Text>
+              <Text className="text-white text-lg font-bold">{editandoMedidaId ? 'Atualizar Medida' : 'Salvar Medidas'}</Text>
             </TouchableOpacity>
               </View>
             )}
@@ -811,7 +812,7 @@ export default function AlunoDetailsScreen() {
           {/* Contato */}
           {(aluno.phone_number || aluno.email) && (
             <LiquidGlassCard style={{ marginBottom: 16 }}>
-              <Text className="text-white text-lg font-bold mb-3">Contato</Text>
+              <Text className="text-white text-2xl font-bold mb-3">Contato</Text>
               
               {aluno.phone_number && (
                 <View className="flex-row items-center mb-3">
@@ -819,8 +820,8 @@ export default function AlunoDetailsScreen() {
                     <Ionicons name="call-outline" size={20} color="#60A5FA" />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-gray-400 text-xs">Telefone</Text>
-                    <Text className="text-white text-base">{aluno.phone_number}</Text>
+                    <Text className="text-gray-400 text-lg">Telefone</Text>
+                    <Text className="text-white text-lg">{aluno.phone_number}</Text>
                   </View>
                 </View>
               )}
@@ -831,8 +832,8 @@ export default function AlunoDetailsScreen() {
                     <Ionicons name="mail-outline" size={20} color="#60A5FA" />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-gray-400 text-xs">Email</Text>
-                    <Text className="text-white text-base">{aluno.email}</Text>
+                    <Text className="text-gray-400 text-lg">Email</Text>
+                    <Text className="text-white text-lg">{aluno.email}</Text>
                   </View>
                 </View>
               )}
@@ -868,11 +869,79 @@ export default function AlunoDetailsScreen() {
               onPress={handleDelete}
             >
               <Ionicons name="trash-outline" size={20} color="white" />
-              <Text className="text-white text-base font-bold">Excluir</Text>
+              <Text className="text-white text-lg font-bold">Excluir</Text>
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
     </View>
+    <Modal visible={showMedidaDetails} transparent animationType="fade">
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 24 }}>
+        <LiquidGlassCard>
+          <View style={{ padding: 16 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <Text className="text-white text-2xl font-bold">Detalhes da Medida</Text>
+              <TouchableOpacity onPress={() => { setShowMedidaDetails(false); setSelectedMedida(null); }}>
+                <Ionicons name="close" size={22} color="#93C5FD" />
+              </TouchableOpacity>
+            </View>
+            {selectedMedida && (
+              <View style={{ gap: 8 }}>
+                <View className="flex-row justify-between">
+                  <Text className="text-gray-400 text-xl">Data</Text>
+                  <Text className="text-white text-xl">{new Date(selectedMedida.created_at || '').toLocaleDateString('pt-BR')}</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-gray-400 text-xl">Peso</Text>
+                  <Text className="text-white text-xl">{selectedMedida.weight ?? '-'} kg</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-gray-400 text-xl">Altura</Text>
+                  <Text className="text-white text-xl">{selectedMedida.height ?? '-'} cm</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-gray-400 text-xl">Massa muscular</Text>
+                  <Text className="text-white text-xl">{selectedMedida.muscle_mass_percentage ?? '-'} %</Text>
+                </View>
+                <View style={{ height: 1, backgroundColor: 'rgba(156,163,175,0.2)', marginVertical: 8 }} />
+                <View className="flex-row justify-between"><Text className="text-gray-400 text-xl">Ombro</Text><Text className="text-white text-xl">{selectedMedida.ombro ?? '-'}</Text></View>
+                <View className="flex-row justify-between"><Text className="text-gray-400 text-xl">Tórax</Text><Text className="text-white text-xl">{selectedMedida.torax ?? '-'}</Text></View>
+                <View className="flex-row justify-between"><Text className="text-gray-400 text-xl">Braço E/D</Text><Text className="text-white text-xl">{selectedMedida.braco_esquerdo ?? '-'} / {selectedMedida.braco_direito ?? '-'}</Text></View>
+                <View className="flex-row justify-between"><Text className="text-gray-400 text-xl">Antebraço E/D</Text><Text className="text-white text-xl">{selectedMedida.antebraco_esquerdo ?? '-'} / {selectedMedida.antebraco_direito ?? '-'}</Text></View>
+                <View className="flex-row justify-between"><Text className="text-gray-400 text-xl">Punho</Text><Text className="text-white text-xl">{selectedMedida.punho ?? '-'}</Text></View>
+                <View className="flex-row justify-between"><Text className="text-gray-400 text-xl">Cintura</Text><Text className="text-white text-xl">{selectedMedida.cintura ?? '-'}</Text></View>
+                <View className="flex-row justify-between"><Text className="text-gray-400 text-xl">Abdômen</Text><Text className="text-white text-xl">{selectedMedida.abdome ?? '-'}</Text></View>
+                <View className="flex-row justify-between"><Text className="text-gray-400 text-xl">Quadril</Text><Text className="text-white text-xl">{selectedMedida.quadril ?? '-'}</Text></View>
+                <View className="flex-row justify-between"><Text className="text-gray-400 text-xl">Coxa E/D</Text><Text className="text-white text-xl">{selectedMedida.coxa_esquerda ?? '-'} / {selectedMedida.coxa_direita ?? '-'}</Text></View>
+                <View className="flex-row justify-between"><Text className="text-gray-400 text-xl">Panturrilha E/D</Text><Text className="text-white text-xl">{selectedMedida.panturrilha_esquerda ?? '-'} / {selectedMedida.panturrilha_direita ?? '-'}</Text></View>
+                {selectedMedida.notes && (
+                  <View style={{ marginTop: 8 }}>
+                    <Text className="text-gray-400 text-xl">Notas</Text>
+                    <Text className="text-white text-xl">{selectedMedida.notes}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+            <View style={{ flexDirection: 'row', gap: 12, marginTop: 16 }}>
+              {selectedMedida?.id && (
+                <TouchableOpacity
+                  className="flex-1 bg-[#60A5FA] rounded-xl py-3 items-center"
+                  onPress={() => { setShowMedidaDetails(false); setSelectedMedida(null); handleEditMedida(selectedMedida!); }}
+                >
+                  <Text className="text-white text-xl font-bold">Editar</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                className="flex-1 bg-white/10 rounded-xl py-3 items-center"
+                onPress={() => { setShowMedidaDetails(false); setSelectedMedida(null); }}
+              >
+                <Text className="text-white text-xl font-bold">Fechar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </LiquidGlassCard>
+      </View>
+    </Modal>
+    </>
   );
 }

@@ -19,7 +19,7 @@ class ClientePhotosService {
   async uploadProfilePhoto(clienteId: number, formData: FormData): Promise<ClientePhoto> {
     try {
       const response = await api.post<ClientePhoto>(
-        `/clientes/${clienteId}/photo`,
+        `/students/${clienteId}/photo`,
         formData,
         {
           headers: {
@@ -40,7 +40,7 @@ class ClientePhotosService {
    */
   async getProfilePhoto(clienteId: number): Promise<ClientePhoto> {
     try {
-      const response = await api.get<ClientePhoto>(`/clientes/${clienteId}/photo`);
+      const response = await api.get<ClientePhoto>(`/students/${clienteId}/photo`);
       return response.data;
     } catch (error) {
       console.error(`Erro ao buscar foto do cliente ${clienteId}:`, error);
@@ -52,7 +52,7 @@ class ClientePhotosService {
    * Obter URL para download da foto de perfil
    */
   getProfilePhotoUrl(clienteId: number): string {
-    return `${api.defaults.baseURL}/clientes/${clienteId}/photo/file`;
+    return `${api.defaults.baseURL}/students/${clienteId}/photo/file`;
   }
 
   /**
@@ -60,7 +60,7 @@ class ClientePhotosService {
    */
   async deleteProfilePhoto(clienteId: number): Promise<void> {
     try {
-      await api.delete(`/clientes/${clienteId}/photo`);
+      await api.delete(`/students/${clienteId}/photo`);
     } catch (error) {
       console.error(`Erro ao deletar foto do cliente ${clienteId}:`, error);
       throw error;
