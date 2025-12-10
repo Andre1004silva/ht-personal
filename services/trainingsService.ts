@@ -4,8 +4,10 @@ export interface Training {
   id?: number;
   admin_id?: number;
   treinador_id?: number;
+  trainer_id?: number;
   name: string; // Backend usa 'name'
   nome?: string; // Alias para compatibilidade
+  day_of_week?: string; // Dia da semana do treino
   duration?: string; // Backend usa 'duration' como string
   duracao?: number; // Alias para compatibilidade (number)
   repeticoes?: string;
@@ -13,6 +15,7 @@ export interface Training {
   carga?: string;
   notes?: string;
   treinador_name?: string;
+  trainer_name?: string;
   // Campos legados do frontend (não existem no backend)
   descricao?: string;
   tipo?: string;
@@ -81,12 +84,9 @@ class TrainingsService {
       // Converte para o formato do backend
       const payload = {
         name: training.name || training.nome,
-        duration: training.duration || (training.duracao ? String(training.duracao) : undefined),
-        repeticoes: training.repeticoes,
-        video_url: training.video_url,
-        carga: training.carga,
-        notes: training.notes || training.descricao || training.observacoes,
-        trainer_id: training.treinador_id,
+        notes: training.notes || training.descricao || training.observacoes || undefined,
+        day_of_week: training.day_of_week || undefined,
+        trainer_id: training.trainer_id || training.treinador_id,
       };
       const response = await api.post<Training>('/trainings', payload);
       return this.normalizeTraining(response.data);
@@ -104,11 +104,9 @@ class TrainingsService {
       // Converte para o formato do backend
       const payload: any = {};
       if (training.name || training.nome) payload.name = training.name || training.nome;
-      if (training.duration || training.duracao) payload.duration = training.duration || (training.duracao ? String(training.duracao) : undefined);
-      if (training.repeticoes !== undefined) payload.repeticoes = training.repeticoes;
-      if (training.video_url !== undefined) payload.video_url = training.video_url;
-      if (training.carga !== undefined) payload.carga = training.carga;
       if (training.notes || training.descricao || training.observacoes) payload.notes = training.notes || training.descricao || training.observacoes;
+      if (training.day_of_week !== undefined) payload.day_of_week = training.day_of_week;
+      if (training.trainer_id !== undefined) payload.trainer_id = training.trainer_id;
       if (training.treinador_id !== undefined) payload.trainer_id = training.treinador_id;
       
       const response = await api.put<Training>(`/trainings/${id}`, payload);

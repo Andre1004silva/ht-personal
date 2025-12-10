@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 import { useSharedValue } from 'react-native-reanimated';
 import { RefreshSplash } from '@/components/RefreshSplash';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
-import { trainingsService, Training } from '@/services';
+import { trainingRoutinesService, TrainingRoutine } from '@/services';
 import { useAuth } from '@/contexts/AuthContext';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -21,7 +21,7 @@ export default function TreinosScreen() {
     const splashScale = useSharedValue(1);
     const splashOpacity = useSharedValue(0);
     const [activeCategory, setActiveCategory] = useState<'workouts' | 'fitness' | 'plans' | 'training'>('workouts');
-    const [treinos, setTreinos] = useState<Training[]>([]);
+    const [rotinas, setRotinas] = useState<TrainingRoutine[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -35,8 +35,8 @@ export default function TreinosScreen() {
     // Imagem padrão para treinos sem imagem
     const defaultImage = require('@/assets/images/desenvolvimento.jpeg');
 
-    // Carrega os treinos da API
-    const loadTreinos = async () => {
+    // Carrega as rotinas da API
+    const loadRotinas = async () => {
         try {
             setError(null);
             
@@ -47,12 +47,12 @@ export default function TreinosScreen() {
                 return;
             }
             
-            // Usa o ID do usuário logado (treinador) como treinador_id
-            const data = await trainingsService.getAll(user.id);
-            setTreinos(data);
+            // Usa o ID do usuário logado (treinador) como trainer_id
+            const data = await trainingRoutinesService.getAll(undefined, user.id);
+            setRotinas(data);
         } catch (err) {
-            console.error('Erro ao carregar treinos:', err);
-            setError('Erro ao carregar treinos. Verifique sua conexão.');
+            console.error('Erro ao carregar rotinas:', err);
+            setError('Erro ao carregar rotinas. Verifique sua conexão.');
         } finally {
             setLoading(false);
         }
@@ -61,14 +61,14 @@ export default function TreinosScreen() {
     // Carrega os dados ao montar o componente e quando o user estiver disponível
     useEffect(() => {
         if (user) {
-            loadTreinos();
+            loadRotinas();
         }
     }, [user]);
 
     const onRefresh = async () => {
         setRefreshing(true);
         setShowRefreshSplash(true);
-        await loadTreinos();
+        await loadRotinas();
         setShowRefreshSplash(false);
         await new Promise(resolve => setTimeout(resolve, 300));
         setRefreshing(false);
@@ -112,7 +112,7 @@ export default function TreinosScreen() {
                     className={`px-5 py-2 rounded-full ${activeCategory === 'workouts' ? 'bg-[#60A5FA]' : 'bg-[#141c30]'}`}
                 >
                     <Text className="font-semibold text-white">
-                        Treinos
+                        Rotinas
                     </Text>
                 </TouchableOpacity>
 
@@ -167,15 +167,15 @@ export default function TreinosScreen() {
                 <LiquidGlassCard>
                     <TouchableOpacity 
                         className="flex-row items-center justify-center gap-2"
-                        onPress={() => router.push('/treino-form' as any)}
+                        onPress={() => router.push('/routine-form' as any)}
                     >
                         <Ionicons name="add-circle-outline" size={24} color="#60A5FA" />
-                        <Text className="text-white font-bold text-base">Criar Novo Treino</Text>
+                        <Text className="text-white font-bold text-base">Criar Nova Rotina</Text>
                     </TouchableOpacity>
                 </LiquidGlassCard>
             </View>
 
-            {/* Treinos Grid */}
+            {/* Rotinas Grid */}
             <ScrollView 
                 className="flex-1 px-4"
                 contentContainerStyle={{ paddingBottom: 100 }}
@@ -194,7 +194,7 @@ export default function TreinosScreen() {
                 {loading && (
                     <View className="flex-1 items-center justify-center py-20">
                         <ActivityIndicator size="large" color="#60A5FA" />
-                        <Text className="text-white mt-4">Carregando treinos...</Text>
+                        <Text className="text-white mt-4">Carregando rotinas...</Text>
                     </View>
                 )}
 
@@ -205,7 +205,7 @@ export default function TreinosScreen() {
                         <Text className="text-white mt-4 text-center px-8">{error}</Text>
                         <TouchableOpacity 
                             className="mt-4 bg-[#60A5FA] px-6 py-3 rounded-lg"
-                            onPress={loadTreinos}
+                            onPress={loadRotinas}
                         >
                             <Text className="text-white font-semibold">Tentar novamente</Text>
                         </TouchableOpacity>
@@ -213,31 +213,38 @@ export default function TreinosScreen() {
                 )}
 
                 {/* Empty State */}
-                {!loading && !error && treinos.length === 0 && (
+                {!loading && !error && rotinas.length === 0 && (
                     <View className="flex-1 items-center justify-center py-20">
                         <Ionicons name="barbell-outline" size={64} color="#9CA3AF" />
                         <Text className="text-white mt-4 text-center px-8">
-                            Nenhum treino encontrado
+                            Nenhuma rotina encontrada
                         </Text>
                     </View>
                 )}
 
                 <View className="flex-row flex-wrap justify-between pb-6">
-                    {!loading && !error && treinos.map((treino) => (
+                    {!loading && !error && rotinas.map((rotina) => (
                         <TouchableOpacity 
-                            key={treino.id} 
+                            key={rotina.id} 
                             className="w-[48%] mb-6"
-                            onPress={() => router.push(`/treino-details?id=${treino.id}`)}
+                            onPress={() => router.push(`/routine-details?id=${rotina.id}`)}
                             activeOpacity={0.9}
                         >
                             {/* Card principal */}
                             <View className="rounded-2xl overflow-hidden relative shadow-lg">
                                 {/* Imagem de fundo */}
                                 <Image
-                                    source={treino.video_url ? { uri: treino.video_url } : defaultImage}
+                                    source={defaultImage}
                                     className="w-full h-60"
                                     resizeMode="cover"
                                 />
+
+                                {/* Badge de dificuldade */}
+                                <View className="absolute top-3 left-3 bg-[#60A5FA] px-3 py-1 rounded-full">
+                                    <Text className="text-white text-xs font-semibold">
+                                        {rotina.difficulty}
+                                    </Text>
+                                </View>
 
                                 {/* Ícone Salvar */}
                                 <TouchableOpacity className="absolute top-3 right-3 bg-black/40 w-8 h-8 rounded-lg items-center justify-center">
@@ -256,27 +263,31 @@ export default function TreinosScreen() {
                                     <View>
                                         <Text
                                             className="text-white font-semibold text-sm mb-1"
-                                            numberOfLines={2}
+                                            numberOfLines={1}
                                         >
-                                            {treino.nome || treino.name}
+                                            {rotina.student_name}
+                                        </Text>
+                                        <Text
+                                            className="text-gray-300 text-xs mb-2"
+                                            numberOfLines={1}
+                                        >
+                                            {rotina.goal}
                                         </Text>
 
                                         <View className="flex-row items-center justify-between">
                                             <View className="flex-row items-center gap-1">
-                                                <Ionicons name="play" size={13} color="#ddd" />
+                                                <Ionicons name="calendar" size={13} color="#ddd" />
                                                 <Text className="text-gray-300 text-xs font-medium">
-                                                    {treino.duration || treino.duracao ? `${treino.duration || treino.duracao} min` : 'N/A'}
+                                                    {new Date(rotina.start_date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                                                 </Text>
                                             </View>
 
-                                            {treino.carga && (
-                                                <View className="flex-row items-center gap-1">
-                                                    <Ionicons name="barbell" size={13} color="#60A5FA" />
-                                                    <Text className="text-gray-300 text-xs">
-                                                        {treino.carga}
-                                                    </Text>
-                                                </View>
-                                            )}
+                                            <View className="flex-row items-center gap-1">
+                                                <Ionicons name="fitness" size={13} color="#60A5FA" />
+                                                <Text className="text-gray-300 text-xs">
+                                                    {rotina.routine_type === 'Dia da semana' ? 'Semanal' : 'Numérico'}
+                                                </Text>
+                                            </View>
                                         </View>
                                     </View>
                                 </View>

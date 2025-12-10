@@ -1,9 +1,9 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Modal } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState, useEffect } from 'react';
-import { trainingsService, Training } from '@/services';
+import { trainingsService, routineTrainingsService, Training } from '@/services';
 import LiquidGlassCard from '../components/LiquidGlassCard';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -12,20 +12,21 @@ export default function TreinoFormScreen() {
   const { user } = useAuth();
   const params = useLocalSearchParams();
   const isEditing = !!params.id;
+  const routineType = params.routineType as string; // 'Dia da semana' ou 'Numérico'
+  const routineId = params.routineId ? Number(params.routineId) : null; // ID da rotina para vincular
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<Partial<Training>>({
-    nome: '',
     name: '',
-    duration: '',
-    duracao: undefined,
-    repeticoes: '',
-    video_url: '',
-    carga: '',
     notes: '',
-    descricao: '',
+    day_of_week: '',
   });
+  const [selectedDay, setSelectedDay] = useState('');
+  const [trainingNumber, setTrainingNumber] = useState('');
+  const [showDayPicker, setShowDayPicker] = useState(false);
+
+  const daysOfWeek = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
 
   useEffect(() => {
     if (isEditing) {
@@ -48,8 +49,19 @@ export default function TreinoFormScreen() {
 
   const handleSave = async () => {
     // Validação básica
-    if (!formData.nome?.trim() && !formData.name?.trim()) {
+    if (!formData.name?.trim()) {
       Alert.alert('Atenção', 'O nome é obrigatório');
+      return;
+    }
+
+    // Validação condicional baseada no tipo da rotina
+    if (routineType === 'Dia da semana' && !selectedDay) {
+      Alert.alert('Atenção', 'Selecione o dia da semana');
+      return;
+    }
+
+    if (routineType === 'Numérico' && !trainingNumber) {
+      Alert.alert('Atenção', 'Digite o número do treino');
       return;
     }
 
@@ -61,20 +73,48 @@ export default function TreinoFormScreen() {
     try {
       setSaving(true);
       
-      // Adiciona o ID do usuário logado (treinador) como treinador_id
+      // Define day_of_week baseado no tipo da rotina
+      let dayOfWeek: string | undefined;
+      if (routineType === 'Dia da semana') {
+        dayOfWeek = selectedDay;
+      } else if (routineType === 'Numérico') {
+        dayOfWeek = trainingNumber;
+      }
+
+      // Adiciona o ID do usuário logado (treinador) como trainer_id
       const dataToSave = {
-        ...formData,
-        treinador_id: user.id,
+        name: formData.name,
+        notes: formData.notes || undefined,
+        day_of_week: dayOfWeek,
+        trainer_id: user.id,
       };
       
       if (isEditing) {
         await trainingsService.update(Number(params.id), dataToSave);
         Alert.alert('Sucesso', 'Treino atualizado com sucesso!');
       } else {
-        await trainingsService.create(dataToSave as Omit<Training, 'id' | 'created_at' | 'updated_at'>);
+        // Criar o treino
+        const newTraining = await trainingsService.create(dataToSave as Omit<Training, 'id' | 'created_at' | 'updated_at'>);
+        
+        // Se tiver routineId, vincular o treino à rotina
+        if (routineId && newTraining.id) {
+          try {
+            await routineTrainingsService.create({
+              routine_id: routineId,
+              training_id: newTraining.id,
+              order: 0, // Será ajustado pelo backend se necessário
+              is_active: true
+            });
+          } catch (linkError) {
+            console.error('Erro ao vincular treino à rotina:', linkError);
+            // Não bloqueia o fluxo, apenas loga o erro
+          }
+        }
+        
         Alert.alert('Sucesso', 'Treino criado com sucesso!');
       }
       
+      // Navegar de volta
       router.back();
     } catch (err: any) {
       Alert.alert('Erro', err.message || 'Erro ao salvar treino');
@@ -127,65 +167,45 @@ export default function TreinoFormScreen() {
           <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-4">Informações Básicas</Text>
             
+            {/* Campo condicional: Dia da Semana ou Número */}
+            {routineType === 'Dia da semana' && (
+              <View className="mb-4">
+                <Text className="text-gray-400 text-sm mb-2">Treino *</Text>
+                <TouchableOpacity
+                  className="bg-[#0B1120] px-4 py-3 rounded-lg flex-row items-center justify-between"
+                  onPress={() => setShowDayPicker(true)}
+                >
+                  <Text className={selectedDay ? "text-white" : "text-gray-500"}>
+                    {selectedDay || 'Selecione um dia'}
+                  </Text>
+                  <Ionicons name="chevron-down" size={20} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {routineType === 'Numérico' && (
+              <View className="mb-4">
+                <Text className="text-gray-400 text-sm mb-2">Treino *</Text>
+                <TextInput
+                  className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                  placeholder="1"
+                  placeholderTextColor="#6B7280"
+                  keyboardType="numeric"
+                  value={trainingNumber}
+                  onChangeText={setTrainingNumber}
+                />
+              </View>
+            )}
+
             {/* Nome */}
-            <View className="mb-4">
+            <View>
               <Text className="text-gray-400 text-sm mb-2">Nome *</Text>
               <TextInput
                 className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
                 placeholder="Digite o nome do treino"
                 placeholderTextColor="#6B7280"
-                value={formData.nome || formData.name}
-                onChangeText={(text) => setFormData({ ...formData, nome: text, name: text })}
-              />
-            </View>
-
-            {/* Duração */}
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Duração (minutos)</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 45, 60"
-                placeholderTextColor="#6B7280"
-                keyboardType="numeric"
-                value={formData.duration || (formData.duracao ? String(formData.duracao) : '')}
-                onChangeText={(text) => setFormData({ ...formData, duration: text, duracao: text ? parseInt(text) : undefined })}
-              />
-            </View>
-
-            {/* Repetições */}
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Repetições</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 3x12, 4x10"
-                placeholderTextColor="#6B7280"
-                value={formData.repeticoes}
-                onChangeText={(text) => setFormData({ ...formData, repeticoes: text })}
-              />
-            </View>
-
-            {/* Carga */}
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Carga</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 20kg, 50kg"
-                placeholderTextColor="#6B7280"
-                value={formData.carga}
-                onChangeText={(text) => setFormData({ ...formData, carga: text })}
-              />
-            </View>
-
-            {/* URL do Vídeo */}
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">URL do Vídeo</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="https://..."
-                placeholderTextColor="#6B7280"
-                autoCapitalize="none"
-                value={formData.video_url}
-                onChangeText={(text) => setFormData({ ...formData, video_url: text })}
+                value={formData.name}
+                onChangeText={(text) => setFormData({ ...formData, name: text })}
               />
             </View>
           </LiquidGlassCard>
@@ -197,8 +217,8 @@ export default function TreinoFormScreen() {
               className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
               placeholder="Adicione observações sobre o treino..."
               placeholderTextColor="#6B7280"
-              value={formData.descricao || formData.notes}
-              onChangeText={(text) => setFormData({ ...formData, descricao: text, notes: text })}
+              value={formData.notes}
+              onChangeText={(text) => setFormData({ ...formData, notes: text })}
               multiline
               numberOfLines={4}
               textAlignVertical="top"
@@ -232,6 +252,58 @@ export default function TreinoFormScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Modal de Seleção de Dia da Semana */}
+      <Modal
+        visible={showDayPicker}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDayPicker(false)}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => setShowDayPicker(false)}
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 20,
+          }}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+            className="bg-[#141c30] rounded-2xl w-full max-w-sm"
+          >
+            <View className="p-6">
+              <Text className="text-white text-xl font-bold mb-4">Selecione o dia</Text>
+              
+              {daysOfWeek.map((day) => (
+                <TouchableOpacity
+                  key={day}
+                  className={`p-4 rounded-lg mb-2 ${
+                    selectedDay === day ? 'bg-[#60A5FA]' : 'bg-[#0B1120]'
+                  }`}
+                  onPress={() => {
+                    setSelectedDay(day);
+                    setShowDayPicker(false);
+                  }}
+                >
+                  <Text className="text-white text-center font-semibold">{day}</Text>
+                </TouchableOpacity>
+              ))}
+
+              <TouchableOpacity
+                className="bg-gray-600 p-4 rounded-lg mt-4"
+                onPress={() => setShowDayPicker(false)}
+              >
+                <Text className="text-white text-center font-semibold">Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
