@@ -841,6 +841,17 @@ export default function AlunoDetailsScreen() {
           )}
 
 
+          {/* Botão Criar Rotina */}
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
+            <TouchableOpacity 
+              className="flex-row items-center justify-center gap-2 py-2"
+              onPress={() => router.push(`/routine-form?student_id=${params.id}&student_name=${aluno.name}` as any)}
+            >
+              <Ionicons name="add-circle" size={24} color="#60A5FA" />
+              <Text className="text-white text-lg font-bold">Criar Nova Rotina</Text>
+            </TouchableOpacity>
+          </LiquidGlassCard>
+
           {/* Botões de Ação */}
           <View className="flex-row gap-3 mb-6">
             <TouchableOpacity 
