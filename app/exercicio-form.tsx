@@ -50,57 +50,54 @@ export default function ExercicioFormScreen() {
   const loadExercicio = async () => {
     try {
       setLoading(true);
-      const data = await exercisesService.getById(Number(params.id));
-      setFormData(data);
-    } catch (err) {
-      Alert.alert('Erro', 'Erro ao carregar dados do exercício');
-      router.back();
+      const exercicio = await exercisesService.getById(Number(params.id));
+      setFormData({
+        nome: exercicio.name || '',
+        name: exercicio.name || '',
+        muscle_group: exercicio.muscle_group || '',
+        equipment: exercicio.equipment || '',
+        video_url: exercicio.video_url || '',
+        image_url: exercicio.image_url || '',
+        favorites: exercicio.favorites || false,
+        notes: exercicio.notes || '',
+        descricao: exercicio.notes || '',
+      });
+    } catch (error) {
+      console.error('Erro ao carregar exercício:', error);
+      Alert.alert('Erro', 'Não foi possível carregar o exercício');
     } finally {
       setLoading(false);
     }
   };
 
   const validateRepetitionData = () => {
-    if (!repetition.type) {
-      Alert.alert('Atenção', 'Selecione um tipo de repetição');
-      return false;
+    if (!repetition.type) return true;
+
+    const typeConfig = repetitionTypes.find(t => t.key === repetition.type);
+    if (!typeConfig) return false;
+
+    for (const field of typeConfig.fields) {
+      const optionalFields = ['speed', 'distance', 'time', 'pace'];
+      let isRequired = !optionalFields.includes(field);
+      
+      if (repetition.type === 'time-incline' && field === 'time') isRequired = true;
+      if (repetition.type === 'reps-time' && field === 'time') isRequired = true;
+      if (repetition.type === 'running' && field === 'rest') isRequired = true;
+      if (repetition.type === 'cadence' && field === 'cadence') isRequired = true;
+      if (repetition.type === 'notes' && field === 'notes') isRequired = true;
+      
+      if (isRequired && (!repetition.data[field] || repetition.data[field].toString().trim() === '')) {
+        Alert.alert('Erro', `Campo obrigatório: ${getFieldLabel(field)}`);
+        return false;
+      }
     }
 
-    const { type, data } = repetition;
-    
-    switch (type) {
-      case 'reps-load':
-        if (!data.set || !data.reps || !data.load || !data.rest) {
-          Alert.alert('Atenção', 'Preencha todos os campos: séries, repetições, carga e descanso');
-          return false;
-        }
-        break;
-      case 'reps-load-time':
-        if (!data.reps || !data.load || !data.time) {
-          Alert.alert('Atenção', 'Preencha todos os campos: repetições, carga e tempo');
-          return false;
-        }
-        break;
-      case 'complete-set':
-        if (!data.set || !data.reps || !data.load || !data.time || !data.rest) {
-          Alert.alert('Atenção', 'Preencha todos os campos: séries, repetições, carga, tempo e descanso');
-          return false;
-        }
-        break;
-      case 'reps-time':
-        if (!data.set || !data.reps || !data.time || !data.rest) {
-          Alert.alert('Atenção', 'Preencha todos os campos: séries, repetições, tempo e descanso');
-          return false;
-        }
-        break;
-    }
     return true;
   };
 
   const handleSave = async () => {
-    // Validação básica
-    if (!formData.nome?.trim()) {
-      Alert.alert('Atenção', 'O nome é obrigatório');
+    if (!formData.name?.trim()) {
+      Alert.alert('Erro', 'Nome do exercício é obrigatório');
       return;
     }
 
@@ -110,28 +107,32 @@ export default function ExercicioFormScreen() {
 
     try {
       setSaving(true);
-      
+
+      const exerciseData = {
+        name: formData.name,
+        muscle_group: formData.muscle_group,
+        equipment: formData.equipment,
+        video_url: formData.video_url,
+        image_url: formData.image_url,
+        favorites: formData.favorites,
+        repetition: repetition.type ? {
+          type: repetition.type,
+          ...repetition.data
+        } : undefined
+      };
+
       if (isEditing) {
-        await exercisesService.update(Number(params.id), formData);
+        await exercisesService.update(Number(params.id), exerciseData);
         Alert.alert('Sucesso', 'Exercício atualizado com sucesso!');
       } else {
-        // Criar exercício com repetição
-        const exercisePayload = {
-          ...formData,
-          name: formData.nome,
-          repetition: repetition.type ? {
-            type: repetition.type,
-            data: repetition.data
-          } : undefined
-        };
-        
-        const newExercise = await exercisesService.create(exercisePayload as any);
+        await exercisesService.create(exerciseData);
         Alert.alert('Sucesso', 'Exercício criado com sucesso!');
       }
-      
+
       router.back();
-    } catch (err: any) {
-      Alert.alert('Erro', err.message || 'Erro ao salvar exercício');
+    } catch (error: any) {
+      console.error('Erro ao salvar exercício:', error);
+      Alert.alert('Erro', error.response?.data?.message || 'Não foi possível salvar o exercício');
     } finally {
       setSaving(false);
     }
@@ -158,10 +159,14 @@ export default function ExercicioFormScreen() {
         {typeConfig.fields.map((field) => {
           const label = getFieldLabel(field);
           const placeholder = getFieldPlaceholder(field);
-          const isRequired = field !== 'speed' && field !== 'distance' && field !== 'time' && field !== 'pace' || 
-                           (repetition.type === 'time-incline' && field === 'time') ||
-                           (repetition.type === 'reps-time' && field === 'time') ||
-                           (repetition.type === 'running' && field === 'rest');
+          const optionalFields = ['speed', 'distance', 'time', 'pace'];
+          let isRequired = !optionalFields.includes(field);
+          
+          if (repetition.type === 'time-incline' && field === 'time') isRequired = true;
+          if (repetition.type === 'reps-time' && field === 'time') isRequired = true;
+          if (repetition.type === 'running' && field === 'rest') isRequired = true;
+          if (repetition.type === 'cadence' && field === 'cadence') isRequired = true;
+          if (repetition.type === 'notes' && field === 'notes') isRequired = true;
           
           const isTextArea = field === 'notes';
           const keyboardType = field === 'cadence' || field === 'notes' || field === 'pace' ? 'default' : 'numeric';
@@ -189,250 +194,170 @@ export default function ExercicioFormScreen() {
       </>
     );
   };
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 60"
-                placeholderTextColor="#6B7280"
-                value={repetition.data.rest?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('rest', text)}
-                keyboardType="numeric"
-              />
-            </View>
-          </>
-        );
-
-      case 'reps-time':
-        return (
-          <>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Séries *</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 3"
-                placeholderTextColor="#6B7280"
-                value={repetition.data.set?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('set', text)}
-                keyboardType="numeric"
-              />
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Repetições *</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 12"
-                placeholderTextColor="#6B7280"
-                value={repetition.data.reps?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('reps', text)}
-                keyboardType="numeric"
-              />
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Tempo (segundos) *</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 30"
-                placeholderTextColor="#6B7280"
-                value={repetition.data.time?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('time', text)}
-                keyboardType="numeric"
-              />
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Descanso (segundos) *</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 60"
-                placeholderTextColor="#6B7280"
-                value={repetition.data.rest?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('rest', text)}
-                keyboardType="numeric"
-              />
-            </View>
-          </>
-        );
-
-      default:
-        return null;
-    }
-  };
 
   if (loading) {
     return (
-      <View className="flex-1 bg-[#0B1120] items-center justify-center">
+      <View className="flex-1 bg-[#0B1120] justify-center items-center">
         <ActivityIndicator size="large" color="#60A5FA" />
-        <Text className="text-white mt-4">Carregando...</Text>
+        <Text className="text-white mt-4">Carregando exercício...</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-[#0B1120]">
-      {/* Background Gradient */}
+    <KeyboardAvoidingView 
+      className="flex-1 bg-[#0B1120]" 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <LinearGradient
-        colors={['rgba(59, 130, 246, 0.1)', 'transparent']}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 300,
-        }}
-      />
-
-      {/* Header */}
-      <View className="flex-row items-center px-5 pt-14 pb-4">
-        <TouchableOpacity 
-          onPress={() => router.back()}
-          className="w-10 h-10 rounded-full bg-white/10 items-center justify-center mr-4"
-        >
-          <Ionicons name="arrow-back" size={24} color="white" />
-        </TouchableOpacity>
-        <Text className="text-white text-2xl font-bold flex-1">
-          {isEditing ? 'Editar Exercício' : 'Novo Exercício'}
-        </Text>
-      </View>
-
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        colors={['#0B1120', '#1E293B', '#334155']}
         className="flex-1"
       >
-        <ScrollView className="flex-1 px-5">
-          <LiquidGlassCard style={{ marginBottom: 16 }}>
-            <Text className="text-white text-lg font-bold mb-4">Informações Básicas</Text>
+        {/* Header */}
+        <View className="pt-12 pb-6 px-6">
+          <View className="flex-row items-center justify-between">
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="w-10 h-10 rounded-full bg-gray-800 items-center justify-center"
+            >
+              <Ionicons name="arrow-back" size={20} color="white" />
+            </TouchableOpacity>
             
-            {/* Nome */}
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Nome *</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Digite o nome do exercício"
-                placeholderTextColor="#6B7280"
-                value={formData.nome}
-                onChangeText={(text) => setFormData({ ...formData, nome: text })}
-              />
-            </View>
-
-            {/* Grupo Muscular */}
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Grupo Muscular</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: Peito, Costas, Pernas"
-                placeholderTextColor="#6B7280"
-                value={formData.muscle_group}
-                onChangeText={(text) => setFormData({ ...formData, muscle_group: text })}
-              />
-            </View>
-
-            {/* Equipamento */}
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Equipamento</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: Halteres, Barra, Máquina"
-                placeholderTextColor="#6B7280"
-                value={formData.equipment}
-                onChangeText={(text) => setFormData({ ...formData, equipment: text })}
-              />
-            </View>
-          </LiquidGlassCard>
-
-
-          {/* Tipo de Repetição */}
-          <LiquidGlassCard style={{ marginBottom: 16 }}>
-            <Text className="text-white text-lg font-bold mb-4">Tipo de Série</Text>
+            <Text className="text-white text-xl font-bold">
+              {isEditing ? 'Editar Exercício' : 'Novo Exercício'}
+            </Text>
             
             <TouchableOpacity
-              className="bg-[#0B1120] rounded-lg p-4 flex-row items-center justify-between border border-white/10"
-              onPress={() => setShowRepetitionTypePicker(!showRepetitionTypePicker)}
-            >
-              <View className="flex-1">
-                <Text className="text-white">
-                  {repetition.type ? repetitionTypes.find(t => t.key === repetition.type)?.label : 'Selecione o tipo da série'}
-                </Text>
-                {repetition.type && (
-                  <Text className="text-gray-400 text-sm mt-1">
-                    {repetitionTypes.find(t => t.key === repetition.type)?.description}
-                  </Text>
-                )}
-              </View>
-              <Ionicons 
-                name={showRepetitionTypePicker ? 'chevron-up' : 'chevron-down'} 
-                size={20} 
-                color="#60A5FA" 
-              />
-            </TouchableOpacity>
-
-            {showRepetitionTypePicker && (
-              <View className="mt-2 bg-[#0B1120] rounded-lg border border-white/10">
-                {repetitionTypes.map((type) => (
-                  <TouchableOpacity
-                    key={type.key}
-                    className="p-4 border-b border-gray-700"
-                    onPress={() => {
-                      setRepetition({ type: type.key as RepetitionType, data: {} });
-                      setShowRepetitionTypePicker(false);
-                    }}
-                  >
-                    <Text className="text-white font-semibold">{type.label}</Text>
-                    <Text className="text-gray-400 text-sm mt-1">{type.description}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          </LiquidGlassCard>
-
-          {/* Campos dinâmicos baseados no tipo de repetição */}
-          {repetition.type && (
-            <LiquidGlassCard style={{ marginBottom: 16 }}>
-              <Text className="text-white text-lg font-bold mb-4">Configuração da Série</Text>
-              
-              {renderRepetitionFields()}
-            </LiquidGlassCard>
-          )}
-
-          <LiquidGlassCard style={{ marginBottom: 16 }}>
-            <Text className="text-white text-lg font-bold mb-4">Observações</Text>
-            
-            <TextInput
-              className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-              placeholder="Adicione observações sobre o exercício..."
-              placeholderTextColor="#6B7280"
-              value={formData.descricao || formData.notes}
-              onChangeText={(text) => setFormData({ ...formData, descricao: text, notes: text })}
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-            />
-          </LiquidGlassCard>
-
-          {/* Botões */}
-          <View className="flex-row gap-3 mb-8">
-            <TouchableOpacity 
-              className="flex-1 bg-[#141c30] rounded-2xl py-4 items-center"
-              onPress={() => router.back()}
-              disabled={saving}
-            >
-              <Text className="text-white text-base font-bold">Cancelar</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              className="flex-1 bg-[#60A5FA] rounded-2xl py-4 items-center flex-row justify-center gap-2"
               onPress={handleSave}
               disabled={saving}
+              className="px-4 py-2 bg-blue-600 rounded-lg"
             >
               {saving ? (
-                <ActivityIndicator color="white" />
+                <ActivityIndicator size="small" color="white" />
               ) : (
-                <>
-                  <Ionicons name="checkmark-circle-outline" size={20} color="white" />
-                  <Text className="text-white text-base font-bold">Salvar</Text>
-                </>
+                <Text className="text-white font-semibold">Salvar</Text>
               )}
             </TouchableOpacity>
           </View>
+        </View>
+
+        <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
+          <LiquidGlassCard>
+            <View className="p-6">
+              {/* Nome do Exercício */}
+              <View className="mb-6">
+                <Text className="text-gray-400 text-sm mb-2">Nome do Exercício *</Text>
+                <TextInput
+                  className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                  placeholder="Digite o nome do exercício"
+                  placeholderTextColor="#6B7280"
+                  value={formData.name}
+                  onChangeText={(text) => setFormData(prev => ({ ...prev, name: text, nome: text }))}
+                />
+              </View>
+
+              {/* Grupo Muscular */}
+              <View className="mb-6">
+                <Text className="text-gray-400 text-sm mb-2">Grupo Muscular</Text>
+                <TextInput
+                  className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                  placeholder="Ex: Peito, Costas, Pernas..."
+                  placeholderTextColor="#6B7280"
+                  value={formData.muscle_group}
+                  onChangeText={(text) => setFormData(prev => ({ ...prev, muscle_group: text }))}
+                />
+              </View>
+
+              {/* Equipamento */}
+              <View className="mb-6">
+                <Text className="text-gray-400 text-sm mb-2">Equipamento</Text>
+                <TextInput
+                  className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                  placeholder="Ex: Halteres, Barra, Máquina..."
+                  placeholderTextColor="#6B7280"
+                  value={formData.equipment}
+                  onChangeText={(text) => setFormData(prev => ({ ...prev, equipment: text }))}
+                />
+              </View>
+
+              {/* URL do Vídeo */}
+              <View className="mb-6">
+                <Text className="text-gray-400 text-sm mb-2">URL do Vídeo</Text>
+                <TextInput
+                  className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                  placeholder="https://..."
+                  placeholderTextColor="#6B7280"
+                  value={formData.video_url}
+                  onChangeText={(text) => setFormData(prev => ({ ...prev, video_url: text }))}
+                />
+              </View>
+
+              {/* URL da Imagem */}
+              <View className="mb-6">
+                <Text className="text-gray-400 text-sm mb-2">URL da Imagem</Text>
+                <TextInput
+                  className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                  placeholder="https://..."
+                  placeholderTextColor="#6B7280"
+                  value={formData.image_url}
+                  onChangeText={(text) => setFormData(prev => ({ ...prev, image_url: text }))}
+                />
+              </View>
+
+              {/* Tipo de Repetição */}
+              <View className="mb-6">
+                <Text className="text-gray-400 text-sm mb-2">Tipo de Repetição</Text>
+                <TouchableOpacity
+                  className="bg-[#0B1120] px-4 py-3 rounded-lg flex-row items-center justify-between"
+                  onPress={() => setShowRepetitionTypePicker(true)}
+                >
+                  <Text className="text-white">
+                    {repetition.type ? repetitionTypes.find(t => t.key === repetition.type)?.label : 'Selecione o tipo da série'}
+                  </Text>
+                  <Ionicons name="chevron-down" size={20} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Campos de Repetição Dinâmicos */}
+              {renderRepetitionFields()}
+            </View>
+          </LiquidGlassCard>
+
+          {/* Modal de Seleção de Tipo */}
+          {showRepetitionTypePicker && (
+            <View className="absolute inset-0 bg-black/50 items-center justify-center">
+              <LiquidGlassCard>
+                <View className="p-6 w-80">
+                  <Text className="text-white text-lg font-bold mb-4">Selecione o tipo da série</Text>
+                  
+                  <ScrollView className="max-h-80">
+                    {repetitionTypes.map((type) => (
+                      <TouchableOpacity
+                        key={type.key}
+                        className="py-3 border-b border-gray-700"
+                        onPress={() => {
+                          setRepetition({ type: type.key, data: {} });
+                          setShowRepetitionTypePicker(false);
+                        }}
+                      >
+                        <Text className="text-white font-semibold">{type.label}</Text>
+                        <Text className="text-gray-400 text-sm">{type.description}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+
+                  <TouchableOpacity
+                    className="mt-4 bg-blue-600 py-3 rounded-lg"
+                    onPress={() => setShowRepetitionTypePicker(false)}
+                  >
+                    <Text className="text-white text-center font-semibold">Fechar</Text>
+                  </TouchableOpacity>
+                </View>
+              </LiquidGlassCard>
+            </View>
+          )}
         </ScrollView>
-      </KeyboardAvoidingView>
-    </View>
+      </LinearGradient>
+    </KeyboardAvoidingView>
   );
 }
