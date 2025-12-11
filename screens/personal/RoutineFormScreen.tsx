@@ -199,10 +199,10 @@ export default function RoutineFormScreen() {
 
       <ScrollView className="flex-1 px-4 mt-6" contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Cliente */}
-        <LiquidGlassCard>
+        <LiquidGlassCard style={{ marginBottom: 16 }}>
           <Text className="text-white font-semibold mb-2">Cliente *</Text>
           <TouchableOpacity
-            className="bg-[#141c30] rounded-lg p-4 flex-row items-center justify-between"
+            className="bg-white/5 rounded-lg p-4 flex-row items-center justify-between border border-white/10"
             onPress={() => setShowClientePicker(!showClientePicker)}
             disabled={loadingClientes}
           >
@@ -217,7 +217,7 @@ export default function RoutineFormScreen() {
           </TouchableOpacity>
 
           {showClientePicker && (
-            <View className="mt-2 bg-[#141c30] rounded-lg max-h-48">
+            <View className="mt-2 bg-white/5 rounded-lg max-h-48 border border-white/10">
               <ScrollView>
                 {clientes.map((cliente) => (
                   <TouchableOpacity
@@ -238,10 +238,10 @@ export default function RoutineFormScreen() {
         </LiquidGlassCard>
 
         {/* Datas */}
-        <LiquidGlassCard>
+        <LiquidGlassCard style={{ marginBottom: 16 }}>
           <Text className="text-white font-semibold mb-2">Data de Início *</Text>
           <TouchableOpacity
-            className="bg-[#141c30] rounded-lg p-4 flex-row items-center justify-between"
+            className="bg-white/5 rounded-lg p-4 flex-row items-center justify-between border border-white/10"
             onPress={() => setShowStartDatePicker(true)}
           >
             <Text className={startDate ? "text-white" : "text-gray-400"}>
@@ -251,10 +251,10 @@ export default function RoutineFormScreen() {
           </TouchableOpacity>
         </LiquidGlassCard>
 
-        <LiquidGlassCard>
+        <LiquidGlassCard style={{ marginBottom: 16 }}>
           <Text className="text-white font-semibold mb-2">Data de Término *</Text>
           <TouchableOpacity
-            className="bg-[#141c30] rounded-lg p-4 flex-row items-center justify-between"
+            className="bg-white/5 rounded-lg p-4 flex-row items-center justify-between border border-white/10"
             onPress={() => setShowEndDatePicker(true)}
           >
             <Text className={endDate ? "text-white" : "text-gray-400"}>
@@ -265,10 +265,10 @@ export default function RoutineFormScreen() {
         </LiquidGlassCard>
 
         {/* Tipo de Rotina */}
-        <LiquidGlassCard>
+        <LiquidGlassCard style={{ marginBottom: 16 }}>
           <Text className="text-white font-semibold mb-2">Tipo de Rotina *</Text>
           <TouchableOpacity
-            className="bg-[#141c30] rounded-lg p-4 flex-row items-center justify-between"
+            className="bg-white/5 rounded-lg p-4 flex-row items-center justify-between border border-white/10"
             onPress={() => setShowRoutineTypePicker(!showRoutineTypePicker)}
           >
             <Text className="text-white">{routineType}</Text>
@@ -280,7 +280,7 @@ export default function RoutineFormScreen() {
           </TouchableOpacity>
 
           {showRoutineTypePicker && (
-            <View className="mt-2 bg-[#141c30] rounded-lg">
+            <View className="mt-2 bg-white/5 rounded-lg border border-white/10">
               {ROUTINE_TYPES.map((type) => (
                 <TouchableOpacity
                   key={type}
@@ -298,10 +298,10 @@ export default function RoutineFormScreen() {
         </LiquidGlassCard>
 
         {/* Objetivo */}
-        <LiquidGlassCard>
+        <LiquidGlassCard style={{ marginBottom: 16 }}>
           <Text className="text-white font-semibold mb-2">Objetivo *</Text>
           <TouchableOpacity
-            className="bg-[#141c30] rounded-lg p-4 flex-row items-center justify-between"
+            className="bg-white/5 rounded-lg p-4 flex-row items-center justify-between border border-white/10"
             onPress={() => setShowGoalPicker(!showGoalPicker)}
           >
             <Text className="text-white">{goal}</Text>
@@ -313,7 +313,7 @@ export default function RoutineFormScreen() {
           </TouchableOpacity>
 
           {showGoalPicker && (
-            <View className="mt-2 bg-[#141c30] rounded-lg max-h-48">
+            <View className="mt-2 bg-white/5 rounded-lg max-h-48 border border-white/10">
               <ScrollView>
                 {GOALS.map((g) => (
                   <TouchableOpacity
@@ -333,10 +333,10 @@ export default function RoutineFormScreen() {
         </LiquidGlassCard>
 
         {/* Dificuldade */}
-        <LiquidGlassCard>
+        <LiquidGlassCard style={{ marginBottom: 16 }}>
           <Text className="text-white font-semibold mb-2">Dificuldade *</Text>
           <TouchableOpacity
-            className="bg-[#141c30] rounded-lg p-4 flex-row items-center justify-between"
+            className="bg-white/5 rounded-lg p-4 flex-row items-center justify-between border border-white/10"
             onPress={() => setShowDifficultyPicker(!showDifficultyPicker)}
           >
             <Text className="text-white">{difficulty}</Text>
@@ -348,7 +348,7 @@ export default function RoutineFormScreen() {
           </TouchableOpacity>
 
           {showDifficultyPicker && (
-            <View className="mt-2 bg-[#141c30] rounded-lg">
+            <View className="mt-2 bg-white/5 rounded-lg border border-white/10">
               {DIFFICULTIES.map((d) => (
                 <TouchableOpacity
                   key={d}
@@ -366,10 +366,10 @@ export default function RoutineFormScreen() {
         </LiquidGlassCard>
 
         {/* Instruções */}
-        <LiquidGlassCard>
+        <LiquidGlassCard style={{ marginBottom: 16 }}>
           <Text className="text-white font-semibold mb-2">Instruções</Text>
           <TextInput
-            className="bg-[#141c30] rounded-lg p-4 text-white"
+            className="bg-white/5 rounded-lg p-4 text-white border border-white/10"
             placeholder="Instruções gerais da rotina..."
             placeholderTextColor="#9CA3AF"
             value={instructions}
@@ -381,13 +381,13 @@ export default function RoutineFormScreen() {
         </LiquidGlassCard>
 
         {/* Opções de Visibilidade */}
-        <LiquidGlassCard>
+        <LiquidGlassCard style={{ marginBottom: 16 }}>
           <TouchableOpacity
             className="flex-row items-center justify-between py-2"
             onPress={() => setHideAfterExpiration(!hideAfterExpiration)}
           >
-            <Text className="text-white">Ocultar após expiração</Text>
-            <View className={`w-6 h-6 rounded ${hideAfterExpiration ? 'bg-[#60A5FA]' : 'bg-[#141c30]'} items-center justify-center`}>
+            <Text className="text-white">Retirar a rotina da tela do aluno quando ela vencer.</Text>
+            <View className={`w-6 h-6 rounded ${hideAfterExpiration ? 'bg-[#60A5FA]' : 'bg-white/5 border border-white/10'} items-center justify-center`}>
               {hideAfterExpiration && <Ionicons name="checkmark" size={16} color="#fff" />}
             </View>
           </TouchableOpacity>
@@ -396,8 +396,8 @@ export default function RoutineFormScreen() {
             className="flex-row items-center justify-between py-2 mt-2"
             onPress={() => setHideBeforeStart(!hideBeforeStart)}
           >
-            <Text className="text-white">Ocultar antes do início</Text>
-            <View className={`w-6 h-6 rounded ${hideBeforeStart ? 'bg-[#60A5FA]' : 'bg-[#141c30]'} items-center justify-center`}>
+            <Text className="text-white">Não exibir essa rotina para o aluno antes da data de início.</Text>
+            <View className={`w-6 h-6 rounded ${hideBeforeStart ? 'bg-[#60A5FA]' : 'bg-white/5 border border-white/10'} items-center justify-center`}>
               {hideBeforeStart && <Ionicons name="checkmark" size={16} color="#fff" />}
             </View>
           </TouchableOpacity>
