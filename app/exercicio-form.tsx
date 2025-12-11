@@ -4,7 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState, useEffect } from 'react';
 import { exercisesService, Exercise } from '@/services';
+import { repetitionsService, RepetitionType } from '@/services';
 import LiquidGlassCard from '../components/LiquidGlassCard';
+
+type RepetitionFormData = {
+  type: RepetitionType | null;
+  data: any;
+};
 
 export default function ExercicioFormScreen() {
   const router = useRouter();
@@ -16,13 +22,28 @@ export default function ExercicioFormScreen() {
   const [formData, setFormData] = useState<Partial<Exercise>>({
     nome: '',
     name: '',
-    repetitions: '',
-    repeticoes: '',
-    series: '',
-    carga: '',
+    muscle_group: '',
+    equipment: '',
+    video_url: '',
+    image_url: '',
+    favorites: false,
     notes: '',
     descricao: '',
   });
+
+  const [repetition, setRepetition] = useState<RepetitionFormData>({
+    type: null,
+    data: {}
+  });
+
+  const [showRepetitionTypePicker, setShowRepetitionTypePicker] = useState(false);
+
+  const repetitionTypes = [
+    { key: 'reps-load', label: 'Repetições e carga', description: 'Séries, repetições, carga e descanso' },
+    { key: 'reps-load-time', label: 'Repetições, carga e tempo', description: 'Repetições, carga e tempo' },
+    { key: 'complete-set', label: 'Série completa', description: 'Séries, repetições, carga, tempo e descanso' },
+    { key: 'reps-time', label: 'Repetições e tempo', description: 'Séries, repetições, tempo e descanso' },
+  ];
 
   useEffect(() => {
     if (isEditing) {
@@ -43,10 +64,51 @@ export default function ExercicioFormScreen() {
     }
   };
 
+  const validateRepetitionData = () => {
+    if (!repetition.type) {
+      Alert.alert('Atenção', 'Selecione um tipo de repetição');
+      return false;
+    }
+
+    const { type, data } = repetition;
+    
+    switch (type) {
+      case 'reps-load':
+        if (!data.set || !data.reps || !data.load || !data.rest) {
+          Alert.alert('Atenção', 'Preencha todos os campos: séries, repetições, carga e descanso');
+          return false;
+        }
+        break;
+      case 'reps-load-time':
+        if (!data.reps || !data.load || !data.time) {
+          Alert.alert('Atenção', 'Preencha todos os campos: repetições, carga e tempo');
+          return false;
+        }
+        break;
+      case 'complete-set':
+        if (!data.set || !data.reps || !data.load || !data.time || !data.rest) {
+          Alert.alert('Atenção', 'Preencha todos os campos: séries, repetições, carga, tempo e descanso');
+          return false;
+        }
+        break;
+      case 'reps-time':
+        if (!data.set || !data.reps || !data.time || !data.rest) {
+          Alert.alert('Atenção', 'Preencha todos os campos: séries, repetições, tempo e descanso');
+          return false;
+        }
+        break;
+    }
+    return true;
+  };
+
   const handleSave = async () => {
     // Validação básica
     if (!formData.nome?.trim()) {
       Alert.alert('Atenção', 'O nome é obrigatório');
+      return;
+    }
+
+    if (!validateRepetitionData()) {
       return;
     }
 
@@ -57,7 +119,17 @@ export default function ExercicioFormScreen() {
         await exercisesService.update(Number(params.id), formData);
         Alert.alert('Sucesso', 'Exercício atualizado com sucesso!');
       } else {
-        await exercisesService.create(formData as Omit<Exercise, 'id' | 'created_at' | 'updated_at'>);
+        // Criar exercício com repetição
+        const exercisePayload = {
+          ...formData,
+          name: formData.nome,
+          repetition: repetition.type ? {
+            type: repetition.type,
+            data: repetition.data
+          } : undefined
+        };
+        
+        const newExercise = await exercisesService.create(exercisePayload as any);
         Alert.alert('Sucesso', 'Exercício criado com sucesso!');
       }
       
@@ -66,6 +138,225 @@ export default function ExercicioFormScreen() {
       Alert.alert('Erro', err.message || 'Erro ao salvar exercício');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const renderRepetitionFields = () => {
+    if (!repetition.type) return null;
+
+    const updateRepetitionData = (field: string, value: string) => {
+      setRepetition(prev => ({
+        ...prev,
+        data: {
+          ...prev.data,
+          [field]: value
+        }
+      }));
+    };
+
+    switch (repetition.type) {
+      case 'reps-load':
+        return (
+          <>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Séries *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 3"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.set?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('set', text)}
+                keyboardType="numeric"
+              />
+            </View>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Repetições *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 12"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.reps?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('reps', text)}
+                keyboardType="numeric"
+              />
+            </View>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Carga (kg) *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 20"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.load?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('load', text)}
+                keyboardType="numeric"
+              />
+            </View>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Descanso (segundos) *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 60"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.rest?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('rest', text)}
+                keyboardType="numeric"
+              />
+            </View>
+          </>
+        );
+
+      case 'reps-load-time':
+        return (
+          <>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Repetições *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 12"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.reps?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('reps', text)}
+                keyboardType="numeric"
+              />
+            </View>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Carga (kg) *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 20"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.load?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('load', text)}
+                keyboardType="numeric"
+              />
+            </View>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Tempo (segundos) *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 30"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.time?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('time', text)}
+                keyboardType="numeric"
+              />
+            </View>
+          </>
+        );
+
+      case 'complete-set':
+        return (
+          <>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Séries *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 3"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.set?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('set', text)}
+                keyboardType="numeric"
+              />
+            </View>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Repetições *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 12"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.reps?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('reps', text)}
+                keyboardType="numeric"
+              />
+            </View>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Carga (kg) *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 20"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.load?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('load', text)}
+                keyboardType="numeric"
+              />
+            </View>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Tempo (segundos) *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 30"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.time?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('time', text)}
+                keyboardType="numeric"
+              />
+            </View>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Descanso (segundos) *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 60"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.rest?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('rest', text)}
+                keyboardType="numeric"
+              />
+            </View>
+          </>
+        );
+
+      case 'reps-time':
+        return (
+          <>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Séries *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 3"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.set?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('set', text)}
+                keyboardType="numeric"
+              />
+            </View>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Repetições *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 12"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.reps?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('reps', text)}
+                keyboardType="numeric"
+              />
+            </View>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Tempo (segundos) *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 30"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.time?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('time', text)}
+                keyboardType="numeric"
+              />
+            </View>
+            <View className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">Descanso (segundos) *</Text>
+              <TextInput
+                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
+                placeholder="Ex: 60"
+                placeholderTextColor="#6B7280"
+                value={repetition.data.rest?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData('rest', text)}
+                keyboardType="numeric"
+              />
+            </View>
+          </>
+        );
+
+      default:
+        return null;
     }
   };
 
@@ -125,43 +416,84 @@ export default function ExercicioFormScreen() {
               />
             </View>
 
-            {/* Repetições */}
+            {/* Grupo Muscular */}
             <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Repetições</Text>
+              <Text className="text-gray-400 text-sm mb-2">Grupo Muscular</Text>
               <TextInput
                 className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 3x12, 4x10"
+                placeholder="Ex: Peito, Costas, Pernas"
                 placeholderTextColor="#6B7280"
-                value={formData.repeticoes || formData.repetitions}
-                onChangeText={(text) => setFormData({ ...formData, repeticoes: text, repetitions: text })}
+                value={formData.muscle_group}
+                onChangeText={(text) => setFormData({ ...formData, muscle_group: text })}
               />
             </View>
 
-            {/* Séries */}
+            {/* Equipamento */}
             <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Séries</Text>
+              <Text className="text-gray-400 text-sm mb-2">Equipamento</Text>
               <TextInput
                 className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 3, 4, 5"
+                placeholder="Ex: Halteres, Barra, Máquina"
                 placeholderTextColor="#6B7280"
-                value={formData.series}
-                onChangeText={(text) => setFormData({ ...formData, series: text })}
-              />
-            </View>
-
-            {/* Carga */}
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Carga</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 20kg, 50kg"
-                placeholderTextColor="#6B7280"
-                value={formData.carga}
-                onChangeText={(text) => setFormData({ ...formData, carga: text })}
+                value={formData.equipment}
+                onChangeText={(text) => setFormData({ ...formData, equipment: text })}
               />
             </View>
           </LiquidGlassCard>
 
+
+          {/* Tipo de Repetição */}
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
+            <Text className="text-white text-lg font-bold mb-4">Tipo de Série</Text>
+            
+            <TouchableOpacity
+              className="bg-[#0B1120] rounded-lg p-4 flex-row items-center justify-between border border-white/10"
+              onPress={() => setShowRepetitionTypePicker(!showRepetitionTypePicker)}
+            >
+              <View className="flex-1">
+                <Text className="text-white">
+                  {repetition.type ? repetitionTypes.find(t => t.key === repetition.type)?.label : 'Selecione o tipo da série'}
+                </Text>
+                {repetition.type && (
+                  <Text className="text-gray-400 text-sm mt-1">
+                    {repetitionTypes.find(t => t.key === repetition.type)?.description}
+                  </Text>
+                )}
+              </View>
+              <Ionicons 
+                name={showRepetitionTypePicker ? 'chevron-up' : 'chevron-down'} 
+                size={20} 
+                color="#60A5FA" 
+              />
+            </TouchableOpacity>
+
+            {showRepetitionTypePicker && (
+              <View className="mt-2 bg-[#0B1120] rounded-lg border border-white/10">
+                {repetitionTypes.map((type) => (
+                  <TouchableOpacity
+                    key={type.key}
+                    className="p-4 border-b border-gray-700"
+                    onPress={() => {
+                      setRepetition({ type: type.key as RepetitionType, data: {} });
+                      setShowRepetitionTypePicker(false);
+                    }}
+                  >
+                    <Text className="text-white font-semibold">{type.label}</Text>
+                    <Text className="text-gray-400 text-sm mt-1">{type.description}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </LiquidGlassCard>
+
+          {/* Campos dinâmicos baseados no tipo de repetição */}
+          {repetition.type && (
+            <LiquidGlassCard style={{ marginBottom: 16 }}>
+              <Text className="text-white text-lg font-bold mb-4">Configuração da Série</Text>
+              
+              {renderRepetitionFields()}
+            </LiquidGlassCard>
+          )}
 
           <LiquidGlassCard style={{ marginBottom: 16 }}>
             <Text className="text-white text-lg font-bold mb-4">Observações</Text>

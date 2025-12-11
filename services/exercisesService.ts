@@ -3,22 +3,28 @@ import api from './api';
 export interface Exercise {
   id?: number;
   admin_id?: number;
+  trainer_id?: number;
   treinador_id?: number;
   name: string; // Backend usa 'name'
   nome?: string; // Alias para compatibilidade
+  muscle_group?: string; // Backend usa 'muscle_group'
+  equipment?: string; // Backend usa 'equipment'
+  video_url?: string; // Backend usa 'video_url'
+  image_url?: string; // Backend usa 'image_url'
+  favorites?: boolean; // Backend usa 'favorites'
   repetitions?: string; // Backend usa 'repetitions'
   repeticoes?: string; // Alias para compatibilidade
   series?: string;
   carga?: string;
   notes?: string;
   treinador_name?: string;
+  trainer_name?: string;
   // Campos legados do frontend (não existem no backend)
   categoria?: string;
   grupoMuscular?: string;
   equipamento?: string;
   dificuldade?: 'Iniciante' | 'Intermediário' | 'Avançado';
   descricao?: string;
-  video_url?: string;
   imagem?: string;
   instrucoes?: string;
   tempo_descanso?: number;
@@ -73,19 +79,27 @@ class ExercisesService {
   /**
    * Cria um novo exercício
    */
-  async create(exercise: Omit<Exercise, 'id' | 'created_at' | 'updated_at'>): Promise<Exercise> {
+  async create(exercise: any): Promise<Exercise> {
     try {
       // Converte para o formato do backend
-      const payload = {
+      const payload: any = {
         name: exercise.name || exercise.nome,
-        repetitions: exercise.repetitions || exercise.repeticoes,
-        series: exercise.series,
-        carga: exercise.carga,
+        muscle_group: exercise.muscle_group,
+        equipment: exercise.equipment,
+        video_url: exercise.video_url,
+        image_url: exercise.image_url,
+        favorites: exercise.favorites || false,
         notes: exercise.notes || exercise.descricao,
-        trainer_id: exercise.treinador_id,
+        trainer_id: exercise.trainer_id || exercise.treinador_id,
       };
-      const response = await api.post<Exercise>('/exercises', payload);
-      return this.normalizeExercise(response.data);
+
+      // Adiciona repetição se fornecida
+      if (exercise.repetition) {
+        payload.repetition = exercise.repetition;
+      }
+
+      const response = await api.post<any>('/exercises', payload);
+      return this.normalizeExercise(response.data.exercise || response.data);
     } catch (error) {
       console.error('Erro ao criar exercício:', error);
       throw error;
