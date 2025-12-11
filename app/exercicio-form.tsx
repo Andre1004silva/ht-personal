@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useState, useEffect } from 'react';
 import { exercisesService, Exercise } from '@/services';
 import { repetitionsService, RepetitionType } from '@/services';
+import { REPETITION_TYPES, getFieldLabel, getFieldPlaceholder } from '../constants/repetitionTypes';
 import LiquidGlassCard from '../components/LiquidGlassCard';
 
 type RepetitionFormData = {
@@ -38,12 +39,7 @@ export default function ExercicioFormScreen() {
 
   const [showRepetitionTypePicker, setShowRepetitionTypePicker] = useState(false);
 
-  const repetitionTypes = [
-    { key: 'reps-load', label: 'Repetições e carga', description: 'Séries, repetições, carga e descanso' },
-    { key: 'reps-load-time', label: 'Repetições, carga e tempo', description: 'Repetições, carga e tempo' },
-    { key: 'complete-set', label: 'Série completa', description: 'Séries, repetições, carga, tempo e descanso' },
-    { key: 'reps-time', label: 'Repetições e tempo', description: 'Séries, repetições, tempo e descanso' },
-  ];
+  const repetitionTypes = REPETITION_TYPES;
 
   useEffect(() => {
     if (isEditing) {
@@ -154,145 +150,45 @@ export default function ExercicioFormScreen() {
       }));
     };
 
-    switch (repetition.type) {
-      case 'reps-load':
-        return (
-          <>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Séries *</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 3"
-                placeholderTextColor="#6B7280"
-                value={repetition.data.set?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('set', text)}
-                keyboardType="numeric"
-              />
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Repetições *</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 12"
-                placeholderTextColor="#6B7280"
-                value={repetition.data.reps?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('reps', text)}
-                keyboardType="numeric"
-              />
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Carga (kg) *</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 20"
-                placeholderTextColor="#6B7280"
-                value={repetition.data.load?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('load', text)}
-                keyboardType="numeric"
-              />
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Descanso (segundos) *</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 60"
-                placeholderTextColor="#6B7280"
-                value={repetition.data.rest?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('rest', text)}
-                keyboardType="numeric"
-              />
-            </View>
-          </>
-        );
+    const typeConfig = repetitionTypes.find(t => t.key === repetition.type);
+    if (!typeConfig) return null;
 
-      case 'reps-load-time':
-        return (
-          <>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Repetições *</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 12"
-                placeholderTextColor="#6B7280"
-                value={repetition.data.reps?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('reps', text)}
-                keyboardType="numeric"
-              />
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Carga (kg) *</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 20"
-                placeholderTextColor="#6B7280"
-                value={repetition.data.load?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('load', text)}
-                keyboardType="numeric"
-              />
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Tempo (segundos) *</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 30"
-                placeholderTextColor="#6B7280"
-                value={repetition.data.time?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('time', text)}
-                keyboardType="numeric"
-              />
-            </View>
-          </>
-        );
+    return (
+      <>
+        {typeConfig.fields.map((field) => {
+          const label = getFieldLabel(field);
+          const placeholder = getFieldPlaceholder(field);
+          const isRequired = field !== 'speed' && field !== 'distance' && field !== 'time' && field !== 'pace' || 
+                           (repetition.type === 'time-incline' && field === 'time') ||
+                           (repetition.type === 'reps-time' && field === 'time') ||
+                           (repetition.type === 'running' && field === 'rest');
+          
+          const isTextArea = field === 'notes';
+          const keyboardType = field === 'cadence' || field === 'notes' || field === 'pace' ? 'default' : 'numeric';
 
-      case 'complete-set':
-        return (
-          <>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Séries *</Text>
+          return (
+            <View key={field} className="mb-4">
+              <Text className="text-gray-400 text-sm mb-2">
+                {label} {isRequired ? '*' : ''}
+              </Text>
               <TextInput
                 className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 3"
+                placeholder={placeholder}
                 placeholderTextColor="#6B7280"
-                value={repetition.data.set?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('set', text)}
-                keyboardType="numeric"
+                value={repetition.data[field]?.toString() || ''}
+                onChangeText={(text) => updateRepetitionData(field, text)}
+                keyboardType={keyboardType}
+                multiline={isTextArea}
+                numberOfLines={isTextArea ? 4 : 1}
+                textAlignVertical={isTextArea ? 'top' : 'center'}
+                style={isTextArea ? { minHeight: 100 } : {}}
               />
             </View>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Repetições *</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 12"
-                placeholderTextColor="#6B7280"
-                value={repetition.data.reps?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('reps', text)}
-                keyboardType="numeric"
-              />
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Carga (kg) *</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 20"
-                placeholderTextColor="#6B7280"
-                value={repetition.data.load?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('load', text)}
-                keyboardType="numeric"
-              />
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Tempo (segundos) *</Text>
-              <TextInput
-                className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
-                placeholder="Ex: 30"
-                placeholderTextColor="#6B7280"
-                value={repetition.data.time?.toString() || ''}
-                onChangeText={(text) => updateRepetitionData('time', text)}
-                keyboardType="numeric"
-              />
-            </View>
-            <View className="mb-4">
-              <Text className="text-gray-400 text-sm mb-2">Descanso (segundos) *</Text>
+          );
+        })}
+      </>
+    );
+  };
               <TextInput
                 className="bg-[#0B1120] text-white px-4 py-3 rounded-lg"
                 placeholder="Ex: 60"

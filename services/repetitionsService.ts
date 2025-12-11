@@ -1,6 +1,6 @@
 import api from './api';
 
-export type RepetitionType = 'reps-load' | 'reps-load-time' | 'complete-set' | 'reps-time';
+export type RepetitionType = 'reps-load' | 'reps-load-time' | 'complete-set' | 'reps-time' | 'cadence' | 'notes' | 'running' | 'time-incline';
 
 // Tipo base para todas as repetições
 interface BaseRepetition {
@@ -41,24 +41,62 @@ export interface RepsTimeRepetition extends BaseRepetition {
   rest: number;
 }
 
+// Cadence: cadência
+export interface CadenceRepetition extends BaseRepetition {
+  cadence: string;
+}
+
+// Notes: observações
+export interface NotesRepetition extends BaseRepetition {
+  notes: string;
+}
+
+// Running: corrida - velocidade, distância, tempo, pace, intervalo
+export interface RunningRepetition extends BaseRepetition {
+  speed?: number;
+  distance?: number;
+  time?: number;
+  pace?: string;
+  rest: number;
+}
+
+// Time-Incline: tempo e inclinação
+export interface TimeInclineRepetition extends BaseRepetition {
+  time: number;
+  incline: number;
+  rest: number;
+}
+
 // Union type para todos os tipos de repetição
 export type Repetition = 
   | RepsLoadRepetition 
   | RepsLoadTimeRepetition 
   | CompleteSetRepetition 
-  | RepsTimeRepetition;
+  | RepsTimeRepetition
+  | CadenceRepetition
+  | NotesRepetition
+  | RunningRepetition
+  | TimeInclineRepetition;
 
 // Payloads para criação
 export type CreateRepsLoadPayload = Omit<RepsLoadRepetition, 'id' | 'created_at'>;
 export type CreateRepsLoadTimePayload = Omit<RepsLoadTimeRepetition, 'id' | 'created_at'>;
 export type CreateCompleteSetPayload = Omit<CompleteSetRepetition, 'id' | 'created_at'>;
 export type CreateRepsTimePayload = Omit<RepsTimeRepetition, 'id' | 'created_at'>;
+export type CreateCadencePayload = Omit<CadenceRepetition, 'id' | 'created_at'>;
+export type CreateNotesPayload = Omit<NotesRepetition, 'id' | 'created_at'>;
+export type CreateRunningPayload = Omit<RunningRepetition, 'id' | 'created_at'>;
+export type CreateTimeInclinePayload = Omit<TimeInclineRepetition, 'id' | 'created_at'>;
 
 export type CreateRepetitionPayload = 
   | CreateRepsLoadPayload 
   | CreateRepsLoadTimePayload 
   | CreateCompleteSetPayload 
-  | CreateRepsTimePayload;
+  | CreateRepsTimePayload
+  | CreateCadencePayload
+  | CreateNotesPayload
+  | CreateRunningPayload
+  | CreateTimeInclinePayload;
 
 class RepetitionsService {
   /**

@@ -6,29 +6,23 @@ import { useState, useRef } from 'react';
 import { useSharedValue } from 'react-native-reanimated';
 import { RefreshSplash } from '../../components/RefreshSplash';
 import LiquidGlassCard from '../../components/LiquidGlassCard';
-import { agendaPointService, clientTrainingService, trainingsService, exercisesService } from '../../services';
+import { agendaPointService } from '../../services';
+import trainingRoutinesService, { TrainingRoutine } from '../../services/trainingRoutinesService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEffect } from 'react';
+import { router } from 'expo-router';
 
 const { width: screenWidth } = Dimensions.get('window');
-
-interface Exercise {
-  id: string;
-  name: string;
-  sets: number;
-  reps: string;
-  weight?: string;
-  rest: string;
-  completed?: boolean;
-}
 
 interface WorkoutDay {
   day: string;
   dayName: string;
   workoutName: string;
   duration: string;
-  exercises: Exercise[];
+  exercises: any[];
   completed: boolean;
+  routineId?: number;
+  trainingId?: number;
 }
 
 export default function StudentWorkoutScreen() {
@@ -47,7 +41,7 @@ export default function StudentWorkoutScreen() {
   });
   const splashScale = useSharedValue(1);
   const splashOpacity = useSharedValue(0);
-  const [clientTrainings, setClientTrainings] = useState<any[]>([]);
+  const [trainingRoutines, setTrainingRoutines] = useState<TrainingRoutine[]>([]);
   const [weekWorkouts, setWeekWorkouts] = useState<WorkoutDay[]>([]);
   const [loadingWorkouts, setLoadingWorkouts] = useState(true);
 
@@ -58,16 +52,16 @@ export default function StudentWorkoutScreen() {
     player.muted = true;
   });
 
-  // Carrega treinos do aluno
+  // Carrega rotinas de treino do aluno
   const loadWorkouts = async () => {
     if (!user?.id) return;
 
     try {
       setLoadingWorkouts(true);
 
-      // Busca treinos atribuídos
-      const trainings = await clientTrainingService.getByClientId(user.id);
-      setClientTrainings(trainings);
+      // Busca rotinas completas do estudante
+      const routines = await trainingRoutinesService.getStudentCompleteRoutines(user.id);
+      setTrainingRoutines(routines);
 
       // Organiza treinos por dia da semana
       const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
@@ -75,30 +69,86 @@ export default function StudentWorkoutScreen() {
       
       const workoutsByDay: WorkoutDay[] = [];
 
-      for (let i = 0; i < days.length; i++) {
-        const training = trainings[i % trainings.length]; // Distribui treinos pelos dias
-        
-        if (training && i < trainings.length * 2) { // Limita repetições
-          try {
-            const trainingDetails = await trainingsService.getById(training.training_id);
-            
-            workoutsByDay.push({
-              day: days[i],
-              dayName: dayNames[i],
-              workoutName: training.training_name || trainingDetails.name || 'Treino',
-              duration: '45 min',
-              exercises: [],
-              completed: false,
-            });
-          } catch (error) {
-            console.log('Erro ao carregar detalhes do treino:', error);
+      // Se há rotinas ativas
+      if (routines.length > 0) {
+        const activeRoutine = routines.find(r => {
+          const now = new Date();
+          const startDate = new Date(r.start_date);
+          const endDate = new Date(r.end_date);
+          return now >= startDate && now <= endDate;
+        }) || routines[0]; // Pega a primeira se não há ativa
+
+        if (activeRoutine?.trainings) {
+          // Organiza treinos por tipo de rotina
+          if (activeRoutine.routine_type === 'Dia da semana') {
+            // Mapeia treinos por dia da semana
+            for (let i = 0; i < days.length; i++) {
+              const training = activeRoutine.trainings.find(t => 
+                t.day_of_week?.toLowerCase().includes(dayNames[i].toLowerCase().substring(0, 3))
+              );
+
+              if (training) {
+                workoutsByDay.push({
+                  day: days[i],
+                  dayName: dayNames[i],
+                  workoutName: training.name,
+                  duration: `${training.exercises?.length * 3 || 45} min`,
+                  exercises: training.exercises || [],
+                  completed: false,
+                  routineId: activeRoutine.id,
+                  trainingId: training.id,
+                });
+              } else {
+                // Dia de descanso
+                workoutsByDay.push({
+                  day: days[i],
+                  dayName: dayNames[i],
+                  workoutName: 'Descanso',
+                  duration: '0 min',
+                  exercises: [],
+                  completed: false,
+                });
+              }
+            }
+          } else {
+            // Rotina numérica - distribui treinos sequencialmente
+            for (let i = 0; i < days.length; i++) {
+              const training = activeRoutine.trainings[i % activeRoutine.trainings.length];
+              
+              if (training && i < activeRoutine.trainings.length * 2) {
+                workoutsByDay.push({
+                  day: days[i],
+                  dayName: dayNames[i],
+                  workoutName: training.name,
+                  duration: `${training.exercises?.length * 3 || 45} min`,
+                  exercises: training.exercises || [],
+                  completed: false,
+                  routineId: activeRoutine.id,
+                  trainingId: training.id,
+                });
+              } else {
+                // Dia de descanso
+                workoutsByDay.push({
+                  day: days[i],
+                  dayName: dayNames[i],
+                  workoutName: 'Descanso',
+                  duration: '0 min',
+                  exercises: [],
+                  completed: false,
+                });
+              }
+            }
           }
-        } else {
-          // Dia de descanso
+        }
+      }
+
+      // Se não há treinos, preenche com dias de descanso
+      if (workoutsByDay.length === 0) {
+        for (let i = 0; i < days.length; i++) {
           workoutsByDay.push({
             day: days[i],
             dayName: dayNames[i],
-            workoutName: 'Descanso',
+            workoutName: 'Sem treino programado',
             duration: '0 min',
             exercises: [],
             completed: false,
@@ -108,9 +158,19 @@ export default function StudentWorkoutScreen() {
 
       setWeekWorkouts(workoutsByDay);
     } catch (error) {
-      console.error('Erro ao carregar treinos:', error);
+      console.error('Erro ao carregar rotinas:', error);
       // Dados de fallback caso falhe
-      setWeekWorkouts([]);
+      const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+      const dayNames = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
+      
+      setWeekWorkouts(days.map((day, i) => ({
+        day,
+        dayName: dayNames[i],
+        workoutName: 'Erro ao carregar',
+        duration: '0 min',
+        exercises: [],
+        completed: false,
+      })));
     } finally {
       setLoadingWorkouts(false);
     }
@@ -129,6 +189,18 @@ export default function StudentWorkoutScreen() {
     setShowRefreshSplash(false);
     await new Promise(resolve => setTimeout(resolve, 300));
     setRefreshing(false);
+  };
+
+  const navigateToWorkoutDay = (workout: WorkoutDay) => {
+    if (isRestDay(workout) || !workout.trainingId) return;
+    
+    router.push({
+      pathname: '/workout-day-detail',
+      params: { 
+        trainingId: workout.trainingId.toString(),
+        dayName: workout.dayName
+      }
+    });
   };
 
   const toggleDay = (day: string) => {
@@ -227,6 +299,24 @@ export default function StudentWorkoutScreen() {
     }
   };
 
+  const navigateToWorkoutDetail = () => {
+    if (trainingRoutines.length > 0) {
+      const activeRoutine = trainingRoutines.find(r => {
+        const now = new Date();
+        const startDate = new Date(r.start_date);
+        const endDate = new Date(r.end_date);
+        return now >= startDate && now <= endDate;
+      }) || trainingRoutines[0];
+
+      router.push({
+        pathname: '/workout-detail',
+        params: { routineId: activeRoutine.id?.toString() || '1' }
+      });
+    } else {
+      Alert.alert('Aviso', 'Nenhuma rotina de treino encontrada');
+    }
+  };
+
   return (
     <View className="flex-1 bg-[#0B1120]">
       {/* Background Video */}
@@ -269,24 +359,45 @@ export default function StudentWorkoutScreen() {
             </Text>
           </View>
           
-          {/* Botão Adicionar Treino */}
-          <TouchableOpacity
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 24,
-              backgroundColor: 'rgba(59, 130, 246, 0.3)',
-              borderWidth: 2,
-              borderColor: '#60A5FA',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginTop: 4,
-            }}
-            activeOpacity={0.7}
-            onPress={() => setShowDialog(true)}
-          >
-            <Ionicons name="add" size={24} color="#60A5FA" />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            {/* Botão Ver Rotina Completa */}
+            <TouchableOpacity
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: 'rgba(34, 197, 94, 0.3)',
+                borderWidth: 2,
+                borderColor: '#22C55E',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: 4,
+              }}
+              activeOpacity={0.7}
+              onPress={navigateToWorkoutDetail}
+            >
+              <Ionicons name="list" size={24} color="#22C55E" />
+            </TouchableOpacity>
+
+            {/* Botão Adicionar Treino */}
+            <TouchableOpacity
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                borderWidth: 2,
+                borderColor: '#60A5FA',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: 4,
+              }}
+              activeOpacity={0.7}
+              onPress={() => setShowDialog(true)}
+            >
+              <Ionicons name="add" size={24} color="#60A5FA" />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -309,7 +420,7 @@ export default function StudentWorkoutScreen() {
           <View key={workout.day} style={{ marginBottom: 16 }}>
             <LiquidGlassCard>
               <TouchableOpacity
-                onPress={() => !isRestDay(workout) && toggleDay(workout.day)}
+                onPress={() => navigateToWorkoutDay(workout)}
                 activeOpacity={isRestDay(workout) ? 1 : 0.7}
               >
                 {/* Header do Card */}
@@ -374,121 +485,15 @@ export default function StudentWorkoutScreen() {
                     </View>
                   </View>
 
-                  {/* Ícone de Expandir */}
+                  {/* Ícone de Navegação */}
                   {!isRestDay(workout) && (
                     <Ionicons 
-                      name={expandedDay === workout.day ? "chevron-up" : "chevron-down"} 
+                      name="chevron-forward" 
                       size={24} 
                       color="#60A5FA" 
                     />
                   )}
                 </View>
-
-                {/* Lista de Exercícios (Expandida) */}
-                {expandedDay === workout.day && !isRestDay(workout) && (
-                  <View style={{ marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(156, 163, 175, 0.2)' }}>
-                    {workout.exercises.map((exercise, idx) => (
-                      <View
-                        key={exercise.id}
-                        style={{
-                          backgroundColor: exercise.completed 
-                            ? 'rgba(34, 197, 94, 0.1)' 
-                            : 'rgba(59, 130, 246, 0.1)',
-                          borderRadius: 12,
-                          padding: 12,
-                          marginBottom: idx < workout.exercises.length - 1 ? 12 : 0,
-                          borderLeftWidth: 3,
-                          borderLeftColor: exercise.completed ? '#22C55E' : '#60A5FA',
-                        }}
-                      >
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                          <View style={{ flex: 1 }}>
-                            <Text style={{ 
-                              color: 'white', 
-                              fontSize: 15, 
-                              fontWeight: '600',
-                              textDecorationLine: exercise.completed ? 'line-through' : 'none',
-                            }}>
-                              {exercise.name}
-                            </Text>
-                          </View>
-                          {exercise.completed && (
-                            <Ionicons name="checkmark-circle" size={20} color="#22C55E" />
-                          )}
-                        </View>
-
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Ionicons name="repeat" size={14} color="#9CA3AF" />
-                            <Text style={{ color: '#9CA3AF', fontSize: 13, marginLeft: 4 }}>
-                              {exercise.sets}x {exercise.reps}
-                            </Text>
-                          </View>
-
-                          {exercise.weight && (
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                              <Ionicons name="barbell" size={14} color="#9CA3AF" />
-                              <Text style={{ color: '#9CA3AF', fontSize: 13, marginLeft: 4 }}>
-                                {exercise.weight}
-                              </Text>
-                            </View>
-                          )}
-
-                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Ionicons name="timer" size={14} color="#9CA3AF" />
-                            <Text style={{ color: '#9CA3AF', fontSize: 13, marginLeft: 4 }}>
-                              {exercise.rest}
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-                    ))}
-
-                    {/* Botão Registrar Ponto */}
-                    {!workout.completed && (
-                      <TouchableOpacity
-                        style={{
-                          backgroundColor: jaRegistrouPonto(workout) 
-                            ? 'rgba(34, 197, 94, 0.3)' 
-                            : 'rgba(59, 130, 246, 0.3)',
-                          borderRadius: 12,
-                          padding: 14,
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          marginTop: 12,
-                          opacity: registrandoPonto === workout.day ? 0.6 : 1,
-                        }}
-                        activeOpacity={0.7}
-                        onPress={() => registrarPonto(workout)}
-                        disabled={registrandoPonto === workout.day || jaRegistrouPonto(workout)}
-                      >
-                        {registrandoPonto === workout.day ? (
-                          <>
-                            <Ionicons name="hourglass" size={24} color="white" />
-                            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600', marginLeft: 8 }}>
-                              Registrando...
-                            </Text>
-                          </>
-                        ) : jaRegistrouPonto(workout) ? (
-                          <>
-                            <Ionicons name="checkmark-circle" size={24} color="#22C55E" />
-                            <Text style={{ color: '#22C55E', fontSize: 16, fontWeight: '600', marginLeft: 8 }}>
-                              Ponto Registrado
-                            </Text>
-                          </>
-                        ) : (
-                          <>
-                            <Ionicons name="fitness" size={24} color="white" />
-                            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600', marginLeft: 8 }}>
-                              Registrar Ponto
-                            </Text>
-                          </>
-                        )}
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                )}
               </TouchableOpacity>
             </LiquidGlassCard>
           </View>

@@ -10,6 +10,41 @@ export type Goal =
   | 'Qualidade de vida';
 export type Difficulty = 'Adaptação' | 'Iniciante' | 'Intermediário' | 'Avançado';
 
+export interface Exercise {
+  id: number;
+  name: string;
+  muscle_group?: string;
+  equipment?: string;
+  video_url?: string;
+  image_url?: string;
+  favorites?: boolean;
+  created_at?: string;
+  // Campos do exercise_training
+  sets?: number;
+  reps?: number;
+  rest_time?: number;
+  exercise_order?: number;
+  exercise_notes?: string;
+  exercise_video_url?: string;
+}
+
+export interface Training {
+  id: number;
+  trainer_id?: number;
+  name: string;
+  notes?: string;
+  day_of_week?: string;
+  training_order?: number;
+  created_at?: string;
+  updated_at?: string;
+  // Campos do routine_training
+  routine_order?: number;
+  is_active?: boolean;
+  routine_notes?: string;
+  // Exercícios vinculados
+  exercises: Exercise[];
+}
+
 export interface TrainingRoutine {
   id?: number;
   admin_id?: number;
@@ -28,6 +63,8 @@ export interface TrainingRoutine {
   // Campos de join
   student_name?: string;
   trainer_name?: string;
+  // Treinos vinculados
+  trainings?: Training[];
 }
 
 export interface CreateTrainingRoutinePayload {
@@ -124,6 +161,19 @@ class TrainingRoutinesService {
       return response.data;
     } catch (error) {
       console.error(`Erro ao deletar rotina ${id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Busca rotinas completas do estudante (com treinos e exercícios)
+   */
+  async getStudentCompleteRoutines(studentId: number): Promise<TrainingRoutine[]> {
+    try {
+      const response = await api.get<TrainingRoutine[]>(`/training-routines/student/${studentId}/complete`);
+      return response.data;
+    } catch (error) {
+      console.error(`Erro ao buscar rotinas completas do estudante ${studentId}:`, error);
       throw error;
     }
   }
