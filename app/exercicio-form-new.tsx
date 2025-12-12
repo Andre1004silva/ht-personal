@@ -71,15 +71,18 @@ export default function ExercicioFormScreen() {
   };
 
   const validateRepetitionData = () => {
-    if (!repetition.type) return true;
+    if (!repetition.type) return true; // Repetição é opcional
 
     const typeConfig = repetitionTypes.find(t => t.key === repetition.type);
     if (!typeConfig) return false;
 
+    // Validar campos obrigatórios baseado no tipo
     for (const field of typeConfig.fields) {
+      // Campos opcionais para corrida
       const optionalFields = ['speed', 'distance', 'time', 'pace'];
       let isRequired = !optionalFields.includes(field);
       
+      // Exceções: alguns campos são obrigatórios em contextos específicos
       if (repetition.type === 'time-incline' && field === 'time') isRequired = true;
       if (repetition.type === 'reps-time' && field === 'time') isRequired = true;
       if (repetition.type === 'running' && field === 'rest') isRequired = true;
@@ -159,9 +162,11 @@ export default function ExercicioFormScreen() {
         {typeConfig.fields.map((field) => {
           const label = getFieldLabel(field);
           const placeholder = getFieldPlaceholder(field);
+          // Campos opcionais para corrida
           const optionalFields = ['speed', 'distance', 'time', 'pace'];
           let isRequired = !optionalFields.includes(field);
           
+          // Exceções: alguns campos são obrigatórios em contextos específicos
           if (repetition.type === 'time-incline' && field === 'time') isRequired = true;
           if (repetition.type === 'reps-time' && field === 'time') isRequired = true;
           if (repetition.type === 'running' && field === 'rest') isRequired = true;
