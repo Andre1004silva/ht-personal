@@ -20,6 +20,13 @@ export interface ExerciseTraining {
   series?: string;
   carga?: string;
   exercise_notes?: string;
+  // Presets da biblioteca
+  rep_type?: 'reps-load' | 'reps-load-time' | 'complete-set' | 'reps-time';
+  default_load?: number;
+  default_set?: number;
+  default_reps?: number;
+  default_time?: number;
+  default_rest?: number;
 }
 
 export interface CreateExerciseTrainingPayload {
@@ -31,6 +38,12 @@ export interface CreateExerciseTrainingPayload {
   rest_time?: number;
   order?: number;
   notes?: string;
+  rep_type?: 'reps-load' | 'reps-load-time' | 'complete-set' | 'reps-time';
+  default_load?: number;
+  default_set?: number;
+  default_reps?: number;
+  default_time?: number;
+  default_rest?: number;
 }
 
 export interface UpdateExerciseTrainingPayload {

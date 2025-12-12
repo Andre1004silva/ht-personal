@@ -22,7 +22,7 @@ const getApiUrl = () => {
   }
   
   // iOS Simulator, Expo Go e dispositivos físicos usam o IP da máquina
-  return 'http://192.168.1.5:3232';
+  return 'http://192.168.1.48:3232';
 };
 
 export const ENV = {

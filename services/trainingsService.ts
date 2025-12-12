@@ -26,6 +26,7 @@ export interface Training {
   ativo?: boolean;
   created_at?: string;
   updated_at?: string;
+  is_library?: boolean;
 }
 
 export interface TrainingResponse {
@@ -64,6 +65,21 @@ class TrainingsService {
   }
 
   /**
+   * Busca treinos da biblioteca (is_library=true)
+   */
+  async getLibrary(treinadorId: number): Promise<Training[]> {
+    try {
+      const response = await api.get<Training[]>('/trainings', {
+        params: { trainer_id: treinadorId, is_library: true }
+      });
+      return response.data.map(t => this.normalizeTraining(t));
+    } catch (error) {
+      console.error('Erro ao buscar treinos da biblioteca:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Busca um treino específico por ID
    */
   async getById(id: number): Promise<Training> {
@@ -87,6 +103,7 @@ class TrainingsService {
         notes: training.notes || training.descricao || training.observacoes || undefined,
         day_of_week: training.day_of_week || undefined,
         trainer_id: training.trainer_id || training.treinador_id,
+        is_library: training.is_library !== undefined ? training.is_library : undefined,
       };
       const response = await api.post<Training>('/trainings', payload);
       return this.normalizeTraining(response.data);

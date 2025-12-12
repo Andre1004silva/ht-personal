@@ -23,6 +23,15 @@ export interface CreateRoutineTrainingPayload {
   order?: number;
   is_active?: boolean;
   notes?: string;
+  exercise_settings?: Array<{
+    exercise_id: number;
+    rep_type?: 'reps-load' | 'reps-load-time' | 'complete-set' | 'reps-time';
+    load?: number;
+    set?: number;
+    reps?: number;
+    time?: number;
+    rest?: number;
+  }>;
 }
 
 export interface UpdateRoutineTrainingPayload {
@@ -73,6 +82,28 @@ class RoutineTrainingsService {
       return response.data;
     } catch (error) {
       console.error('Erro ao criar vínculo routine-training:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Lista exercícios resolvidos (preset + override) para um vínculo
+   */
+  async getResolvedExercises(id: number): Promise<Array<{
+    exercise_id: number;
+    exercise_name: string;
+    rep_type: string | null;
+    load: number | null;
+    set: number | null;
+    reps: number | null;
+    time: number | null;
+    rest: number | null;
+  }>> {
+    try {
+      const response = await api.get(`/routine-trainings/${id}/resolved-exercises`);
+      return response.data;
+    } catch (error) {
+      console.error(`Erro ao buscar exercícios resolvidos do vínculo ${id}:`, error);
       throw error;
     }
   }

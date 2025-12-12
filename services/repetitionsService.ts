@@ -152,6 +152,36 @@ class RepetitionsService {
       throw error;
     }
   }
+
+  /**
+   * Atualiza somente a carga de uma repetição (tipos com carga)
+   */
+  async updateLoad(type: Extract<RepetitionType, 'reps-load' | 'reps-load-time' | 'complete-set'>, id: number, load: number): Promise<{ message: string; repetition: any }> {
+    try {
+      const response = await api.patch<{ message: string; repetition: any }>(`/repetitions/${type}/${id}/load`, { load });
+      return response.data;
+    } catch (error) {
+      console.error(`Erro ao atualizar carga da repetição ${id} do tipo ${type}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Evolução de carga por aluno (série temporal por exercício)
+   */
+  async getLoadProgressByStudent(studentId: number, filters?: { exercise_id?: number; start_date?: string; end_date?: string }): Promise<{ student_id: number; exercises: Array<{ exercise_id: number; exercise_name: string; progress: Array<{ type: RepetitionType | 'complete-set' | 'reps-load-time' | 'reps-load'; set: number | null; reps: number | null; load: number | null; time: number | null; rest: number | null; created_at: string; }> }> }> {
+    try {
+      const params: any = {};
+      if (filters?.exercise_id) params.exercise_id = filters.exercise_id;
+      if (filters?.start_date) params.start_date = filters.start_date;
+      if (filters?.end_date) params.end_date = filters.end_date;
+      const response = await api.get(`/repetitions/load-progress/student/${studentId}`, { params });
+      return response.data;
+    } catch (error) {
+      console.error(`Erro ao buscar evolução de carga do aluno ${studentId}:`, error);
+      throw error;
+    }
+  }
 }
 
 export default new RepetitionsService();

@@ -9,9 +9,11 @@ import {
   trainingRoutinesService, 
   trainingsService,
   routineTrainingsService,
+  exerciseTrainingsService,
   TrainingRoutine,
   Training,
-  RoutineTraining
+  RoutineTraining,
+  ExerciseTraining
 } from '@/services';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -32,6 +34,12 @@ export default function RoutineDetailsScreen() {
   const [newTrainingDayOfWeek, setNewTrainingDayOfWeek] = useState('');
   const [newTrainingNumber, setNewTrainingNumber] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showResolvedModal, setShowResolvedModal] = useState(false);
+  const [resolvedForRt, setResolvedForRt] = useState<Array<{ exercise_id: number; exercise_name: string; rep_type: string | null; load: number | null; set: number | null; reps: number | null; time: number | null; rest: number | null }>>([]);
+  const [resolvedTitle, setResolvedTitle] = useState<string>('');
+  const [showConfigureModal, setShowConfigureModal] = useState(false);
+  const [configureTrainingId, setConfigureTrainingId] = useState<number | null>(null);
+  const [configureExercises, setConfigureExercises] = useState<Array<{ exercise_id: number; exercise_name: string; preset_load: number | null; input_load: string; preset_rep_type: ('reps-load'|'reps-load-time'|'complete-set'|'reps-time'|null); rep_type: ('reps-load'|'reps-load-time'|'complete-set'|'reps-time'|null) }>>([]);
 
   const videoPlayer = useVideoPlayer(require('@/assets/background_720p.mp4'), player => {
     player.loop = true;
@@ -61,9 +69,9 @@ export default function RoutineDetailsScreen() {
       // Carregar trainings vinculados a esta rotina
       await loadRoutineTrainings();
 
-      // Carregar treinos disponíveis do treinador
+      // Carregar treinos disponíveis do treinador (biblioteca)
       if (user?.id) {
-        const trainings = await trainingsService.getAll(user.id);
+        const trainings = await trainingsService.getLibrary(user.id);
         setAvailableTrainings(trainings);
       }
     } catch (err) {
@@ -84,24 +92,68 @@ export default function RoutineDetailsScreen() {
     }
   };
 
-  const handleAddTraining = async (trainingId: number) => {
+  const handleChooseTraining = async (trainingId: number) => {
     try {
-      if (!routineId) return;
-      
-      await routineTrainingsService.create({
-        routine_id: routineId,
-        training_id: trainingId,
-        order: routineTrainings.length + 1,
-        is_active: true
+      setConfigureTrainingId(trainingId);
+      const rows = await exerciseTrainingsService.getByTrainingId(trainingId);
+      const mapped = rows.map((ex: ExerciseTraining) => ({
+        exercise_id: ex.exercise_id,
+        exercise_name: ex.exercise_name || `Exercício ${ex.exercise_id}`,
+        preset_load: ex.default_load ?? null,
+        input_load: ex.default_load != null ? String(ex.default_load) : '',
+        preset_rep_type: (ex.rep_type as any) ?? null,
+        rep_type: (ex.rep_type as any) ?? null,
+      }));
+      setConfigureExercises(mapped);
+      setShowAddTrainingModal(false);
+      setShowConfigureModal(true);
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível carregar exercícios do treino');
+    }
+  };
+
+  const handleLinkTrainingWithLoads = async () => {
+    try {
+      if (!routineId || !configureTrainingId) return;
+      const LOAD_TYPES = ['reps-load','reps-load-time','complete-set'] as const;
+      const exercise_settings = configureExercises.map(e => {
+        const rep_type = e.rep_type ?? undefined;
+        const hasLoad = rep_type ? LOAD_TYPES.includes(rep_type as any) : false;
+        const loadValue = e.input_load && !isNaN(Number(e.input_load)) && hasLoad ? Number(e.input_load) : undefined;
+        const payload: any = { exercise_id: e.exercise_id };
+        if (rep_type) payload.rep_type = rep_type;
+        if (loadValue !== undefined) payload.load = loadValue;
+        return payload;
       });
 
-      Alert.alert('Sucesso', 'Treino adicionado à rotina!');
+      await routineTrainingsService.create({
+        routine_id: routineId,
+        training_id: configureTrainingId,
+        order: routineTrainings.length + 1,
+        is_active: true,
+        exercise_settings,
+      });
+
+      Alert.alert('Sucesso', 'Treino vinculado com cargas configuradas!');
+      setShowConfigureModal(false);
+      setConfigureTrainingId(null);
+      setConfigureExercises([]);
       await loadRoutineTrainings();
-      setShowAddTrainingModal(false);
     } catch (error: any) {
-      console.error('Erro ao adicionar treino:', error);
-      const message = error?.response?.data?.message || 'Não foi possível adicionar o treino';
+      console.error('Erro ao vincular treino com cargas:', error);
+      const message = error?.response?.data?.message || 'Não foi possível vincular o treino';
       Alert.alert('Erro', message);
+    }
+  };
+
+  const openResolvedExercises = async (rtId: number, trainingName?: string) => {
+    try {
+      const rows = await routineTrainingsService.getResolvedExercises(rtId);
+      setResolvedForRt(rows);
+      setResolvedTitle(trainingName ? `Exercícios de ${trainingName}` : 'Exercícios do treino');
+      setShowResolvedModal(true);
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível carregar exercícios do treino');
     }
   };
 
@@ -136,6 +188,7 @@ export default function RoutineDetailsScreen() {
         notes: newTrainingNotes || undefined,
         day_of_week: dayOfWeek,
         trainer_id: user.id,
+        is_library: true,
       });
 
       // Vincular à rotina
@@ -158,7 +211,7 @@ export default function RoutineDetailsScreen() {
       // Recarregar dados
       await loadRoutineTrainings();
       if (user?.id) {
-        const trainings = await trainingsService.getAll(user.id);
+        const trainings = await trainingsService.getLibrary(user.id);
         setAvailableTrainings(trainings);
       }
     } catch (error: any) {
@@ -395,6 +448,12 @@ export default function RoutineDetailsScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   className="ml-2 p-2"
+                  onPress={() => openResolvedExercises(rt.id!, rt.training_name)}
+                >
+                  <Ionicons name="list-circle-outline" size={20} color="#60A5FA" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="ml-2 p-2"
                   onPress={() => handleRemoveTraining(rt.id!)}
                 >
                   <Ionicons name="trash-outline" size={20} color="#EF4444" />
@@ -482,7 +541,7 @@ export default function RoutineDetailsScreen() {
                         className={`p-4 mb-2 rounded-lg ${
                           isAlreadyAdded ? 'bg-gray-700 opacity-50' : 'bg-[#1e2a47]'
                         }`}
-                        onPress={() => !isAlreadyAdded && handleAddTraining(training.id!)}
+                        onPress={() => !isAlreadyAdded && handleChooseTraining(training.id!)}
                         disabled={isAlreadyAdded}
                       >
                         <View className="flex-row items-center justify-between">
@@ -626,6 +685,116 @@ export default function RoutineDetailsScreen() {
                   <Text className="text-white font-semibold">Criar</Text>
                 </TouchableOpacity>
               </View>
+            </View>
+          </BlurView>
+        </View>
+      )}
+
+      {showConfigureModal && (
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <BlurView intensity={80} tint="dark" style={{ width: '100%', maxWidth: 440, borderRadius: 20, overflow: 'hidden' }}>
+            <View className="bg-[#141c30] p-6">
+              <View className="flex-row items-center justify-between mb-4">
+                <Text className="text-white text-xl font-bold">Definir cargas por exercício</Text>
+                <TouchableOpacity onPress={() => { setShowConfigureModal(false); setConfigureExercises([]); setConfigureTrainingId(null); }}>
+                  <Ionicons name="close" size={28} color="#fff" />
+                </TouchableOpacity>
+              </View>
+              <ScrollView className="max-h-96">
+                {configureExercises.length === 0 ? (
+                  <View className="items-center py-8">
+                    <Ionicons name="barbell-outline" size={48} color="#9CA3AF" />
+                    <Text className="text-gray-400 mt-2">Este treino não possui exercícios na biblioteca</Text>
+                  </View>
+                ) : (
+                  configureExercises.map((ex, idx) => (
+                    <View key={`${ex.exercise_id}-${idx}`} className="bg-[#1e2a47] rounded-lg p-4 mb-2">
+                      <Text className="text-white font-semibold">{ex.exercise_name}</Text>
+                      <View className="mt-2">
+                        <Text className="text-gray-400 text-xs mb-2">Tipo de Repetição</Text>
+                        <View className="flex-row flex-wrap gap-2">
+                          {['reps-load','reps-load-time','complete-set','reps-time'].map((t) => (
+                            <TouchableOpacity
+                              key={t}
+                              className={`px-3 py-2 rounded-lg ${ex.rep_type === t ? 'bg-[#60A5FA]' : 'bg-[#0B1120]'}`}
+                              onPress={() => setConfigureExercises(prev => prev.map(p => p.exercise_id === ex.exercise_id ? { ...p, rep_type: t as any } : p))}
+                            >
+                              <Text className="text-white text-xs">{t}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </View>
+                      {ex.rep_type === 'reps-load' || ex.rep_type === 'reps-load-time' || ex.rep_type === 'complete-set' ? (
+                        <View className="flex-row items-center mt-3">
+                          <View className="flex-1 mr-2">
+                            <Text className="text-gray-400 text-xs mb-1">Carga</Text>
+                            <TextInput
+                              className="bg-[#0B1120] text-white px-3 py-2 rounded-lg"
+                              placeholder={ex.preset_load != null ? String(ex.preset_load) : 'Ex: 30'}
+                              placeholderTextColor="#6B7280"
+                              keyboardType="decimal-pad"
+                              value={ex.input_load}
+                              onChangeText={(t) => {
+                                setConfigureExercises(prev => prev.map(p => p.exercise_id === ex.exercise_id ? { ...p, input_load: t } : p));
+                              }}
+                            />
+                          </View>
+                        </View>
+                      ) : null}
+                    </View>
+                  ))
+                )}
+              </ScrollView>
+              <View className="flex-row gap-3 mt-4">
+                <TouchableOpacity className="flex-1 bg-gray-600 rounded-lg p-4 items-center" onPress={() => { setShowConfigureModal(false); setConfigureExercises([]); setConfigureTrainingId(null); }}>
+                  <Text className="text-white font-semibold">Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity className="flex-1 bg-[#60A5FA] rounded-lg p-4 items-center" onPress={handleLinkTrainingWithLoads}>
+                  <Text className="text-white font-semibold">Vincular</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </BlurView>
+        </View>
+      )}
+
+      {showResolvedModal && (
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <BlurView intensity={80} tint="dark" style={{ width: '100%', maxWidth: 420, borderRadius: 20, overflow: 'hidden' }}>
+            <View className="bg-[#141c30] p-6">
+              <View className="flex-row items-center justify-between mb-4">
+                <Text className="text-white text-xl font-bold">{resolvedTitle}</Text>
+                <TouchableOpacity onPress={() => setShowResolvedModal(false)}>
+                  <Ionicons name="close" size={28} color="#fff" />
+                </TouchableOpacity>
+              </View>
+              {resolvedForRt.length === 0 ? (
+                <View className="items-center py-8">
+                  <Ionicons name="barbell-outline" size={48} color="#9CA3AF" />
+                  <Text className="text-gray-400 mt-2">Nenhum exercício encontrado</Text>
+                </View>
+              ) : (
+                <ScrollView style={{ maxHeight: 420 }}>
+                  {resolvedForRt.map((ex, idx) => (
+                    <View key={`${ex.exercise_id}-${idx}`} className="bg-[#1e2a47] rounded-lg p-4 mb-2">
+                      <Text className="text-white font-semibold">{ex.exercise_name}</Text>
+                      <Text className="text-gray-300 mt-1">Repetição: {ex.rep_type ?? '—'}</Text>
+                      <View className="flex-row justify-between mt-1">
+                        <Text className="text-gray-400">Carga: {ex.load ?? '—'}</Text>
+                        <Text className="text-gray-400">Séries: {ex.set ?? '—'}</Text>
+                        <Text className="text-gray-400">Reps: {ex.reps ?? '—'}</Text>
+                      </View>
+                      <View className="flex-row justify-between mt-1">
+                        <Text className="text-gray-400">Tempo: {ex.time ?? '—'}</Text>
+                        <Text className="text-gray-400">Descanso: {ex.rest ?? '—'}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </ScrollView>
+              )}
+              <TouchableOpacity className="bg-gray-600 rounded-lg p-4 items-center mt-4" onPress={() => setShowResolvedModal(false)}>
+                <Text className="text-white font-semibold">Fechar</Text>
+              </TouchableOpacity>
             </View>
           </BlurView>
         </View>

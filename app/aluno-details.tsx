@@ -93,6 +93,9 @@ export default function AlunoDetailsScreen() {
   const [mostrarFormMedidas, setMostrarFormMedidas] = useState(false);
   const [selectedMedida, setSelectedMedida] = useState<ClienteEstatistic | null>(null);
   const [showMedidaDetails, setShowMedidaDetails] = useState(false);
+  const [showInfoOpen, setShowInfoOpen] = useState(false);
+  const [showMedidasOpen, setShowMedidasOpen] = useState(false);
+  const [showContatoOpen, setShowContatoOpen] = useState(false);
 
   // Carrega os dados do cliente e medidas
   useEffect(() => {
@@ -431,52 +434,99 @@ export default function AlunoDetailsScreen() {
 
         {/* Conteúdo */}
         <View className="px-5 pb-6">
-          {/* Informações Pessoais */}
+          {/* Gavetas */}
           <LiquidGlassCard style={{ marginBottom: 16 }}>
-            <Text className="text-white text-2xl font-bold mb-3">Informações do Aluno</Text>
-            
-            {aluno.gender && (
-              <View className="mb-3">
-                <Text className="text-gray-400 text-lg mb-1">Gênero</Text>
-                <Text className="text-white text-lg">{aluno.gender}</Text>
-              </View>
-            )}
+            <Text className="text-white text-2xl font-bold mb-3">Atalhos</Text>
+            <View>
+              <TouchableOpacity className="flex-row items-center justify-between py-3" onPress={() => router.push(`/aluno-treinos?student_id=${params.id}&student_name=${aluno.name}` as any)}>
+                <View className="flex-row items-center">
+                  <View className="bg-[#60A5FA]/20 w-10 h-10 rounded-full items-center justify-center mr-3">
+                    <Ionicons name="barbell-outline" size={20} color="#60A5FA" />
+                  </View>
+                  <Text className="text-white text-lg">Treinos</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#93C5FD" />
+              </TouchableOpacity>
 
-            {aluno.age && (
-              <View className="mb-3">
-                <Text className="text-gray-400 text-lg mb-1">Idade</Text>
-                <Text className="text-white text-lg">{aluno.age || 'N/A'}</Text>
+              
+            </View>
+          </LiquidGlassCard>
+          {/* Informações Pessoais (Gaveta) */}
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
+            <TouchableOpacity 
+              className="flex-row items-center justify-between"
+              activeOpacity={0.7}
+              onPress={() => setShowInfoOpen(prev => !prev)}
+            >
+              <View className="flex-row items-center">
+                <View className="bg-[#60A5FA]/20 w-10 h-10 rounded-full items-center justify-center mr-3">
+                  <Ionicons name="person-outline" size={20} color="#60A5FA" />
+                </View>
+                <Text className="text-white text-2xl font-bold">Informações</Text>
               </View>
-            )}
+              <Ionicons name={showInfoOpen ? 'chevron-down' : 'chevron-forward'} size={22} color="#93C5FD" />
+            </TouchableOpacity>
 
-            {aluno.date_of_birth && (
-              <View className="mb-3">
-                <Text className="text-gray-400 text-lg mb-1">Data de Nascimento</Text>
-                <Text className="text-white text-lg">{new Date(aluno.date_of_birth).toLocaleDateString('pt-BR')}</Text>
-              </View>
-            )}
+            {showInfoOpen && (
+              <View className="mt-3">
+                {aluno.gender && (
+                  <View className="mb-3">
+                    <Text className="text-gray-400 text-lg mb-1">Gênero</Text>
+                    <Text className="text-white text-lg">{aluno.gender}</Text>
+                  </View>
+                )}
 
-            {aluno.treinador_name && (
-              <View>
-                <Text className="text-gray-400 text-lg mb-1">Treinador</Text>
-                <Text className="text-white text-lg">{aluno.treinador_name}</Text>
+                {aluno.age && (
+                  <View className="mb-3">
+                    <Text className="text-gray-400 text-lg mb-1">Idade</Text>
+                    <Text className="text-white text-lg">{aluno.age || 'N/A'}</Text>
+                  </View>
+                )}
+
+                {aluno.date_of_birth && (
+                  <View className="mb-3">
+                    <Text className="text-gray-400 text-lg mb-1">Data de Nascimento</Text>
+                    <Text className="text-white text-lg">{new Date(aluno.date_of_birth).toLocaleDateString('pt-BR')}</Text>
+                  </View>
+                )}
+
+                {aluno.treinador_name && (
+                  <View>
+                    <Text className="text-gray-400 text-lg mb-1">Treinador</Text>
+                    <Text className="text-white text-lg">{aluno.treinador_name}</Text>
+                  </View>
+                )}
               </View>
             )}
           </LiquidGlassCard>
           
-          {/* Medidas - Histórico e Formulário */}
           <LiquidGlassCard style={{ marginBottom: 16 }}>
-            <View className="flex-row justify-between items-center mb-3">
-              <Text className="text-white text-2xl font-bold">Medidas Corporais</Text>
-              {!mostrarFormMedidas && (
-                <TouchableOpacity 
-                  onPress={() => setMostrarFormMedidas(true)}
-                  className="bg-[#60A5FA] p-3 rounded-full flex-row items-center gap-2"
-                >
-                  <Ionicons name="add" size={28} color="white" />
-                </TouchableOpacity>
-              )}
-            </View>
+            <TouchableOpacity
+              className="flex-row items-center justify-between"
+              activeOpacity={0.7}
+              onPress={() => setShowMedidasOpen(prev => !prev)}
+            >
+              <View className="flex-row items-center">
+                <View className="bg-[#60A5FA]/20 w-10 h-10 rounded-full items-center justify-center mr-3">
+                  <Ionicons name="fitness-outline" size={20} color="#60A5FA" />
+                </View>
+                <Text className="text-white text-2xl font-bold">Medidas Corporais</Text>
+              </View>
+              <Ionicons name={showMedidasOpen ? 'chevron-down' : 'chevron-forward'} size={22} color="#93C5FD" />
+            </TouchableOpacity>
+
+            {showMedidasOpen && (
+              <View>
+                {!mostrarFormMedidas && (
+                  <View className="flex-row justify-end items-center mb-3 mt-3">
+                    <TouchableOpacity
+                      onPress={() => setMostrarFormMedidas(true)}
+                      className="bg-[#60A5FA] p-3 rounded-full"
+                    >
+                      <Ionicons name="add" size={24} color="white" />
+                    </TouchableOpacity>
+                  </View>
+                )}
 
             {/* Loading State */}
             {loadingMedidas && (
@@ -548,8 +598,7 @@ export default function AlunoDetailsScreen() {
               </View>
             )}
 
-            {/* Formulário de Medidas */}
-            {mostrarFormMedidas && (
+                {mostrarFormMedidas && (
               <View>
                 <View className="flex-row justify-between items-center mb-3">
                   <Text className="text-white text-xl font-bold">
@@ -799,58 +848,66 @@ export default function AlunoDetailsScreen() {
             </View>
 
             {/* Botão Salvar */}
-            <TouchableOpacity 
-              className="bg-[#60A5FA] rounded-xl py-4 items-center"
-              onPress={handleSaveMedida}
-            >
-              <Text className="text-white text-lg font-bold">{editandoMedidaId ? 'Atualizar Medida' : 'Salvar Medidas'}</Text>
-            </TouchableOpacity>
+                <TouchableOpacity 
+                  className="bg-[#60A5FA] rounded-xl py-4 items-center"
+                  onPress={handleSaveMedida}
+                >
+                  <Text className="text-white text-lg font-bold">{editandoMedidaId ? 'Atualizar Medida' : 'Salvar Medidas'}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
               </View>
             )}
           </LiquidGlassCard>
 
-          {/* Contato */}
           {(aluno.phone_number || aluno.email) && (
             <LiquidGlassCard style={{ marginBottom: 16 }}>
-              <Text className="text-white text-2xl font-bold mb-3">Contato</Text>
-              
-              {aluno.phone_number && (
-                <View className="flex-row items-center mb-3">
+              <TouchableOpacity
+                className="flex-row items-center justify-between"
+                activeOpacity={0.7}
+                onPress={() => setShowContatoOpen(prev => !prev)}
+              >
+                <View className="flex-row items-center">
                   <View className="bg-[#60A5FA]/20 w-10 h-10 rounded-full items-center justify-center mr-3">
                     <Ionicons name="call-outline" size={20} color="#60A5FA" />
                   </View>
-                  <View className="flex-1">
-                    <Text className="text-gray-400 text-lg">Telefone</Text>
-                    <Text className="text-white text-lg">{aluno.phone_number}</Text>
-                  </View>
+                  <Text className="text-white text-2xl font-bold">Contato</Text>
                 </View>
-              )}
+                <Ionicons name={showContatoOpen ? 'chevron-down' : 'chevron-forward'} size={22} color="#93C5FD" />
+              </TouchableOpacity>
 
-              {aluno.email && (
-                <View className="flex-row items-center">
-                  <View className="bg-[#60A5FA]/20 w-10 h-10 rounded-full items-center justify-center mr-3">
-                    <Ionicons name="mail-outline" size={20} color="#60A5FA" />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-gray-400 text-lg">Email</Text>
-                    <Text className="text-white text-lg">{aluno.email}</Text>
-                  </View>
+              {showContatoOpen && (
+                <View className="mt-3">
+                  {aluno.phone_number && (
+                    <View className="flex-row items-center mb-3">
+                      <View className="bg-[#60A5FA]/20 w-10 h-10 rounded-full items-center justify-center mr-3">
+                        <Ionicons name="call-outline" size={20} color="#60A5FA" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-gray-400 text-lg">Telefone</Text>
+                        <Text className="text-white text-lg">{aluno.phone_number}</Text>
+                      </View>
+                    </View>
+                  )}
+
+                  {aluno.email && (
+                    <View className="flex-row items-center">
+                      <View className="bg-[#60A5FA]/20 w-10 h-10 rounded-full items-center justify-center mr-3">
+                        <Ionicons name="mail-outline" size={20} color="#60A5FA" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-gray-400 text-lg">Email</Text>
+                        <Text className="text-white text-lg">{aluno.email}</Text>
+                      </View>
+                    </View>
+                  )}
                 </View>
               )}
             </LiquidGlassCard>
           )}
 
 
-          {/* Botão Criar Rotina */}
-          <LiquidGlassCard style={{ marginBottom: 16 }}>
-            <TouchableOpacity 
-              className="flex-row items-center justify-center gap-2 py-2"
-              onPress={() => router.push(`/routine-form?student_id=${params.id}&student_name=${aluno.name}` as any)}
-            >
-              <Ionicons name="add-circle" size={24} color="#60A5FA" />
-              <Text className="text-white text-lg font-bold">Criar Nova Rotina</Text>
-            </TouchableOpacity>
-          </LiquidGlassCard>
+        
 
           {/* Botões de Ação */}
           <View className="flex-row gap-3 mb-6">
