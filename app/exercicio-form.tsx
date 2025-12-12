@@ -117,7 +117,7 @@ export default function ExercicioFormScreen() {
         favorites: formData.favorites,
         repetition: repetition.type ? {
           type: repetition.type,
-          ...repetition.data
+          data: repetition.data
         } : undefined
       };
 

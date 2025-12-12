@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useState, useEffect } from 'react';
 import LiquidGlassCard from '../components/LiquidGlassCard';
 import Svg, { Circle, Polygon, Defs, RadialGradient, Stop } from 'react-native-svg';
-import { exercisesService, Exercise } from '@/services';
+import { exercisesService, Exercise, repetitionsService } from '@/services';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -15,6 +15,8 @@ export default function ExercicioDetailsScreen() {
   const [exercicio, setExercicio] = useState<Exercise | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [repetitions, setRepetitions] = useState<any>(null);
+  const [loadingRepetitions, setLoadingRepetitions] = useState(false);
 
   // Imagem padrão
   const defaultImage = require('../assets/images/desenvolvimento.jpeg');
@@ -29,11 +31,27 @@ export default function ExercicioDetailsScreen() {
       setError(null);
       const data = await exercisesService.getById(Number(params.id));
       setExercicio(data);
+      
+      // Carregar repetições do exercício
+      await loadRepetitions(Number(params.id));
     } catch (err) {
       console.error('Erro ao carregar exercício:', err);
       setError('Erro ao carregar dados do exercício');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadRepetitions = async (exerciseId: number) => {
+    try {
+      setLoadingRepetitions(true);
+      const data = await repetitionsService.getByExercise(exerciseId);
+      setRepetitions(data);
+    } catch (err) {
+      console.error('Erro ao carregar repetições:', err);
+      // Não definir como erro crítico, apenas não mostrar repetições
+    } finally {
+      setLoadingRepetitions(false);
     }
   };
 
@@ -62,6 +80,52 @@ export default function ExercicioDetailsScreen() {
 
   const handleEdit = () => {
     router.push(`/exercicio-form?id=${params.id}` as any);
+  };
+
+  const getRepetitionIcon = (type: string) => {
+    switch (type) {
+      case 'running':
+        return 'walk-outline';
+      case 'reps-load':
+        return 'barbell-outline';
+      case 'reps-time':
+        return 'timer-outline';
+      case 'complete-set':
+        return 'fitness-outline';
+      case 'cadence':
+        return 'pulse-outline';
+      case 'notes':
+        return 'document-text-outline';
+      case 'time-incline':
+        return 'trending-up-outline';
+      case 'reps-load-time':
+        return 'stopwatch-outline';
+      default:
+        return 'ellipse-outline';
+    }
+  };
+
+  const getRepetitionTypeLabel = (type: string) => {
+    switch (type) {
+      case 'running':
+        return 'Corrida';
+      case 'reps-load':
+        return 'Séries x Repetições x Carga';
+      case 'reps-time':
+        return 'Séries x Repetições x Tempo';
+      case 'complete-set':
+        return 'Série Completa';
+      case 'cadence':
+        return 'Cadência';
+      case 'notes':
+        return 'Observações';
+      case 'time-incline':
+        return 'Tempo x Inclinação';
+      case 'reps-load-time':
+        return 'Repetições x Carga x Tempo';
+      default:
+        return type;
+    }
   };
 
   if (loading) {
@@ -308,6 +372,74 @@ export default function ExercicioDetailsScreen() {
               <View>
                 <Text className="text-gray-400 text-xs mb-1">Treinador</Text>
                 <Text className="text-white text-base">{exercicio.treinador_name}</Text>
+              </View>
+            )}
+          </LiquidGlassCard>
+
+          {/* Seção de Repetições */}
+          <LiquidGlassCard style={{ marginBottom: 16 }}>
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-white text-lg font-bold">Repetições</Text>
+              <View className="flex-row items-center gap-2">
+                {loadingRepetitions && (
+                  <ActivityIndicator size="small" color="#60A5FA" />
+                )}
+                <TouchableOpacity 
+                  onPress={() => loadRepetitions(Number(params.id))}
+                  disabled={loadingRepetitions}
+                >
+                  <Ionicons name="refresh-outline" size={20} color="#60A5FA" />
+                </TouchableOpacity>
+              </View>
+            </View>
+            
+            {repetitions && repetitions.repetitions && repetitions.repetitions.length > 0 ? (
+              <View>
+                <Text className="text-gray-400 text-sm mb-3">
+                  {repetitions.repetitions.length} repetição(ões) encontrada(s)
+                </Text>
+                
+                {repetitions.repetitions.map((rep: any, index: number) => (
+                  <View 
+                    key={`${rep.type}-${rep.id}-${index}`}
+                    className="bg-white/5 rounded-lg p-3 mb-3 last:mb-0"
+                  >
+                    <View className="flex-row items-center justify-between mb-2">
+                      <View className="flex-row items-center gap-2">
+                        <Ionicons 
+                          name={getRepetitionIcon(rep.type) as any} 
+                          size={18} 
+                          color="#60A5FA" 
+                        />
+                        <Text className="text-white font-semibold">
+                          {getRepetitionTypeLabel(rep.type)}
+                        </Text>
+                      </View>
+                      <Text className="text-gray-400 text-xs">
+                        {new Date(rep.created_at).toLocaleDateString('pt-BR')}
+                      </Text>
+                    </View>
+                    
+                    <Text className="text-gray-300 text-sm">
+                      {rep.formatted}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View className="items-center py-6">
+                <Ionicons name="fitness-outline" size={48} color="#374151" />
+                <Text className="text-gray-400 text-center mt-2">
+                  Nenhuma repetição cadastrada para este exercício
+                </Text>
+                <TouchableOpacity 
+                  className="mt-3 bg-[#60A5FA] px-4 py-2 rounded-lg"
+                  onPress={() => router.push(`/exercicio-form?id=${params.id}` as any)}
+                >
+                  <Text className="text-white text-sm font-semibold">
+                    Adicionar Repetição
+                  </Text>
+                </TouchableOpacity>
               </View>
             )}
           </LiquidGlassCard>

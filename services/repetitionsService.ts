@@ -205,6 +205,44 @@ class RepetitionsService {
   }
 
   /**
+   * Busca todas as repetições de um exercício específico em todas as tabelas
+   * @param exerciseId - ID do exercício
+   * @param adminId - ID do admin (opcional, será usado o padrão se não fornecido)
+   */
+  async getByExercise(exerciseId: number, adminId?: number): Promise<{
+    exercise_id: number;
+    exercise_name: string;
+    repetitions: Array<{
+      id: number;
+      type: string;
+      formatted: string;
+      created_at: string;
+      [key: string]: any;
+    }>;
+  }> {
+    try {
+      const headers: any = {};
+      if (adminId) {
+        headers['admin_id'] = adminId.toString();
+      }
+      
+      const response = await api.get(`/repetitions/exercise/${exerciseId}`, { headers });
+      return response.data;
+    } catch (error: any) {
+      console.error(`Erro ao buscar repetições do exercício ${exerciseId}:`, error);
+      
+      // Log mais detalhado do erro
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+        console.error('Response headers:', error.response.headers);
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
    * Evolução de carga por aluno (série temporal por exercício)
    */
   async getLoadProgressByStudent(studentId: number, filters?: { exercise_id?: number; start_date?: string; end_date?: string }): Promise<{ student_id: number; exercises: Array<{ exercise_id: number; exercise_name: string; progress: Array<{ type: RepetitionType | 'complete-set' | 'reps-load-time' | 'reps-load'; set: number | null; reps: number | null; load: number | null; time: number | null; rest: number | null; created_at: string; }> }> }> {
@@ -217,6 +255,170 @@ class RepetitionsService {
       return response.data;
     } catch (error) {
       console.error(`Erro ao buscar evolução de carga do aluno ${studentId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cria uma repetição automaticamente baseada no tipo do exercício
+   * @param exerciseId - ID do exercício
+   * @param payload - Dados da repetição (campos variam baseado no tipo do exercício)
+   */
+  async createAuto<T extends Repetition>(
+    exerciseId: number, 
+    payload: any
+  ): Promise<T & { type: RepetitionType; message: string }> {
+    try {
+      const response = await api.post<T & { type: RepetitionType; message: string }>(`/repetitions/auto/${exerciseId}`, payload);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao criar repetição automaticamente:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cria uma repetição de corrida
+   */
+  async createRunning(payload: {
+    exercise_id: number;
+    speed?: number;
+    distance?: number;
+    time?: number;
+    pace?: string;
+    rest: number;
+  }): Promise<any> {
+    try {
+      const response = await api.post('/repetitions/running', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao criar repetição de corrida:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cria uma repetição de cadência
+   */
+  async createCadence(payload: {
+    exercise_id: number;
+    cadence: string;
+  }): Promise<any> {
+    try {
+      const response = await api.post('/repetitions/cadence', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao criar repetição de cadência:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cria uma repetição com observações
+   */
+  async createNotes(payload: {
+    exercise_id: number;
+    notes: string;
+  }): Promise<any> {
+    try {
+      const response = await api.post('/repetitions/notes', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao criar repetição com observações:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cria uma repetição tempo-inclinação
+   */
+  async createTimeIncline(payload: {
+    exercise_id: number;
+    time: number;
+    incline: number;
+    rest: number;
+  }): Promise<any> {
+    try {
+      const response = await api.post('/repetitions/time-incline', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao criar repetição tempo-inclinação:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cria uma repetição reps-load
+   */
+  async createRepsLoad(payload: {
+    exercise_id: number;
+    set: number;
+    reps: number;
+    load: number;
+    rest: number;
+  }): Promise<any> {
+    try {
+      const response = await api.post('/repetitions/reps-load', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao criar repetição reps-load:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cria uma repetição reps-load-time
+   */
+  async createRepsLoadTime(payload: {
+    exercise_id: number;
+    reps: number;
+    load: number;
+    time: number;
+  }): Promise<any> {
+    try {
+      const response = await api.post('/repetitions/reps-load-time', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao criar repetição reps-load-time:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cria uma repetição complete-set
+   */
+  async createCompleteSet(payload: {
+    exercise_id: number;
+    set: number;
+    reps: number;
+    load: number;
+    time: number;
+    rest: number;
+  }): Promise<any> {
+    try {
+      const response = await api.post('/repetitions/complete-set', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao criar repetição complete-set:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cria uma repetição reps-time
+   */
+  async createRepsTime(payload: {
+    exercise_id: number;
+    set: number;
+    reps: number;
+    time: number;
+    rest: number;
+  }): Promise<any> {
+    try {
+      const response = await api.post('/repetitions/reps-time', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao criar repetição reps-time:', error);
       throw error;
     }
   }
